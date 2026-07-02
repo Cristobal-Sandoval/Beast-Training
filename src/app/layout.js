@@ -21,6 +21,9 @@ export const metadata = {
   title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
   description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento. Saca la bestia que llevas dentro.",
   keywords: ["gym", "gimnasio", "concepcion", "chile", "funcional", "hiit", "crossfit", "fuerza", "beast training"],
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({ children }) {

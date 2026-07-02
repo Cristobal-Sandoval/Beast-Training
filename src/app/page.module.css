@@ -12,7 +12,13 @@
 
 @media (max-width: 768px) {
   .heroSection {
-    height: 500px;
+    height: 440px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroSection {
+    height: 380px;
   }
 }
 
@@ -174,17 +180,17 @@
 
 .carouselIndicators {
   position: absolute;
-  bottom: 24px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  gap: 8px;
   z-index: 10;
 }
 
 .indicator {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   border: none;
@@ -195,19 +201,25 @@
 
 .activeIndicator {
   background: var(--primary);
-  transform: scale(1.2);
-  width: 28px;
+  transform: scale(1.15);
+  width: 20px;
   border-radius: 20px;
 }
 
 /* Section Header */
 .sectionHeader {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+@media (max-width: 576px) {
+  .sectionHeader {
+    margin-bottom: 24px;
+  }
 }
 
 .subtitle {
@@ -293,10 +305,16 @@
 
 /* CTA Banner Section */
 .ctaBannerSection {
-  padding: 40px 24px;
+  padding: 24px 16px;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+}
+
+@media (min-width: 769px) {
+  .ctaBannerSection {
+    padding: 40px 24px;
+  }
 }
 
 .ctaContainer {
