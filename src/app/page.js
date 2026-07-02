@@ -103,11 +103,24 @@ export default function Home() {
             className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`}
             style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url(${banner.image_url})` }}
           >
-            <div className={styles.heroContent}>
-              <span className={styles.heroBadge}><Sparkles size={14} /> beast training concepción</span>
-              <h1 className={styles.heroTitle}>{banner.title}</h1>
-              <p className={styles.heroDescription}>{banner.description}</p>
-              <div className={styles.heroBtns}>
+            <div 
+              className={styles.heroContent}
+              style={{
+                textAlign: banner.text_align || 'left',
+                alignItems: banner.text_align === 'center' ? 'center' : banner.text_align === 'right' ? 'flex-end' : 'flex-start',
+                marginLeft: banner.text_align === 'center' ? 'auto' : '0',
+                marginRight: banner.text_align === 'center' ? 'auto' : banner.text_align === 'right' ? '0' : 'auto',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <span className={styles.heroBadge}>
+                <Sparkles size={14} /> {banner.h3_tagline || 'beast training concepción'}
+              </span>
+              <h1 className={styles.heroTitle}>{banner.h1_title || banner.title}</h1>
+              <p className={styles.heroDescription}>{banner.h2_subtitle || banner.description}</p>
+              <div className={styles.heroBtns} style={{ alignSelf: banner.text_align === 'center' ? 'center' : banner.text_align === 'right' ? 'flex-end' : 'flex-start' }}>
                 <Link href={banner.link_url || '/planes'} className={styles.primaryBtn}>
                   Ver Planes <ArrowRight size={18} />
                 </Link>

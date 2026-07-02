@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS public.banners (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
+    h3_tagline TEXT,
+    text_align TEXT DEFAULT 'center' CHECK (text_align IN ('left', 'center', 'right')) NOT NULL,
     image_url TEXT NOT NULL,
     link_url TEXT,
     active BOOLEAN DEFAULT true NOT NULL,
@@ -225,4 +227,32 @@ CREATE POLICY "Users can read their own received or sent messages" ON public.dir
 
 CREATE POLICY "Users can insert their own sent messages" ON public.direct_messages
     FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
+
+-- 12. Create Announcement Bar Table
+CREATE TABLE IF NOT EXISTS public.announcement_bar (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    text TEXT NOT NULL,
+    link_url TEXT,
+    active BOOLEAN DEFAULT false NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.announcement_bar ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for announcement bar" ON public.announcement_bar FOR SELECT USING (true);
+CREATE POLICY "Allow admins to manage announcement bar" ON public.announcement_bar FOR ALL USING (public.is_admin());
+
+-- 13. Create Promo Codes Table
+CREATE TABLE IF NOT EXISTS public.promo_codes (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    discount_percent INTEGER NOT NULL CHECK (discount_percent >= 0 AND discount_percent <= 100),
+    active BOOLEAN DEFAULT true NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for active promo codes" ON public.promo_codes FOR SELECT USING (true);
+CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL USING (public.is_admin());
+
 

@@ -53,8 +53,21 @@ export default function AdminDashboard() {
   // Banner Form State
   const [bannerTitle, setBannerTitle] = useState('');
   const [bannerDesc, setBannerDesc] = useState('');
+  const [bannerTagline, setBannerTagline] = useState('beast training concepción');
+  const [bannerAlign, setBannerAlign] = useState('center');
   const [bannerImg, setBannerImg] = useState('');
   const [bannerLink, setBannerLink] = useState('');
+
+  // Top Announcement Bar settings
+  const [annBarText, setAnnBarText] = useState('');
+  const [annBarLink, setAnnBarLink] = useState('');
+  const [annBarActive, setAnnBarActive] = useState(false);
+  const [annBarId, setAnnBarId] = useState(null);
+
+  // Discount Codes (promo_codes)
+  const [promoCodes, setPromoCodes] = useState([]);
+  const [newPromoCode, setNewPromoCode] = useState('');
+  const [newPromoDiscount, setNewPromoDiscount] = useState(20);
   
   // Blog Form State
   const [postTitle, setPostTitle] = useState('');
@@ -119,6 +132,8 @@ export default function AdminDashboard() {
       fetchBanners();
       fetchPosts();
       fetchAnnouncements();
+      fetchAnnouncementBar();
+      fetchPromoCodes();
     }
   }, [profile, demoAdminMode]);
 
@@ -145,6 +160,37 @@ export default function AdminDashboard() {
       if (!error && data) setBanners(data);
     } catch (err) {
       console.warn(err);
+    }
+  };
+
+  const fetchAnnouncementBar = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('announcement_bar')
+        .select('*');
+      if (!error && data && data.length > 0) {
+        const activeBar = data.find(b => b.active) || data[0];
+        setAnnBarId(activeBar.id);
+        setAnnBarText(activeBar.text);
+        setAnnBarLink(activeBar.link_url || '');
+        setAnnBarActive(activeBar.active);
+      }
+    } catch (err) {
+      console.warn('Error fetching announcement bar config:', err);
+    }
+  };
+
+  const fetchPromoCodes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        setPromoCodes(data);
+      }
+    } catch (err) {
+      console.warn('Error fetching promo codes:', err);
     }
   };
 
@@ -438,6 +484,8 @@ export default function AdminDashboard() {
     const newBanner = {
       title: bannerTitle,
       description: bannerDesc,
+      h3_tagline: bannerTagline,
+      text_align: bannerAlign,
       image_url: bannerImg || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop',
       link_url: bannerLink || '/planes',
       active: true
@@ -455,10 +503,103 @@ export default function AdminDashboard() {
       setSuccessMsg('¡Banner creado exitosamente!');
       setBannerTitle('');
       setBannerDesc('');
+      setBannerTagline('beast training concepción');
+      setBannerAlign('center');
       setBannerImg('');
       setBannerLink('');
     } catch (err) {
       alert(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSaveAnnouncementBar = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    try {
+      let error;
+      if (annBarId) {
+        const { error: err } = await supabase
+          .from('announcement_bar')
+          .update({
+            text: annBarText,
+            link_url: annBarLink,
+            active: annBarActive
+          })
+          .eq('id', annBarId);
+        error = err;
+      } else {
+        const { data, error: err } = await supabase
+          .from('announcement_bar')
+          .insert([{
+            text: annBarText,
+            link_url: annBarLink,
+            active: annBarActive
+          }])
+          .select();
+        error = err;
+        if (data && data.length > 0) setAnnBarId(data[0].id);
+      }
+
+      if (error) throw error;
+      setSuccessMsg('¡Cintillo de anuncios superior guardado correctamente!');
+    } catch (err) {
+      alert('Error al guardar cintillo: ' + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCreatePromoCode = async (e) => {
+    e.preventDefault();
+    if (!newPromoCode.trim()) return;
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    const newPromo = {
+      code: newPromoCode.trim().toUpperCase(),
+      discount_percent: parseInt(newPromoDiscount) || 0,
+      active: true
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('promo_codes')
+        .insert([newPromo])
+        .select();
+
+      if (error) throw error;
+      if (data) setPromoCodes([data[0], ...promoCodes]);
+
+      setSuccessMsg(`¡Cupón ${newPromo.code} creado exitosamente!`);
+      setNewPromoCode('');
+      setNewPromoDiscount(20);
+    } catch (err) {
+      alert('Error al crear cupón: ' + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeletePromoCode = async (promoId) => {
+    if (!confirm('¿Estás seguro de eliminar este cupón de descuento?')) return;
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    try {
+      const { error } = await supabase
+        .from('promo_codes')
+        .delete()
+        .eq('id', promoId);
+
+      if (error) throw error;
+      setPromoCodes(promoCodes.filter(c => c.id !== promoId));
+      setSuccessMsg('¡Cupón eliminado correctamente!');
+    } catch (err) {
+      alert('Error al eliminar cupón: ' + err.message);
     } finally {
       setActionLoading(false);
     }
@@ -1040,6 +1181,13 @@ export default function AdminDashboard() {
                 <FileText size={18} />
                 <span>Noticias (Blog)</span>
               </button>
+              <button
+                onClick={() => { setActiveTab('promos'); setSuccessMsg(null); }}
+                className={`${styles.tabBtn} ${activeTab === 'promos' ? styles.activeTab : ''}`}
+              >
+                <Sparkles size={18} />
+                <span>Promociones & Cupones</span>
+              </button>
             </aside>
 
             {/* main Content area */}
@@ -1260,11 +1408,11 @@ export default function AdminDashboard() {
                     <h2>Subir Nuevo Banner</h2>
                     <form onSubmit={handleCreateBanner} className={styles.form}>
                       <div className={styles.inputGroup}>
-                        <label htmlFor="bannerTitle">Título del Banner</label>
+                        <label htmlFor="bannerTitle">Título del Banner (H1)</label>
                         <input
                           id="bannerTitle"
                           type="text"
-                          placeholder="Ej: Promo de Primavera"
+                          placeholder="Ej: Saca la Bestia que Llevas Dentro"
                           value={bannerTitle}
                           onChange={(e) => setBannerTitle(e.target.value)}
                           required
@@ -1272,14 +1420,49 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className={styles.inputGroup}>
-                        <label htmlFor="bannerDesc">Descripción corta</label>
+                        <label htmlFor="bannerDesc">Descripción Corta (H2 / Subtítulo)</label>
                         <input
                           id="bannerDesc"
                           type="text"
-                          placeholder="Ej: Suscríbete hoy y obtén un 20%..."
+                          placeholder="Ej: Entrenamiento funcional en Concepción..."
                           value={bannerDesc}
                           onChange={(e) => setBannerDesc(e.target.value)}
                         />
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="bannerTagline">Tagline Superior (H3 / Micro-texto)</label>
+                          <input
+                            id="bannerTagline"
+                            type="text"
+                            placeholder="Ej: beast training concepción"
+                            value={bannerTagline}
+                            onChange={(e) => setBannerTagline(e.target.value)}
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="bannerAlign">Alineación del Texto</label>
+                          <select
+                            id="bannerAlign"
+                            value={bannerAlign}
+                            onChange={(e) => setBannerAlign(e.target.value)}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.04)',
+                              border: '1px solid var(--border-light)',
+                              borderRadius: '6px',
+                              padding: '10px 14px',
+                              color: '#ffffff',
+                              fontSize: '0.95rem',
+                              outline: 'none',
+                              minHeight: '44px'
+                            }}
+                          >
+                            <option value="left" style={{ background: '#121212' }}>Izquierda</option>
+                            <option value="center" style={{ background: '#121212' }}>Centro</option>
+                            <option value="right" style={{ background: '#121212' }}>Derecha</option>
+                          </select>
+                        </div>
                       </div>
 
                       <div className={styles.formRow}>
@@ -1324,7 +1507,17 @@ export default function AdminDashboard() {
                             <div className={styles.itemInfo}>
                               <h3>{banner.title}</h3>
                               <p>{banner.description}</p>
-                              <span className={styles.itemBadge}>Destino: {banner.link_url}</span>
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                                <span className={styles.itemBadge} style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                  Tagline: {banner.h3_tagline || 'Ninguno'}
+                                </span>
+                                <span className={styles.itemBadge} style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                  Alineación: {banner.text_align === 'left' ? 'Izquierda' : banner.text_align === 'right' ? 'Derecha' : 'Centro'}
+                                </span>
+                                <span className={styles.itemBadge} style={{ background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>
+                                  Destino: {banner.link_url}
+                                </span>
+                              </div>
                             </div>
                             <button
                               onClick={() => handleDeleteBanner(banner.id)}
@@ -1431,6 +1624,123 @@ export default function AdminDashboard() {
                               onClick={() => handleDeletePost(post.id)}
                               className={styles.deleteBtn}
                               title="Eliminar Noticia"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
+            {/* Tab: Promociones & Cupones */}
+              {activeTab === 'promos' && (
+                <div className={styles.tabContent}>
+                  {/* Top Announcement Bar Customizer */}
+                  <div className={`${styles.cardPanel} glass`}>
+                    <h2>Cintillo de Anuncios Superior</h2>
+                    <p className={styles.panelInstructions}>
+                      Configura el mensaje flotante que se muestra en la parte superior del sitio web (afuera de los paneles).
+                    </p>
+                    <form onSubmit={handleSaveAnnouncementBar} className={styles.form}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="annBarText">Mensaje del Cintillo</label>
+                        <input
+                          id="annBarText"
+                          type="text"
+                          placeholder="Ej: ¡PROMO IMPERDIBLE: 20% DE DESCUENTO CON EL CÓDIGO BEAST20!"
+                          value={annBarText}
+                          onChange={(e) => setAnnBarText(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formRow}>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="annBarLink">Enlace de Redirección (Opcional)</label>
+                          <input
+                            id="annBarLink"
+                            type="text"
+                            placeholder="Ej: /planes"
+                            value={annBarLink}
+                            onChange={(e) => setAnnBarLink(e.target.value)}
+                          />
+                        </div>
+                        <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <label htmlFor="annBarActive" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                            <input
+                              id="annBarActive"
+                              type="checkbox"
+                              checked={annBarActive}
+                              onChange={(e) => setAnnBarActive(e.target.checked)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <span>Mostrar Cintillo Activo</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <button type="submit" className={styles.submitBtn}>
+                        Guardar Cintillo
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Promo Codes Manager */}
+                  <div className={`${styles.cardPanel} glass`}>
+                    <h2>Crear Código de Descuento (Cupón)</h2>
+                    <form onSubmit={handleCreatePromoCode} className={styles.form}>
+                      <div className={styles.formRow}>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="newPromoCode">Código del Cupón</label>
+                          <input
+                            id="newPromoCode"
+                            type="text"
+                            placeholder="Ej: BEAST20"
+                            value={newPromoCode}
+                            onChange={(e) => setNewPromoCode(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className={styles.inputGroup}>
+                          <label htmlFor="newPromoDiscount">Porcentaje de Descuento (%)</label>
+                          <input
+                            id="newPromoDiscount"
+                            type="number"
+                            min="1"
+                            max="100"
+                            placeholder="20"
+                            value={newPromoDiscount}
+                            onChange={(e) => setNewPromoDiscount(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <button type="submit" className={styles.submitBtn}>
+                        Crear y Activar Cupón
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className={`${styles.cardPanel} glass`}>
+                    <h2>Cupones de Descuento Activos</h2>
+                    {promoCodes.length === 0 ? (
+                      <p className={styles.emptyText}>No hay cupones creados.</p>
+                    ) : (
+                      <div className={styles.listGrid}>
+                        {promoCodes.map((promo) => (
+                          <div key={promo.id} className={styles.listItemCard}>
+                            <div className={styles.itemInfo}>
+                              <h3>{promo.code}</h3>
+                              <p>Descuento: <strong>{promo.discount_percent}% OFF</strong></p>
+                              <span className={styles.itemBadge}>Válido para la primera compra del alumno</span>
+                            </div>
+                            <button
+                              onClick={() => handleDeletePromoCode(promo.id)}
+                              className={styles.deleteBtn}
+                              title="Eliminar Cupón"
                             >
                               <Trash2 size={16} />
                             </button>

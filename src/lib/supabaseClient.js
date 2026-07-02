@@ -285,6 +285,8 @@ class MockSupabase {
                   id: 'b1',
                   title: 'Saca la Bestia que Llevas Dentro',
                   description: 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.',
+                  h3_tagline: 'beast training concepción',
+                  text_align: 'left',
                   image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop',
                   link_url: '/planes',
                   active: true,
@@ -293,6 +295,8 @@ class MockSupabase {
                   id: 'b2',
                   title: 'Desafía Tus Límites Diariamente',
                   description: 'Clases de CrossFit, HIIT y planes personalizados orientados a tus objetivos.',
+                  h3_tagline: 'beast training concepción',
+                  text_align: 'center',
                   image_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop',
                   link_url: '/planes',
                   active: true,
@@ -487,6 +491,104 @@ class MockSupabase {
                 data = messages.filter(m => m.receiver_id === this._eqValue);
               }
               data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+              if (this._single && Array.isArray(data)) {
+                data = data[0] || null;
+              }
+            }
+          } else if (table === 'announcement_bar') {
+            const storedKey = 'beast_announcement_bar';
+            let bars = [];
+            try {
+              const raw = localStorage.getItem(storedKey);
+              bars = raw ? JSON.parse(raw) : [];
+              if (!Array.isArray(bars)) bars = [];
+            } catch (e) {
+              bars = [];
+            }
+
+            if (bars.length === 0) {
+              bars = [
+                {
+                  id: 'ab1',
+                  text: '¡PROMO INAUGURACIÓN: 20% DE DESCUENTO EN TU PRIMERA MEMBRESÍA CON EL CÓDIGO BEAST20!',
+                  link_url: '/planes',
+                  active: true
+                }
+              ];
+              localStorage.setItem(storedKey, JSON.stringify(bars));
+            }
+
+            if (this._queryType === 'insert') {
+              const newBar = this._records.map(b => ({ id: Math.random().toString(), created_at: new Date().toISOString(), ...b }));
+              if (newBar[0].active) {
+                bars = bars.map(b => ({ ...b, active: false }));
+              }
+              bars = [...newBar, ...bars];
+              localStorage.setItem(storedKey, JSON.stringify(bars));
+              data = this._single ? newBar[0] : newBar;
+            } else if (this._queryType === 'update') {
+              bars = bars.map(b => b.id === this._eqValue ? { ...b, ...this._updateData } : b);
+              if (this._updateData && this._updateData.active) {
+                bars = bars.map(b => b.id === this._eqValue ? b : { ...b, active: false });
+              }
+              localStorage.setItem(storedKey, JSON.stringify(bars));
+              data = bars;
+            } else if (this._queryType === 'delete') {
+              bars = bars.filter(b => b.id !== this._eqValue);
+              localStorage.setItem(storedKey, JSON.stringify(bars));
+              data = bars;
+            } else {
+              data = bars;
+              if (this._eqField === 'active') {
+                data = bars.filter(b => b.active === this._eqValue);
+              }
+              if (this._single && Array.isArray(data)) {
+                data = data[0] || null;
+              }
+            }
+          } else if (table === 'promo_codes') {
+            const storedKey = 'beast_promo_codes';
+            let codes = [];
+            try {
+              const raw = localStorage.getItem(storedKey);
+              codes = raw ? JSON.parse(raw) : [];
+              if (!Array.isArray(codes)) codes = [];
+            } catch (e) {
+              codes = [];
+            }
+
+            if (codes.length === 0) {
+              codes = [
+                {
+                  id: 'pc1',
+                  code: 'BEAST20',
+                  discount_percent: 20,
+                  active: true
+                },
+                {
+                  id: 'pc2',
+                  code: 'BEAST50',
+                  discount_percent: 50,
+                  active: true
+                }
+              ];
+              localStorage.setItem(storedKey, JSON.stringify(codes));
+            }
+
+            if (this._queryType === 'insert') {
+              const newCodes = this._records.map(c => ({ id: Math.random().toString(), code: c.code.toUpperCase(), created_at: new Date().toISOString(), ...c }));
+              codes = [...newCodes, ...codes];
+              localStorage.setItem(storedKey, JSON.stringify(codes));
+              data = this._single ? newCodes[0] : newCodes;
+            } else if (this._queryType === 'delete') {
+              codes = codes.filter(c => c.id !== this._eqValue);
+              localStorage.setItem(storedKey, JSON.stringify(codes));
+              data = codes;
+            } else {
+              data = codes;
+              if (this._eqField === 'code') {
+                data = codes.filter(c => c.code.toUpperCase() === this._eqValue.toUpperCase());
+              }
               if (this._single && Array.isArray(data)) {
                 data = data[0] || null;
               }
