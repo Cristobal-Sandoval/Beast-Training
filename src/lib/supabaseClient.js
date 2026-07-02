@@ -137,7 +137,9 @@ class MockSupabase {
       _updateData: null,
       
       select(fields) {
-        this._queryType = 'select';
+        if (this._queryType !== 'insert' && this._queryType !== 'update' && this._queryType !== 'delete') {
+          this._queryType = 'select';
+        }
         return this;
       },
       eq(field, value) {
