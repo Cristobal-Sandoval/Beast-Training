@@ -310,6 +310,10 @@ class MockSupabase {
               banners = [...newBanners, ...banners];
               localStorage.setItem(storedKey, JSON.stringify(banners));
               data = this._single ? newBanners[0] : newBanners;
+            } else if (this._queryType === 'update') {
+              banners = banners.map(b => b.id === this._eqValue ? { ...b, ...this._updateData } : b);
+              localStorage.setItem(storedKey, JSON.stringify(banners));
+              data = banners.filter(b => b.id === this._eqValue);
             } else if (this._queryType === 'delete') {
               if (this._eqField === 'id') {
                 banners = banners.filter(b => b.id !== this._eqValue);

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp } from 'lucide-react';
+import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit } from 'lucide-react';
 import styles from './admin.module.css';
 
 export default function AdminDashboard() {
@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [bannerAlign, setBannerAlign] = useState('center');
   const [bannerImg, setBannerImg] = useState('');
   const [bannerLink, setBannerLink] = useState('');
+  const [editingBannerId, setEditingBannerId] = useState(null);
 
   // Top Announcement Bar settings
   const [annBarText, setAnnBarText] = useState('');
@@ -481,7 +482,7 @@ export default function AdminDashboard() {
     setActionLoading(true);
     setSuccessMsg(null);
 
-    const newBanner = {
+    const bannerData = {
       title: bannerTitle,
       description: bannerDesc,
       h3_tagline: bannerTagline,
@@ -492,15 +493,32 @@ export default function AdminDashboard() {
     };
 
     try {
-      const { data, error } = await supabase
-        .from('banners')
-        .insert([newBanner])
-        .select();
+      if (editingBannerId) {
+        const { data, error } = await supabase
+          .from('banners')
+          .update(bannerData)
+          .eq('id', editingBannerId)
+          .select();
 
-      if (error) throw error;
-      if (data) setBanners([data[0], ...banners]);
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setBanners(banners.map(b => b.id === editingBannerId ? data[0] : b));
+        }
 
-      setSuccessMsg('¡Banner creado exitosamente!');
+        setSuccessMsg('¡Banner actualizado exitosamente!');
+        setEditingBannerId(null);
+      } else {
+        const { data, error } = await supabase
+          .from('banners')
+          .insert([bannerData])
+          .select();
+
+        if (error) throw error;
+        if (data) setBanners([data[0], ...banners]);
+
+        setSuccessMsg('¡Banner creado exitosamente!');
+      }
+
       setBannerTitle('');
       setBannerDesc('');
       setBannerTagline('beast training concepción');
@@ -511,6 +529,21 @@ export default function AdminDashboard() {
       alert(err.message);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleEditBannerSelect = (banner) => {
+    setEditingBannerId(banner.id);
+    setBannerTitle(banner.title || '');
+    setBannerDesc(banner.description || '');
+    setBannerTagline(banner.h3_tagline || 'beast training concepción');
+    setBannerAlign(banner.text_align || 'center');
+    setBannerImg(banner.image_url || '');
+    setBannerLink(banner.link_url || '');
+
+    const formElement = document.getElementById('bannerFormPanel');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -1404,8 +1437,8 @@ export default function AdminDashboard() {
               {/* Tab: Banners */}
               {activeTab === 'banners' && (
                 <div className={styles.tabContent}>
-                  <div className={`${styles.cardPanel} glass`}>
-                    <h2>Subir Nuevo Banner</h2>
+                  <div id="bannerFormPanel" className={`${styles.cardPanel} glass`}>
+                    <h2>{editingBannerId ? 'Editar Banner' : 'Subir Nuevo Banner'}</h2>
                     <form onSubmit={handleCreateBanner} className={styles.form}>
                       <div className={styles.inputGroup}>
                         <label htmlFor="bannerTitle">Título del Banner (H1)</label>
@@ -1488,9 +1521,29 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <button type="submit" className={styles.submitBtn}>
-                        Crear y Publicar Banner
-                      </button>
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '10px', flexWrap: 'wrap' }}>
+                        <button type="submit" className={styles.submitBtn} style={{ flex: 1, minHeight: '44px' }}>
+                          {editingBannerId ? 'Guardar Cambios' : 'Crear y Publicar Banner'}
+                        </button>
+                        {editingBannerId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingBannerId(null);
+                              setBannerTitle('');
+                              setBannerDesc('');
+                              setBannerTagline('beast training concepción');
+                              setBannerAlign('center');
+                              setBannerImg('');
+                              setBannerLink('');
+                            }}
+                            className={styles.deactivateBtnSmall}
+                            style={{ padding: '10px 18px', borderRadius: '6px', cursor: 'pointer', height: 'auto', minHeight: '44px' }}
+                          >
+                            Cancelar Edición
+                          </button>
+                        )}
+                      </div>
                     </form>
                   </div>
 
@@ -1519,13 +1572,24 @@ export default function AdminDashboard() {
                                 </span>
                               </div>
                             </div>
-                            <button
-                              onClick={() => handleDeleteBanner(banner.id)}
-                              className={styles.deleteBtn}
-                              title="Eliminar Banner"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <button
+                                onClick={() => handleEditBannerSelect(banner)}
+                                className={styles.viewEditBtn}
+                                style={{ padding: '6px', borderRadius: '6px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="Editar Banner"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBanner(banner.id)}
+                                className={styles.deleteBtn}
+                                style={{ padding: '6px', borderRadius: '6px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="Eliminar Banner"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

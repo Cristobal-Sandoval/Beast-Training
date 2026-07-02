@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function TopAnnouncementBar() {
   const [bar, setBar] = useState(null);
   const [visible, setVisible] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     fetchActiveBar();
@@ -28,7 +30,9 @@ export default function TopAnnouncementBar() {
     }
   };
 
-  if (!bar || !visible) return null;
+  const isDashboardOrAdmin = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+
+  if (!bar || !visible || isDashboardOrAdmin) return null;
 
   return (
     <div
