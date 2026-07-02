@@ -438,7 +438,14 @@ class MockSupabase {
             }
           } else if (table === 'direct_messages') {
             const storedKey = 'beast_direct_messages';
-            let messages = JSON.parse(localStorage.getItem(storedKey) || '[]');
+            let messages = [];
+            try {
+              const raw = localStorage.getItem(storedKey);
+              messages = raw ? JSON.parse(raw) : [];
+              if (!Array.isArray(messages)) messages = [];
+            } catch (e) {
+              messages = [];
+            }
             
             // Seed a welcome message for user-uuid-456 if empty
             if (messages.length === 0) {
@@ -452,6 +459,17 @@ class MockSupabase {
                 }
               ];
               localStorage.setItem(storedKey, JSON.stringify(messages));
+            } else {
+              // De-duplicate by id to fix any duplicates in local storage
+              const uniqueMap = new Map();
+              messages.forEach(m => {
+                if (m && m.id) uniqueMap.set(m.id, m);
+              });
+              const cleaned = Array.from(uniqueMap.values());
+              if (cleaned.length !== messages.length) {
+                messages = cleaned;
+                localStorage.setItem(storedKey, JSON.stringify(messages));
+              }
             }
 
             if (this._queryType === 'insert') {

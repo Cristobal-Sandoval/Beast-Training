@@ -891,11 +891,11 @@ export default function AdminDashboard() {
                   <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
                 ) : (
                   <div className={styles.chatMessagesWrapper}>
-                    {chatMessages.map((msg) => {
+                    {chatMessages.map((msg, idx) => {
                       const isAdminMsg = msg.sender_id === 'admin-uuid-123';
                       return (
                         <div
-                          key={msg.id}
+                          key={`${msg.id || idx}-${idx}`}
                           className={`${styles.chatMessage} ${isAdminMsg ? styles.chatMsgAdmin : styles.chatMsgUser}`}
                         >
                           <div className={styles.chatMsgHeader}>

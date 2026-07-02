@@ -527,11 +527,11 @@ function DashboardContent() {
                 <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
               ) : (
                 <div className={styles.chatMessagesWrapper}>
-                  {chatMessages.map((msg) => {
+                  {chatMessages.map((msg, idx) => {
                     const isUserMsg = msg.sender_id === user.id;
                     return (
                       <div
-                        key={msg.id}
+                        key={`${msg.id || idx}-${idx}`}
                         className={`${styles.chatMessage} ${isUserMsg ? styles.chatMsgUser : styles.chatMsgAdmin}`}
                       >
                         <div className={styles.chatMsgHeader}>
