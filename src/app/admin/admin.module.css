@@ -15,8 +15,8 @@
 
 @media (max-width: 576px) {
   .container {
-    padding: 24px 16px;
-    gap: 20px;
+    padding: 16px 12px;
+    gap: 16px;
   }
 }
 
@@ -91,7 +91,7 @@
 @media (max-width: 768px) {
   .adminLayout {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 20px;
   }
 }
 
@@ -107,7 +107,18 @@
     flex-direction: row;
     width: 100%;
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
+    position: sticky;
+    top: 62px;
+    z-index: 50;
+    background: var(--background-bg);
+    padding-top: 8px;
+    margin-bottom: -4px;
+    /* hide scrollbar but keep functionality */
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -132,6 +143,9 @@
   .tabBtn {
     width: auto;
     white-space: nowrap;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    gap: 8px;
   }
 }
 
@@ -161,8 +175,9 @@
 .tabContent {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 24px;
   width: 100%;
+  min-width: 0;
 }
 
 .cardPanel {
@@ -176,7 +191,8 @@
 
 @media (max-width: 576px) {
   .cardPanel {
-    padding: 20px;
+    padding: 16px 14px;
+    gap: 14px;
   }
 }
 

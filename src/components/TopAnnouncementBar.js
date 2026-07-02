@@ -57,7 +57,7 @@ const marqueeStyles = `
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  animation: marqueeScroll 16s linear infinite;
+  animation: marqueeScroll 30s linear infinite;
   padding-right: 48px;
 }
 

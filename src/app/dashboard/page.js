@@ -351,20 +351,22 @@ function DashboardContent() {
           </p>
         </div>
 
-        {/* Member status card */}
-        <div className={`${styles.membershipCard} glass`}>
-          <Award className={styles.membershipIcon} size={28} />
-          <div>
-            <p className={styles.cardLabel}>Estado de Cuenta</p>
-            <h3 className={styles.membershipStatus}>
-              {profile?.status === 'active' ? (
-                <span className={styles.activeSub}>Miembro Activo</span>
-              ) : (
-                <span className={styles.inactiveSub}>Membresía Vencida / Inactiva</span>
-              )}
-            </h3>
+        {/* Member status card — only for regular users */}
+        {profile?.role !== 'admin' && (
+          <div className={`${styles.membershipCard} glass`}>
+            <Award className={styles.membershipIcon} size={28} />
+            <div>
+              <p className={styles.cardLabel}>Estado de Cuenta</p>
+              <h3 className={styles.membershipStatus}>
+                {profile?.status === 'active' ? (
+                  <span className={styles.activeSub}>Miembro Activo</span>
+                ) : (
+                  <span className={styles.inactiveSub}>Membresía Vencida / Inactiva</span>
+                )}
+              </h3>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Comunicados Beast (Urgentes/Normales) */}

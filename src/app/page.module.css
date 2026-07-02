@@ -12,13 +12,13 @@
 
 @media (max-width: 768px) {
   .heroSection {
-    height: 440px;
+    height: 480px;
   }
 }
 
 @media (max-width: 480px) {
   .heroSection {
-    height: 380px;
+    height: 460px;
   }
 }
 
@@ -47,7 +47,7 @@
 .heroContent {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 40px 48px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,7 @@
 
 @media (max-width: 576px) {
   .heroContent {
-    padding: 0 20px;
+    padding: 0 20px 48px;
     gap: 12px;
   }
 }
