@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Calendar, TrendingUp, Heart, CheckCircle, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare } from 'lucide-react';
+import { Calendar, TrendingUp, Heart, CheckCircle, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 // Fallback data if local storage / Supabase is empty
@@ -25,12 +25,10 @@ function DashboardContent() {
   const [announcements, setAnnouncements] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [submittingAppt, setSubmittingAppt] = useState(false);
-  const [apptSuccess, setApptSuccess] = useState(false);
-  
-  // Appointment Form
-  const [apptDate, setApptDate] = useState('');
-  const [apptTime, setApptTime] = useState('Mañana (08:00 - 12:00)');
+  // Appointment slot selection state
+  const [selectedSlot, setSelectedSlot] = useState('');
+  const [submittingConfirm, setSubmittingConfirm] = useState(false);
+  const [apptConfirmSuccess, setApptConfirmSuccess] = useState(false);
 
   // Dismissed Announcements state
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState([]);
@@ -146,47 +144,32 @@ function DashboardContent() {
     }
   };
 
-  const handleRequestAppointment = async (e) => {
+  const handleConfirmSlot = async (e) => {
     e.preventDefault();
-    if (!apptDate) return;
-    setSubmittingAppt(true);
-    setApptSuccess(false);
+    if (!selectedSlot) return;
+    setSubmittingConfirm(true);
+    setApptConfirmSuccess(false);
 
     try {
       const { data, error } = await supabase
-        .from('appointment_requests')
-        .insert([
-          {
-            user_id: user.id,
-            requested_date: apptDate,
-            requested_time: apptTime,
-            status: 'pending'
-          }
-        ])
+        .from('profiles')
+        .update({
+          next_evaluation_date: selectedSlot,
+          proposed_slots: null
+        })
+        .eq('id', user.id)
         .select();
 
       if (error) throw error;
-
-      if (data) {
-        setAppointments([data[0], ...appointments]);
+      
+      if (data && data.length > 0) {
+        setProfile(data[0]);
       }
-      setApptSuccess(true);
-      setApptDate('');
+      setApptConfirmSuccess(true);
     } catch (err) {
-      console.warn('Error al solicitar cita en Supabase, registrando localmente:', err);
-      const mockAppt = {
-        id: Math.random().toString(),
-        user_id: user.id,
-        requested_date: apptDate,
-        requested_time: apptTime,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      };
-      setAppointments([mockAppt, ...appointments]);
-      setApptSuccess(true);
-      setApptDate('');
+      alert('Error al confirmar cita: ' + err.message);
     } finally {
-      setSubmittingAppt(false);
+      setSubmittingConfirm(false);
     }
   };
 
@@ -383,6 +366,55 @@ function DashboardContent() {
           </div>
         </div>
       </section>
+
+      {/* Comunicados Beast (Urgentes/Normales) */}
+      {visibleAnnouncements.length > 0 && (
+        <section style={{ marginBottom: '24px' }}>
+          <div className={`${styles.cardPanel} glass glow-orange`} style={{ padding: '16px 20px', marginBottom: 0 }}>
+            <div className={styles.panelTitleWrapper} style={{ marginBottom: '12px' }}>
+              <Bell className={styles.accent} size={20} />
+              <h2 style={{ fontSize: '1.2rem', borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>Comunicados de Beast Training</h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {visibleAnnouncements.map((ann) => (
+                <div
+                  key={ann.id}
+                  className={`${styles.annCard} ${ann.priority === 'priority' ? styles.annPriority : styles.annNormal}`}
+                  style={{ padding: '14px', borderRadius: '6px', margin: 0 }}
+                >
+                  <div className={styles.annHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700' }}>{ann.title}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {ann.priority === 'priority' && <span className={styles.priorityBadge}>Urgente</span>}
+                      <button
+                        onClick={() => handleDismissAnnouncement(ann.id)}
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid var(--border-light)',
+                          color: '#ffffff',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          minHeight: 'auto',
+                          fontWeight: '600'
+                        }}
+                        title="Ocultar comunicado"
+                      >
+                        Entendido
+                      </button>
+                    </div>
+                  </div>
+                  <p style={{ margin: '8px 0 4px 0', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{ann.content}</p>
+                  <span className={styles.annDate} style={{ fontSize: '0.75rem', opacity: 0.6 }}>
+                    {new Date(ann.created_at || ann.published_at).toLocaleDateString('es-CL')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Stats Grid with Comparatives */}
       <section className={styles.statsGrid}>
@@ -598,108 +630,80 @@ function DashboardContent() {
             </form>
           </div>
 
-          {/* Appointment request panel */}
+          {/* Appointment request panel (Slots model) */}
           <div className={`${styles.cardPanel} glass`}>
             <div className={styles.panelTitleWrapper}>
               <Calendar className={styles.accent} size={20} />
               <h2>Próxima Evaluación</h2>
             </div>
-            <p className={styles.panelSubtitle}>Solicita agendar tu próxima medición mensual con los entrenadores.</p>
 
-            {pendingAppt ? (
-              <div className={styles.apptAlertPending}>
-                <p>Tienes una solicitud de evaluación pendiente para el:</p>
-                <strong>{new Date(pendingAppt.requested_date).toLocaleDateString('es-CL')}</strong>
-                {pendingAppt.requested_time && (
-                  <div style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>
-                    Jornada: {pendingAppt.requested_time}
+            {profile?.next_evaluation_date ? (
+              <div className={styles.apptAlertPending} style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--success)', padding: '16px', borderRadius: '6px' }}>
+                <p style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff' }}>Tu próxima evaluación física está programada para el:</p>
+                <div style={{ fontSize: '1.1rem', color: 'var(--success)', fontWeight: 'bold', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Check size={18} /> {profile.next_evaluation_date}
+                </div>
+                <p className={styles.apptDetails} style={{ marginTop: '12px', fontSize: '0.85rem', opacity: 0.8 }}>Si necesitas cambiar la fecha, comunícate directamente con tu entrenador.</p>
+              </div>
+            ) : profile?.proposed_slots ? (
+              <div>
+                <p className={styles.panelSubtitle}>Tu entrenador ha propuesto las siguientes fechas y horas para tu medición mensual. Selecciona la opción que más te acomode:</p>
+                
+                <form onSubmit={handleConfirmSlot} className={styles.apptForm}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '14px' }}>
+                    {profile.proposed_slots.split(',').map((slot, index) => {
+                      const trimmedSlot = slot.trim();
+                      if (!trimmedSlot) return null;
+                      return (
+                        <label 
+                          key={index} 
+                          style={{
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '10px', 
+                            background: selectedSlot === trimmedSlot ? 'rgba(255, 87, 0, 0.08)' : 'rgba(255,255,255,0.03)',
+                            border: '1px solid ' + (selectedSlot === trimmedSlot ? 'var(--primary)' : 'var(--border-light)'),
+                            padding: '12px 16px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: '#ffffff',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="proposedSlot"
+                            value={trimmedSlot}
+                            checked={selectedSlot === trimmedSlot}
+                            onChange={(e) => setSelectedSlot(e.target.value)}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                          />
+                          <span>{trimmedSlot}</span>
+                        </label>
+                      );
+                    })}
                   </div>
-                )}
-                <p className={styles.apptDetails}>El administrador confirmará la hora contigo a la brevedad.</p>
+                  
+                  {apptConfirmSuccess && <p className={styles.successFormText} style={{ marginTop: '8px', color: 'var(--success)' }}>¡Cita confirmada y programada con éxito!</p>}
+                  
+                  <button 
+                    type="submit" 
+                    disabled={submittingConfirm || !selectedSlot} 
+                    className={styles.apptBtn} 
+                    style={{ marginTop: '16px', width: '100%' }}
+                  >
+                    {submittingConfirm ? 'Confirmando...' : 'Confirmar Fecha de Cita'}
+                  </button>
+                </form>
               </div>
             ) : (
-              <form onSubmit={handleRequestAppointment} className={styles.apptForm}>
-                <div className={styles.inputGroup}>
-                  <label htmlFor="apptDate">Fecha solicitada</label>
-                  <input
-                    id="apptDate"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={apptDate}
-                    onChange={(e) => setApptDate(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className={styles.inputGroup} style={{ marginTop: '10px' }}>
-                  <label htmlFor="apptTime">Jornada Preferida</label>
-                  <select
-                    id="apptTime"
-                    value={apptTime}
-                    onChange={(e) => setApptTime(e.target.value)}
-                    className={styles.selectInput}
-                    style={{ background: 'rgba(255, 255, 255, 0.04)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', width: '100%', padding: '8px', borderRadius: '6px' }}
-                  >
-                    <option value="Mañana (08:00 - 12:00)">Mañana (08:00 - 12:00)</option>
-                    <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
-                    <option value="Noche (18:00 - 21:00)">Noche (18:00 - 21:00)</option>
-                  </select>
-                </div>
-                
-                {apptSuccess && <p className={styles.successFormText} style={{ marginTop: '8px' }}>¡Solicitud enviada con éxito!</p>}
-                <button type="submit" disabled={submittingAppt} className={styles.apptBtn} style={{ marginTop: '12px' }}>
-                  {submittingAppt ? 'Enviando...' : 'Solicitar Evaluación'}
-                </button>
-              </form>
+              <div className={styles.apptAlertPending} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', padding: '16px', borderRadius: '6px' }}>
+                <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.8 }}>No tienes evaluaciones programadas ni propuestas por el staff para este mes.</p>
+                <p style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '600' }}>Tus preparadores configurarán tus opciones pronto.</p>
+              </div>
             )}
-          </div>
-
-          {/* Announcements panel */}
-          <div className={`${styles.cardPanel} glass`}>
-            <div className={styles.panelTitleWrapper}>
-              <Bell className={styles.accent} size={20} />
-              <h2>Comunicados Beast</h2>
-            </div>
-            <p className={styles.panelSubtitle}>Avisos y mensajes directos del staff para todos los miembros activos.</p>
-            <div className={styles.announcementsContainer}>
-              {visibleAnnouncements.length === 0 ? (
-                <p className={styles.emptyText}>No tienes comunicados pendientes de lectura.</p>
-              ) : (
-                visibleAnnouncements.map((ann) => (
-                  <div
-                    key={ann.id}
-                    className={`${styles.annCard} ${ann.priority === 'priority' ? styles.annPriority : styles.annNormal}`}
-                  >
-                    <div className={styles.annHeader}>
-                      <h4>{ann.title}</h4>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {ann.priority === 'priority' && <span className={styles.priorityBadge}>Urgente</span>}
-                        <button
-                          onClick={() => handleDismissAnnouncement(ann.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--text-muted)',
-                            fontSize: '0.75rem',
-                            cursor: 'pointer',
-                            padding: '2px 4px',
-                            minHeight: 'auto',
-                            fontWeight: '600'
-                          }}
-                          title="Ocultar comunicado"
-                        >
-                          Entendido
-                        </button>
-                      </div>
-                    </div>
-                    <p>{ann.content}</p>
-                    <span className={styles.annDate}>
-                      {new Date(ann.created_at || ann.published_at).toLocaleDateString('es-CL')}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
           </div>
         </div>
       </section>

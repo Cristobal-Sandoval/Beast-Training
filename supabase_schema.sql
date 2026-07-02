@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     role user_role DEFAULT 'user'::user_role,
     status TEXT DEFAULT 'inactive' CHECK (status IN ('active', 'inactive')) NOT NULL,
     workout_plan TEXT,
+    next_evaluation_date TEXT,
+    proposed_slots TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

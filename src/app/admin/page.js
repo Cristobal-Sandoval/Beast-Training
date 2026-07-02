@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit } from 'lucide-react';
+import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar } from 'lucide-react';
 import styles from './admin.module.css';
 
 export default function AdminDashboard() {
@@ -74,6 +74,11 @@ export default function AdminDashboard() {
   const [postTitle, setPostTitle] = useState('');
   const [postExcerpt, setPostExcerpt] = useState('');
   const [postContent, setPostContent] = useState('');
+
+  // Proposed Slots form states
+  const [proposedSlot1, setProposedSlot1] = useState('');
+  const [proposedSlot2, setProposedSlot2] = useState('');
+  const [proposedSlot3, setProposedSlot3] = useState('');
   const [postImg, setPostImg] = useState('');
   const [postAuthor, setPostAuthor] = useState('');
 
@@ -266,6 +271,13 @@ export default function AdminDashboard() {
     setAlumnoAge(alumno.age || '');
     setAlumnoPhone(alumno.phone || '');
     setAlumnoStatus(alumno.status || 'inactive');
+    
+    // Parse proposed slots
+    const slots = (alumno.proposed_slots || '').split(',');
+    setProposedSlot1(slots[0]?.trim() || '');
+    setProposedSlot2(slots[1]?.trim() || '');
+    setProposedSlot3(slots[2]?.trim() || '');
+
     setSuccessMsg(null);
     
     fetchDirectMessages(alumno.id);
@@ -420,6 +432,45 @@ export default function AdminDashboard() {
       setSuccessMsg('¡Plan de trabajo mensual actualizado con éxito!');
     } catch (err) {
       alert('Error al actualizar plan: ' + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleProposeSlots = async (e) => {
+    e.preventDefault();
+    if (!selectedAlumno) return;
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    const slotsText = [proposedSlot1.trim(), proposedSlot2.trim(), proposedSlot3.trim()]
+      .filter(s => s !== '')
+      .join(', ');
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          proposed_slots: slotsText || null,
+          next_evaluation_date: null
+        })
+        .eq('id', selectedAlumno.id)
+        .select();
+
+      if (error) throw error;
+      
+      const updatedAlumno = {
+        ...selectedAlumno,
+        proposed_slots: slotsText || null,
+        next_evaluation_date: null
+      };
+      
+      setAlumnos(alumnos.map(a => a.id === selectedAlumno.id ? updatedAlumno : a));
+      setSelectedAlumno(updatedAlumno);
+
+      setSuccessMsg('¡Fechas y horas de evaluación propuestas con éxito al alumno!');
+    } catch (err) {
+      alert('Error al proponer fechas: ' + err.message);
     } finally {
       setActionLoading(false);
     }
@@ -1079,6 +1130,67 @@ export default function AdminDashboard() {
 
                     <button type="submit" className={styles.submitBtn}>
                       Guardar Mediciones
+                    </button>
+                  </form>
+                </div>
+
+                {/* CARD PANEL: PROPONER FECHAS DE EVALUACION */}
+                <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginTop: '30px' }}>
+                  <div className={styles.panelTitleWrapper}>
+                    <Calendar size={20} className={styles.accent} />
+                    <h2>Proponer Fechas de Evaluación</h2>
+                  </div>
+                  <p className={styles.panelInstructions}>
+                    Propón 3 opciones de fechas y horas para la próxima evaluación física de {selectedAlumno.full_name}. El alumno elegirá una desde su dashboard.
+                  </p>
+                  
+                  {selectedAlumno.next_evaluation_date && (
+                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--success)', padding: '12px 16px', borderRadius: '6px', marginBottom: '20px' }}>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#ffffff' }}>
+                        ¡Fecha confirmada por el alumno!: <strong>{selectedAlumno.next_evaluation_date}</strong>
+                      </p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleProposeSlots} className={styles.form}>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="slot1">Opción 1</label>
+                        <input
+                          id="slot1"
+                          type="text"
+                          placeholder="Ej: Lunes 6 de Julio (10:00)"
+                          value={proposedSlot1}
+                          onChange={(e) => setProposedSlot1(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="slot2">Opción 2</label>
+                        <input
+                          id="slot2"
+                          type="text"
+                          placeholder="Ej: Miércoles 8 de Julio (15:30)"
+                          value={proposedSlot2}
+                          onChange={(e) => setProposedSlot2(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="slot3">Opción 3</label>
+                        <input
+                          id="slot3"
+                          type="text"
+                          placeholder="Ej: Viernes 10 de Julio (18:00)"
+                          value={proposedSlot3}
+                          onChange={(e) => setProposedSlot3(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn}>
+                      Enviar Opciones al Alumno
                     </button>
                   </form>
                 </div>

@@ -208,7 +208,9 @@ class MockSupabase {
                   phone: '+56987654321',
                   role: 'user',
                   status: 'active',
-                  workout_plan: 'Hipertrofia - Pecho/Bíceps:\n• Press Banca Plano: 4x8\n• Press Inclinado Mancuernas: 4x10\n• Aperturas Polea: 3x12\n• Curl con Barra: 4x10\n• Curl Martillo: 3x12\n• Cardio HIIT: 15 minutos en trotadora'
+                  workout_plan: 'Hipertrofia - Pecho/Bíceps:\n• Press Banca Plano: 4x8\n• Press Inclinado Mancuernas: 4x10\n• Aperturas Polea: 3x12\n• Curl con Barra: 4x10\n• Curl Martillo: 3x12\n• Cardio HIIT: 15 minutos en trotadora',
+                  proposed_slots: 'Lunes 7 de Julio (10:00), Miércoles 9 de Julio (15:30), Viernes 11 de Julio (18:00)',
+                  next_evaluation_date: null
                 }
               ];
               localStorage.setItem(profilesKey, JSON.stringify(profiles));
