@@ -1,0 +1,265 @@
+.wrapper {
+  min-height: calc(100vh - 70px);
+  width: 100%;
+}
+
+.breadcrumb {
+  background: #0d0d0f;
+  border-bottom: 1px solid var(--border-light);
+  padding: 16px 24px;
+}
+
+.breadcrumbContent {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.breadcrumbContent a:hover {
+  color: var(--primary);
+}
+
+.current {
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.article {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 50px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+@media (max-width: 576px) {
+  .article {
+    padding: 30px 16px;
+    gap: 20px;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 2.8rem;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+}
+
+.meta {
+  display: flex;
+  gap: 24px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  color: var(--primary);
+}
+
+.imageContainer {
+  width: 100%;
+  max-height: 480px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Layout */
+.layout {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+.body {
+  border-radius: 12px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 576px) {
+  .body {
+    padding: 24px;
+  }
+}
+
+.paragraph {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.listItem {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  padding-left: 12px;
+  border-left: 3px solid var(--primary);
+  margin-top: 10px;
+}
+
+.list {
+  list-style-type: square;
+  padding-left: 24px;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.list li {
+  margin-bottom: 8px;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.ctaCard {
+  border-radius: 12px;
+  padding: 30px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctaIcon {
+  color: var(--primary);
+}
+
+.ctaCard h3 {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+}
+
+.ctaCard p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.ctaBtn {
+  background: var(--primary);
+  color: var(--text-primary);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.ctaBtn:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.3);
+}
+
+.footerNav {
+  border-top: 1px solid var(--border-light);
+  padding-top: 30px;
+  margin-top: 20px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.backBtn:hover {
+  color: var(--primary);
+  gap: 12px;
+}
+
+/* Loading state */
+.loadingWrapper {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  color: var(--primary);
+  animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Not Found state */
+.notFoundWrapper {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.notFoundWrapper h2 {
+  font-size: 2rem;
+  text-transform: uppercase;
+}
+
+.notFoundWrapper p {
+  color: var(--text-secondary);
+}
