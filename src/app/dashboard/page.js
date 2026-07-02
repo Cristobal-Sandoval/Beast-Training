@@ -418,6 +418,24 @@ function DashboardContent() {
       {/* Main Grid: Info columns */}
       <section className={styles.dashboardGrid}>
         <div className={styles.chartsColumn}>
+          {/* Workout Plan panel */}
+          <div className={`${styles.cardPanel} glass glow-orange`}>
+            <div className={styles.panelTitleWrapper}>
+              <FileText className={styles.accent} size={20} />
+              <h2>Plan de Trabajo del Mes</h2>
+            </div>
+            <p className={styles.panelSubtitle}>Tus metas físicas y ejercicios recomendados por tu entrenador.</p>
+            <div className={styles.workoutPlanBox} style={{ maxHeight: 'none', overflowY: 'visible' }}>
+              {profile?.workout_plan ? (
+                profile.workout_plan.split('\n').map((line, idx) => (
+                  <p key={idx} style={{ marginBottom: line.startsWith('•') ? '6px' : '12px' }}>{line}</p>
+                ))
+              ) : (
+                <p className={styles.emptyText}>No hay plan cargado aún para este mes. Acércate a tus entrenadores.</p>
+              )}
+            </div>
+          </div>
+
           {/* Charts Panel */}
           <div className={`${styles.cardPanel} glass`}>
             <h2>Tu Evolución Física</h2>
@@ -461,59 +479,6 @@ function DashboardContent() {
 
         {/* Sidebar Info Panels */}
         <div className={styles.sidebarColumn}>
-          {/* Workout Plan panel */}
-          <div className={`${styles.cardPanel} glass glow-orange`}>
-            <div className={styles.panelTitleWrapper}>
-              <FileText className={styles.accent} size={20} />
-              <h2>Plan de Trabajo del Mes</h2>
-            </div>
-            <p className={styles.panelSubtitle}>Tus metas físicas y ejercicios recomendados por tu entrenador.</p>
-            <div className={styles.workoutPlanBox}>
-              {profile?.workout_plan ? (
-                profile.workout_plan.split('\n').map((line, idx) => (
-                  <p key={idx} style={{ marginBottom: line.startsWith('•') ? '6px' : '12px' }}>{line}</p>
-                ))
-              ) : (
-                <p className={styles.emptyText}>No hay plan cargado aún para este mes. Acércate a tus entrenadores.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Appointment request panel */}
-          <div className={`${styles.cardPanel} glass`}>
-            <div className={styles.panelTitleWrapper}>
-              <Calendar className={styles.accent} size={20} />
-              <h2>Próxima Evaluación</h2>
-            </div>
-            <p className={styles.panelSubtitle}>Solicita agendar tu próxima medición mensual con los entrenadores.</p>
-
-            {pendingAppt ? (
-              <div className={styles.apptAlertPending}>
-                <p>Tienes una solicitud de evaluación pendiente para el:</p>
-                <strong>{new Date(pendingAppt.requested_date).toLocaleDateString('es-CL')}</strong>
-                <p className={styles.apptDetails}>El administrador confirmará la hora contigo a la brevedad.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleRequestAppointment} className={styles.apptForm}>
-                <div className={styles.inputGroup}>
-                  <label htmlFor="apptDate">Fecha solicitada</label>
-                  <input
-                    id="apptDate"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={apptDate}
-                    onChange={(e) => setApptDate(e.target.value)}
-                    required
-                  />
-                </div>
-                {apptSuccess && <p className={styles.successFormText}>¡Solicitud enviada con éxito!</p>}
-                <button type="submit" disabled={submittingAppt} className={styles.apptBtn}>
-                  {submittingAppt ? 'Enviando...' : 'Solicitar Evaluación'}
-                </button>
-              </form>
-            )}
-          </div>
-
           {/* PANEL: MENSAJES CON TU ENTRENADOR */}
           <div className={`${styles.cardPanel} glass glow-orange`}>
             <div className={styles.panelTitleWrapper}>
@@ -522,7 +487,7 @@ function DashboardContent() {
             </div>
             <p className={styles.panelSubtitle}>Escríbele directamente al Coach sobre tus rutinas o progresos.</p>
             
-            <div className={styles.chatBox}>
+            <div className={styles.chatBox} style={{ maxHeight: '280px' }}>
               {chatMessages.length === 0 ? (
                 <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
               ) : (
@@ -571,6 +536,41 @@ function DashboardContent() {
                 {submittingChat ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
             </form>
+          </div>
+
+          {/* Appointment request panel */}
+          <div className={`${styles.cardPanel} glass`}>
+            <div className={styles.panelTitleWrapper}>
+              <Calendar className={styles.accent} size={20} />
+              <h2>Próxima Evaluación</h2>
+            </div>
+            <p className={styles.panelSubtitle}>Solicita agendar tu próxima medición mensual con los entrenadores.</p>
+
+            {pendingAppt ? (
+              <div className={styles.apptAlertPending}>
+                <p>Tienes una solicitud de evaluación pendiente para el:</p>
+                <strong>{new Date(pendingAppt.requested_date).toLocaleDateString('es-CL')}</strong>
+                <p className={styles.apptDetails}>El administrador confirmará la hora contigo a la brevedad.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleRequestAppointment} className={styles.apptForm}>
+                <div className={styles.inputGroup}>
+                  <label htmlFor="apptDate">Fecha solicitada</label>
+                  <input
+                    id="apptDate"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={apptDate}
+                    onChange={(e) => setApptDate(e.target.value)}
+                    required
+                  />
+                </div>
+                {apptSuccess && <p className={styles.successFormText}>¡Solicitud enviada con éxito!</p>}
+                <button type="submit" disabled={submittingAppt} className={styles.apptBtn}>
+                  {submittingAppt ? 'Enviando...' : 'Solicitar Evaluación'}
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Announcements panel */}
