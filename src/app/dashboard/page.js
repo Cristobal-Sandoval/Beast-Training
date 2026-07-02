@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Calendar, TrendingUp, Heart, CheckCircle, Scale, ShieldAlert, Award, FileText, Bell, Sparkles } from 'lucide-react';
+import { Calendar, TrendingUp, Heart, CheckCircle, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 // Fallback data if local storage / Supabase is empty
@@ -30,6 +30,11 @@ function DashboardContent() {
   
   // Appointment Form
   const [apptDate, setApptDate] = useState('');
+
+  // Direct Message states
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newDirectMessage, setNewDirectMessage] = useState('');
+  const [submittingChat, setSubmittingChat] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -108,6 +113,18 @@ function DashboardContent() {
       if (apptData) {
         setAppointments(apptData);
       }
+
+      // 5. Fetch Direct Messages
+      const { data: dmData } = await supabase
+        .from('direct_messages')
+        .select('*');
+      if (dmData) {
+        const filtered = dmData.filter(m => 
+          (m.sender_id === userId && m.receiver_id === 'admin-uuid-123') ||
+          (m.sender_id === 'admin-uuid-123' && m.receiver_id === userId)
+        );
+        setChatMessages(filtered);
+      }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       // Fallbacks
@@ -157,6 +174,44 @@ function DashboardContent() {
       setApptDate('');
     } finally {
       setSubmittingAppt(false);
+    }
+  };
+
+  const handleSendDirectMessage = async (e) => {
+    e.preventDefault();
+    if (!newDirectMessage.trim()) return;
+    setSubmittingChat(true);
+
+    const newMsg = {
+      sender_id: user.id,
+      receiver_id: 'admin-uuid-123',
+      content: newDirectMessage.trim()
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('direct_messages')
+        .insert([newMsg])
+        .select();
+
+      if (error) throw error;
+      if (data) {
+        setChatMessages([...chatMessages, data[0]]);
+      }
+      setNewDirectMessage('');
+    } catch (err) {
+      console.warn('Error al enviar mensaje, registrando localmente:', err);
+      const mockDm = {
+        id: Math.random().toString(),
+        sender_id: user.id,
+        receiver_id: 'admin-uuid-123',
+        content: newDirectMessage.trim(),
+        created_at: new Date().toISOString()
+      };
+      setChatMessages([...chatMessages, mockDm]);
+      setNewDirectMessage('');
+    } finally {
+      setSubmittingChat(false);
     }
   };
 
@@ -457,6 +512,65 @@ function DashboardContent() {
                 </button>
               </form>
             )}
+          </div>
+
+          {/* PANEL: MENSAJES CON TU ENTRENADOR */}
+          <div className={`${styles.cardPanel} glass glow-orange`}>
+            <div className={styles.panelTitleWrapper}>
+              <MessageSquare className={styles.accent} size={20} />
+              <h2>Mensajes con tu Entrenador</h2>
+            </div>
+            <p className={styles.panelSubtitle}>Escríbele directamente al Coach sobre tus rutinas o progresos.</p>
+            
+            <div className={styles.chatBox}>
+              {chatMessages.length === 0 ? (
+                <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
+              ) : (
+                <div className={styles.chatMessagesWrapper}>
+                  {chatMessages.map((msg) => {
+                    const isUserMsg = msg.sender_id === user.id;
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`${styles.chatMessage} ${isUserMsg ? styles.chatMsgUser : styles.chatMsgAdmin}`}
+                      >
+                        <div className={styles.chatMsgHeader}>
+                          <strong>{isUserMsg ? 'Tú' : 'Coach'}</strong>
+                          <span>{new Date(msg.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <p>{msg.content}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
+              <textarea
+                value={newDirectMessage}
+                onChange={(e) => setNewDirectMessage(e.target.value)}
+                placeholder="Escribe un mensaje para el Coach..."
+                rows={3}
+                required
+                style={{
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  border: '1px solid var(--border-light)',
+                  color: 'var(--text-primary)',
+                  padding: '12px',
+                  borderRadius: '6px',
+                  fontSize: '0.95rem',
+                  outline: 'none',
+                  width: '100%',
+                  fontFamily: 'inherit',
+                  lineHeight: '1.5',
+                  resize: 'none'
+                }}
+              />
+              <button type="submit" disabled={submittingChat} className={styles.apptBtn} style={{ marginTop: '10px' }}>
+                {submittingChat ? 'Enviando...' : 'Enviar Mensaje'}
+              </button>
+            </form>
           </div>
 
           {/* Announcements panel */}

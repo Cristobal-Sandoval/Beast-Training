@@ -436,6 +436,41 @@ class MockSupabase {
                 data = data[0] || null;
               }
             }
+          } else if (table === 'direct_messages') {
+            const storedKey = 'beast_direct_messages';
+            let messages = JSON.parse(localStorage.getItem(storedKey) || '[]');
+            
+            // Seed a welcome message for user-uuid-456 if empty
+            if (messages.length === 0) {
+              messages = [
+                {
+                  id: 'dm1',
+                  sender_id: 'admin-uuid-123',
+                  receiver_id: 'user-uuid-456',
+                  content: '¡Hola Diego! Bienvenido a Beast Training. Aquí podré ir subiendo tus rutinas y evaluaciones de progreso físico. Si tienes dudas con tus ejercicios o plan alimenticio, escríbeme por esta bandeja y te responderé en breve. ¡A entrenar!',
+                  created_at: '2026-07-01T12:00:00Z'
+                }
+              ];
+              localStorage.setItem(storedKey, JSON.stringify(messages));
+            }
+
+            if (this._queryType === 'insert') {
+              const newMsg = this._records.map(m => ({ id: Math.random().toString(), created_at: new Date().toISOString(), ...m }));
+              messages = [...messages, ...newMsg];
+              localStorage.setItem(storedKey, JSON.stringify(messages));
+              data = this._single ? newMsg[0] : newMsg;
+            } else {
+              data = messages;
+              if (this._eqField === 'sender_id') {
+                data = messages.filter(m => m.sender_id === this._eqValue);
+              } else if (this._eqField === 'receiver_id') {
+                data = messages.filter(m => m.receiver_id === this._eqValue);
+              }
+              data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+              if (this._single && Array.isArray(data)) {
+                data = data[0] || null;
+              }
+            }
           }
         } catch (err) {
           error = err;

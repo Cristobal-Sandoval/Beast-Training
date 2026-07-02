@@ -41,6 +41,10 @@ export default function AdminDashboard() {
   const [alumnoPhone, setAlumnoPhone] = useState('');
   const [alumnoStatus, setAlumnoStatus] = useState('inactive');
 
+  // Direct Message states
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newDirectMessage, setNewDirectMessage] = useState('');
+
   // Banner Form State
   const [bannerTitle, setBannerTitle] = useState('');
   const [bannerDesc, setBannerDesc] = useState('');
@@ -184,6 +188,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDirectMessages = async (alumnoId) => {
+    try {
+      const { data, error } = await supabase
+        .from('direct_messages')
+        .select('*');
+      if (!error && data) {
+        const filtered = data.filter(m => 
+          (m.sender_id === 'admin-uuid-123' && m.receiver_id === alumnoId) ||
+          (m.sender_id === alumnoId && m.receiver_id === 'admin-uuid-123')
+        );
+        setChatMessages(filtered);
+      }
+    } catch (err) {
+      console.warn('Error fetching messages:', err);
+    }
+  };
+
   // Select user for detailed edit
   const handleSelectAlumno = async (alumno) => {
     setSelectedAlumno(alumno);
@@ -194,6 +215,8 @@ export default function AdminDashboard() {
     setAlumnoStatus(alumno.status || 'inactive');
     setSuccessMsg(null);
     
+    fetchDirectMessages(alumno.id);
+
     // Fetch this specific user's physical progress
     try {
       const { data, error } = await supabase
@@ -207,6 +230,33 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.warn('Error fetching alumno progress:', err);
+    }
+  };
+
+  // Send Direct Message
+  const handleSendDirectMessage = async (e) => {
+    e.preventDefault();
+    if (!newDirectMessage.trim()) return;
+
+    const newMsg = {
+      sender_id: 'admin-uuid-123',
+      receiver_id: selectedAlumno.id,
+      content: newDirectMessage.trim()
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('direct_messages')
+        .insert([newMsg])
+        .select();
+
+      if (error) throw error;
+      if (data) {
+        setChatMessages([...chatMessages, data[0]]);
+      }
+      setNewDirectMessage('');
+    } catch (err) {
+      alert('Error al enviar mensaje: ' + err.message);
     }
   };
 
@@ -826,6 +876,52 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               )}
+            </div>
+
+            {/* PANEL: MENSAJES PRIVADOS CON EL ALUMNO */}
+            <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginTop: '30px' }}>
+              <div className={styles.panelTitleWrapper}>
+                <MessageSquare size={20} className={styles.accent} />
+                <h2>Mensajes Personales con el Alumno</h2>
+              </div>
+              <p className={styles.panelInstructions}>Bandeja de comunicación directa y privada con {selectedAlumno.full_name}.</p>
+
+              <div className={styles.chatBox}>
+                {chatMessages.length === 0 ? (
+                  <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
+                ) : (
+                  <div className={styles.chatMessagesWrapper}>
+                    {chatMessages.map((msg) => {
+                      const isAdminMsg = msg.sender_id === 'admin-uuid-123';
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`${styles.chatMessage} ${isAdminMsg ? styles.chatMsgAdmin : styles.chatMsgUser}`}
+                        >
+                          <div className={styles.chatMsgHeader}>
+                            <strong>{isAdminMsg ? 'Tú (Staff)' : selectedAlumno.full_name}</strong>
+                            <span>{new Date(msg.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <p>{msg.content}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
+                <textarea
+                  value={newDirectMessage}
+                  onChange={(e) => setNewDirectMessage(e.target.value)}
+                  placeholder="Escribe un mensaje para el alumno..."
+                  rows={3}
+                  required
+                />
+                <button type="submit" className={styles.submitBtn} style={{ marginTop: '10px' }}>
+                  Enviar Mensaje Privado
+                </button>
+              </form>
             </div>
           </div>
         ) : (

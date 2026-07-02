@@ -206,3 +206,22 @@ INSERT INTO public.announcements (title, content, priority) VALUES
 ('¡Atención: Feriado 16 de Julio!', 'Estimada comunidad, les informamos que el gimnasio permanecerá cerrado el próximo jueves 16 de Julio por feriado nacional. Retomamos actividades el viernes 17 en horario normal. ¡Sigan entrenando duro!', 'normal'),
 ('⚠️ Mantenimiento de la Zona de Fuerza', 'Hoy a las 14:00 hrs se realizará la mantención trimestral de las poleas y jaulas en la sala de musculación. Se mantendrá habilitada la zona de peso libre. Disculpen las molestias, es para mantener sus entrenamientos seguros.', 'priority')
 ON CONFLICT DO NOTHING;
+
+-- 16. Create Direct Messages Table
+CREATE TABLE IF NOT EXISTS public.direct_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    sender_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    receiver_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for direct_messages
+ALTER TABLE public.direct_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read their own received or sent messages" ON public.direct_messages
+    FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+
+CREATE POLICY "Users can insert their own sent messages" ON public.direct_messages
+    FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
