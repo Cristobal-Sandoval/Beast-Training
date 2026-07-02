@@ -22,6 +22,11 @@ export default function AdminDashboard() {
   // Selected Alumno Edit State
   const [selectedAlumno, setSelectedAlumno] = useState(null);
   const [alumnoProgress, setAlumnoProgress] = useState([]);
+  const [fichaTab, setFichaTab] = useState('routine'); // 'routine', 'evaluations', 'chat'
+
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'inactive'
   
   // Alumno physical form
   const [logWeight, setLogWeight] = useState('');
@@ -208,6 +213,7 @@ export default function AdminDashboard() {
   // Select user for detailed edit
   const handleSelectAlumno = async (alumno) => {
     setSelectedAlumno(alumno);
+    setFichaTab('routine');
     setWorkoutPlanText(alumno.workout_plan || '');
     setAlumnoName(alumno.full_name || '');
     setAlumnoAge(alumno.age || '');
@@ -573,6 +579,15 @@ export default function AdminDashboard() {
     );
   }
 
+  const filteredAlumnos = alumnos.filter(alumno => {
+    const matchesSearch = 
+      (alumno.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (alumno.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (statusFilter === 'all') return matchesSearch;
+    return matchesSearch && alumno.status === statusFilter;
+  });
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
@@ -630,299 +645,367 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* CARD PANEL: DATOS PERSONALES */}
-            <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginBottom: '30px' }}>
-              <div className={styles.panelTitleWrapper}>
-                <UserCheck size={20} className={styles.accent} />
-                <h2>Datos Personales del Alumno</h2>
-              </div>
-              <p className={styles.panelInstructions}>Actualiza los datos personales básicos y el estado de la membresía (pago) del alumno.</p>
-              
-              <form onSubmit={handleUpdatePersonalDetails} className={styles.form}>
-                <div className={styles.formRow}>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="alumnoName">Nombre Completo</label>
-                    <input
-                      id="alumnoName"
-                      type="text"
-                      value={alumnoName}
-                      onChange={(e) => setAlumnoName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="alumnoEmail">Correo Electrónico (Solo Lectura)</label>
-                    <input
-                      id="alumnoEmail"
-                      type="email"
-                      value={selectedAlumno.email}
-                      disabled
-                      style={{ opacity: 0.6, cursor: 'not-allowed' }}
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="alumnoAge">Edad</label>
-                    <input
-                      id="alumnoAge"
-                      type="number"
-                      placeholder="Ej: 25"
-                      value={alumnoAge}
-                      onChange={(e) => setAlumnoAge(e.target.value)}
-                    />
-                  </div>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="alumnoPhone">Teléfono</label>
-                    <input
-                      id="alumnoPhone"
-                      type="text"
-                      placeholder="Ej: +56 9 1234 5678"
-                      value={alumnoPhone}
-                      onChange={(e) => setAlumnoPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className={styles.formRow}>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="alumnoStatus">Estado de Membresía (Pago)</label>
-                    <select
-                      id="alumnoStatus"
-                      value={alumnoStatus}
-                      onChange={(e) => setAlumnoStatus(e.target.value)}
-                      className={styles.selectInput}
-                    >
-                      <option value="active">Activo (Membresía Pagada)</option>
-                      <option value="inactive">Inactivo (Vencido / Sin Pago)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button type="submit" className={styles.submitBtn}>
-                  Actualizar Datos Personales
-                </button>
-              </form>
+            {/* Horizontal Sub-Tabs */}
+            <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-light)', paddingBottom: '1px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setFichaTab('routine')}
+                style={{
+                  background: fichaTab === 'routine' ? 'rgba(255, 87, 0, 0.1)' : 'none',
+                  color: fichaTab === 'routine' ? 'var(--primary)' : 'var(--text-secondary)',
+                  border: 'none',
+                  borderBottom: fichaTab === 'routine' ? '2px solid var(--primary)' : '2px solid transparent',
+                  padding: '10px 20px',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  minHeight: 'auto',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Ficha & Rutina
+              </button>
+              <button
+                onClick={() => setFichaTab('evaluations')}
+                style={{
+                  background: fichaTab === 'evaluations' ? 'rgba(255, 87, 0, 0.1)' : 'none',
+                  color: fichaTab === 'evaluations' ? 'var(--primary)' : 'var(--text-secondary)',
+                  border: 'none',
+                  borderBottom: fichaTab === 'evaluations' ? '2px solid var(--primary)' : '2px solid transparent',
+                  padding: '10px 20px',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  minHeight: 'auto',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Historial & Evaluaciones
+              </button>
+              <button
+                onClick={() => setFichaTab('chat')}
+                style={{
+                  background: fichaTab === 'chat' ? 'rgba(255, 87, 0, 0.1)' : 'none',
+                  color: fichaTab === 'chat' ? 'var(--primary)' : 'var(--text-secondary)',
+                  border: 'none',
+                  borderBottom: fichaTab === 'chat' ? '2px solid var(--primary)' : '2px solid transparent',
+                  padding: '10px 20px',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  minHeight: 'auto',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Mensajes Privados
+              </button>
             </div>
 
-            <div className={styles.adminGrid}>
-              {/* Form to load measurements */}
-              <div className={`${styles.cardPanel} glass`}>
-                <div className={styles.panelTitleWrapper}>
-                  <Scale size={20} className={styles.accent} />
-                  <h2>Cargar Evaluación Física (Mensual)</h2>
-                </div>
-                <form onSubmit={handleAddMeasurement} className={styles.form}>
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="logDate">Fecha de evaluación</label>
-                    <input
-                      id="logDate"
-                      type="date"
-                      value={logDate}
-                      onChange={(e) => setLogDate(e.target.value)}
-                      required
-                    />
+            {/* Sub-Tab Content: Ficha & Rutina */}
+            {fichaTab === 'routine' && (
+              <div>
+                {/* CARD PANEL: DATOS PERSONALES */}
+                <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginBottom: '30px' }}>
+                  <div className={styles.panelTitleWrapper}>
+                    <UserCheck size={20} className={styles.accent} />
+                    <h2>Datos Personales del Alumno</h2>
                   </div>
+                  <p className={styles.panelInstructions}>Actualiza los datos personales básicos y el estado de la membresía (pago) del alumno.</p>
+                  
+                  <form onSubmit={handleUpdatePersonalDetails} className={styles.form}>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="alumnoName">Nombre Completo</label>
+                        <input
+                          id="alumnoName"
+                          type="text"
+                          value={alumnoName}
+                          onChange={(e) => setAlumnoName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="alumnoEmail">Correo Electrónico (Solo Lectura)</label>
+                        <input
+                          id="alumnoEmail"
+                          type="email"
+                          value={selectedAlumno.email}
+                          disabled
+                          style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                        />
+                      </div>
+                    </div>
 
-                  <div className={styles.formRow}>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="alumnoAge">Edad</label>
+                        <input
+                          id="alumnoAge"
+                          type="number"
+                          placeholder="Ej: 25"
+                          value={alumnoAge}
+                          onChange={(e) => setAlumnoAge(e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="alumnoPhone">Teléfono</label>
+                        <input
+                          id="alumnoPhone"
+                          type="text"
+                          placeholder="Ej: +56 9 1234 5678"
+                          value={alumnoPhone}
+                          onChange={(e) => setAlumnoPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="alumnoStatus">Estado de Membresía (Pago)</label>
+                        <select
+                          id="alumnoStatus"
+                          value={alumnoStatus}
+                          onChange={(e) => setAlumnoStatus(e.target.value)}
+                          className={styles.selectInput}
+                        >
+                          <option value="active">Activo (Membresía Pagada)</option>
+                          <option value="inactive">Inactivo (Vencido / Sin Pago)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn}>
+                      Guardar Datos Personales
+                    </button>
+                  </form>
+                </div>
+
+                {/* Edit workout plan */}
+                <div className={`${styles.cardPanel} glass glow-orange`}>
+                  <div className={styles.panelTitleWrapper}>
+                    <FileText size={20} className={styles.accent} />
+                    <h2>Plan de Trabajo del Mes</h2>
+                  </div>
+                  <p className={styles.panelInstructions}>Escribe las rutinas, series y metas físicas asignadas al alumno.</p>
+                  <form onSubmit={handleUpdateWorkoutPlan} className={styles.form}>
                     <div className={styles.inputGroup}>
-                      <label htmlFor="logWeight">Peso Corporal (kg)</label>
-                      <input
-                        id="logWeight"
-                        type="number"
-                        step="0.01"
-                        placeholder="80.5"
-                        value={logWeight}
-                        onChange={(e) => setLogWeight(e.target.value)}
+                      <textarea
+                        value={workoutPlanText}
+                        onChange={(e) => setWorkoutPlanText(e.target.value)}
+                        placeholder="• Press Banca: 4x8&#10;• Sentadilla: 4x10&#10;• Correr 20 min..."
+                        rows={8}
+                        className={styles.planTextarea}
                         required
                       />
                     </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="logBodyFat">% Grasa Corporal</label>
-                      <input
-                        id="logBodyFat"
-                        type="number"
-                        step="0.01"
-                        placeholder="18.5"
-                        value={logBodyFat}
-                        onChange={(e) => setLogBodyFat(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.formRow}>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="logMuscle">Masa Muscular (kg)</label>
-                      <input
-                        id="logMuscle"
-                        type="number"
-                        step="0.01"
-                        placeholder="35.8"
-                        value={logMuscle}
-                        onChange={(e) => setLogMuscle(e.target.value)}
-                      />
-                    </div>
-                    <div className={styles.inputGroup}>
-                      <label htmlFor="logWaist">Cintura (cm)</label>
-                      <input
-                        id="logWaist"
-                        type="number"
-                        step="0.1"
-                        placeholder="88"
-                        value={logWaist}
-                        onChange={(e) => setLogWaist(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="logChest">Pecho (cm)</label>
-                    <input
-                      id="logChest"
-                      type="number"
-                      step="0.1"
-                      placeholder="104"
-                      value={logChest}
-                      onChange={(e) => setLogChest(e.target.value)}
-                    />
-                  </div>
-
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="logNotes">Notas de la evaluación</label>
-                    <input
-                      id="logNotes"
-                      type="text"
-                      placeholder="Mejora en masa muscular, bajar azúcares..."
-                      value={logNotes}
-                      onChange={(e) => setLogNotes(e.target.value)}
-                    />
-                  </div>
-
-                  <button type="submit" className={styles.submitBtn}>
-                    Guardar Mediciones
-                  </button>
-                </form>
+                    <button type="submit" className={styles.submitBtn}>
+                      Actualizar Plan de Trabajo
+                    </button>
+                  </form>
+                </div>
               </div>
+            )}
 
-              {/* Edit workout plan */}
+            {/* Sub-Tab Content: Historial & Evaluaciones */}
+            {fichaTab === 'evaluations' && (
+              <div>
+                {/* Form to submit physical progress */}
+                <div className={`${styles.cardPanel} glass glow-orange`}>
+                  <div className={styles.panelTitleWrapper}>
+                    <TrendingUp size={20} className={styles.accent} />
+                    <h2>Registrar Nueva Evaluación Física</h2>
+                  </div>
+                  <p className={styles.panelInstructions}>Registra los resultados de las mediciones corporales mensuales realizadas al alumno.</p>
+
+                  <form onSubmit={handleAddMeasurement} className={styles.form}>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logDate">Fecha de Evaluación</label>
+                        <input
+                          id="logDate"
+                          type="date"
+                          value={logDate}
+                          onChange={(e) => setLogDate(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logWeight">Peso (kg)</label>
+                        <input
+                          id="logWeight"
+                          type="number"
+                          step="0.1"
+                          placeholder="Ej: 78.5"
+                          value={logWeight}
+                          onChange={(e) => setLogWeight(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logBodyFat">Grasa Corporal (%)</label>
+                        <input
+                          id="logBodyFat"
+                          type="number"
+                          step="0.1"
+                          placeholder="Ej: 16.4"
+                          value={logBodyFat}
+                          onChange={(e) => setLogBodyFat(e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logMuscle">Masa Muscular (kg)</label>
+                        <input
+                          id="logMuscle"
+                          type="number"
+                          step="0.1"
+                          placeholder="Ej: 34.2"
+                          value={logMuscle}
+                          onChange={(e) => setLogMuscle(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logWaist">Cintura (cm)</label>
+                        <input
+                          id="logWaist"
+                          type="number"
+                          step="0.1"
+                          placeholder="84"
+                          value={logWaist}
+                          onChange={(e) => setLogWaist(e.target.value)}
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label htmlFor="logChest">Pecho (cm)</label>
+                        <input
+                          id="logChest"
+                          type="number"
+                          step="0.1"
+                          placeholder="104"
+                          value={logChest}
+                          onChange={(e) => setLogChest(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="logNotes">Notas de la evaluación</label>
+                      <input
+                        id="logNotes"
+                        type="text"
+                        placeholder="Mejora en masa muscular, bajar azúcares..."
+                        value={logNotes}
+                        onChange={(e) => setLogNotes(e.target.value)}
+                      />
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn}>
+                      Guardar Mediciones
+                    </button>
+                  </form>
+                </div>
+
+                {/* List past evaluations */}
+                <div className={`${styles.cardPanel} glass`} style={{ marginTop: '30px' }}>
+                  <h2>Historial de Mediciones del Alumno</h2>
+                  {alumnoProgress.length === 0 ? (
+                    <p className={styles.emptyText}>No hay evaluaciones cargadas para este alumno.</p>
+                  ) : (
+                    <div className={styles.tableWrapper}>
+                      <table className={styles.table}>
+                        <thead>
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Peso (kg)</th>
+                            <th>Grasa (%)</th>
+                            <th>Masa Musc. (kg)</th>
+                            <th>Cintura (cm)</th>
+                            <th>Pecho (cm)</th>
+                            <th>Notas</th>
+                            <th>Acción</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {alumnoProgress.map((record) => (
+                            <tr key={record.id}>
+                              <td>{new Date(record.date).toLocaleDateString('es-CL')}</td>
+                              <td>{record.weight}</td>
+                              <td>{record.body_fat || '--'}</td>
+                              <td>{record.muscle_mass || '--'}</td>
+                              <td>{record.waist || '--'}</td>
+                              <td>{record.chest || '--'}</td>
+                              <td style={{ fontSize: '0.8rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={record.notes}>
+                                {record.notes || '--'}
+                              </td>
+                              <td>
+                                <button
+                                  onClick={() => handleDeleteProgress(record.id)}
+                                  className={styles.deleteBtn}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Sub-Tab Content: Chat Privado */}
+            {fichaTab === 'chat' && (
               <div className={`${styles.cardPanel} glass glow-orange`}>
                 <div className={styles.panelTitleWrapper}>
-                  <FileText size={20} className={styles.accent} />
-                  <h2>Plan de Trabajo del Mes</h2>
+                  <MessageSquare size={20} className={styles.accent} />
+                  <h2>Mensajes Personales con el Alumno</h2>
                 </div>
-                <p className={styles.panelInstructions}>Escribe las rutinas, series y metas físicas asignadas al alumno.</p>
-                <form onSubmit={handleUpdateWorkoutPlan} className={styles.form}>
-                  <div className={styles.inputGroup}>
-                    <textarea
-                      value={workoutPlanText}
-                      onChange={(e) => setWorkoutPlanText(e.target.value)}
-                      placeholder="• Press Banca: 4x8&#10;• Sentadilla: 4x10&#10;• Correr 20 min..."
-                      rows={8}
-                      className={styles.planTextarea}
-                      required
-                    />
-                  </div>
-                  <button type="submit" className={styles.submitBtn}>
-                    Actualizar Plan de Trabajo
+                <p className={styles.panelInstructions}>Bandeja de comunicación directa y privada con {selectedAlumno.full_name}.</p>
+
+                <div className={styles.chatBox}>
+                  {chatMessages.length === 0 ? (
+                    <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
+                  ) : (
+                    <div className={styles.chatMessagesWrapper}>
+                      {chatMessages.map((msg, idx) => {
+                        const isAdminMsg = msg.sender_id === 'admin-uuid-123';
+                        return (
+                          <div
+                            key={`${msg.id || idx}-${idx}`}
+                            className={`${styles.chatMessage} ${isAdminMsg ? styles.chatMsgAdmin : styles.chatMsgUser}`}
+                          >
+                            <div className={styles.chatMsgHeader}>
+                              <strong>{isAdminMsg ? 'Tú (Staff)' : selectedAlumno.full_name}</strong>
+                              <span>{new Date(msg.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <p>{msg.content}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
+                  <textarea
+                    value={newDirectMessage}
+                    onChange={(e) => setNewDirectMessage(e.target.value)}
+                    placeholder="Escribe un mensaje para el alumno..."
+                    rows={3}
+                    required
+                  />
+                  <button type="submit" className={styles.submitBtn} style={{ marginTop: '10px' }}>
+                    Enviar Mensaje Privado
                   </button>
                 </form>
               </div>
-            </div>
-
-            {/* List past evaluations */}
-            <div className={`${styles.cardPanel} glass`} style={{ marginTop: '30px' }}>
-              <h2>Historial de Mediciones del Alumno</h2>
-              {alumnoProgress.length === 0 ? (
-                <p className={styles.emptyText}>No hay evaluaciones cargadas para este alumno.</p>
-              ) : (
-                <div className={styles.tableWrapper}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>Fecha</th>
-                        <th>Peso (kg)</th>
-                        <th>Grasa (%)</th>
-                        <th>Masa Musc. (kg)</th>
-                        <th>Cintura (cm)</th>
-                        <th>Pecho (cm)</th>
-                        <th>Notas</th>
-                        <th>Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {alumnoProgress.map((record) => (
-                        <tr key={record.id}>
-                          <td>{new Date(record.date).toLocaleDateString('es-CL')}</td>
-                          <td>{record.weight}</td>
-                          <td>{record.body_fat || '--'}</td>
-                          <td>{record.muscle_mass || '--'}</td>
-                          <td>{record.waist || '--'}</td>
-                          <td>{record.chest || '--'}</td>
-                          <td style={{ fontSize: '0.8rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={record.notes}>
-                            {record.notes || '--'}
-                          </td>
-                          <td>
-                            <button
-                              onClick={() => handleDeleteProgress(record.id)}
-                              className={styles.deleteBtn}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            {/* PANEL: MENSAJES PRIVADOS CON EL ALUMNO */}
-            <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginTop: '30px' }}>
-              <div className={styles.panelTitleWrapper}>
-                <MessageSquare size={20} className={styles.accent} />
-                <h2>Mensajes Personales con el Alumno</h2>
-              </div>
-              <p className={styles.panelInstructions}>Bandeja de comunicación directa y privada con {selectedAlumno.full_name}.</p>
-
-              <div className={styles.chatBox}>
-                {chatMessages.length === 0 ? (
-                  <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
-                ) : (
-                  <div className={styles.chatMessagesWrapper}>
-                    {chatMessages.map((msg, idx) => {
-                      const isAdminMsg = msg.sender_id === 'admin-uuid-123';
-                      return (
-                        <div
-                          key={`${msg.id || idx}-${idx}`}
-                          className={`${styles.chatMessage} ${isAdminMsg ? styles.chatMsgAdmin : styles.chatMsgUser}`}
-                        >
-                          <div className={styles.chatMsgHeader}>
-                            <strong>{isAdminMsg ? 'Tú (Staff)' : selectedAlumno.full_name}</strong>
-                            <span>{new Date(msg.created_at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                          <p>{msg.content}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
-                <textarea
-                  value={newDirectMessage}
-                  onChange={(e) => setNewDirectMessage(e.target.value)}
-                  placeholder="Escribe un mensaje para el alumno..."
-                  rows={3}
-                  required
-                />
-                <button type="submit" className={styles.submitBtn} style={{ marginTop: '10px' }}>
-                  Enviar Mensaje Privado
-                </button>
-              </form>
-            </div>
+            )}
           </div>
         ) : (
           /* GENERAL TABS NAVIGATION */
@@ -965,37 +1048,116 @@ export default function AdminDashboard() {
               {activeTab === 'alumnos' && (
                 <div className={`${styles.cardPanel} glass`}>
                   <h2>Directorio de Alumnos</h2>
+                  
                   {alumnos.length === 0 ? (
                     <p className={styles.emptyText}>No hay alumnos registrados.</p>
                   ) : (
-                    <div className={styles.alumnosListGrid}>
-                      {alumnos.map((alumno) => (
-                        <div key={alumno.id} className={styles.alumnoCard}>
-                          <div className={styles.alumnoCardInfo}>
-                            <h3>{alumno.full_name}</h3>
-                            <p>{alumno.email}</p>
-                            <span className={alumno.status === 'active' ? styles.activeTextBadge : styles.inactiveTextBadge}>
-                              Membresía: {alumno.status === 'active' ? 'Activa' : 'Inactiva'}
-                            </span>
-                          </div>
-                          
-                          <div className={styles.alumnoCardBtns}>
-                            <button
-                              onClick={() => handleToggleStatus(alumno)}
-                              className={alumno.status === 'active' ? styles.deactivateBtnSmall : styles.activateBtnSmall}
-                              title={alumno.status === 'active' ? 'Desactivar Alumno' : 'Activar Alumno'}
-                            >
-                              <UserCheck size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleSelectAlumno(alumno)}
-                              className={styles.viewEditBtn}
-                            >
-                              Ver / Evaluar <ArrowRight size={14} />
-                            </button>
-                          </div>
+                    <div>
+                      {/* Search Bar & Status Filters */}
+                      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <input
+                          type="text"
+                          placeholder="Buscar alumno por nombre o correo..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          style={{
+                            flex: 1,
+                            minWidth: '240px',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid var(--border-light)',
+                            borderRadius: '6px',
+                            padding: '10px 14px',
+                            color: '#ffffff',
+                            fontSize: '0.95rem',
+                            outline: 'none'
+                          }}
+                        />
+                        
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <button
+                            onClick={() => setStatusFilter('all')}
+                            style={{
+                              background: statusFilter === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+                              color: '#ffffff',
+                              border: '1px solid ' + (statusFilter === 'all' ? 'var(--primary)' : 'var(--border-light)'),
+                              padding: '8px 14px',
+                              borderRadius: '6px',
+                              fontSize: '0.85rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              minHeight: 'auto'
+                            }}
+                          >
+                            Todos
+                          </button>
+                          <button
+                            onClick={() => setStatusFilter('active')}
+                            style={{
+                              background: statusFilter === 'active' ? 'var(--success)' : 'rgba(255,255,255,0.03)',
+                              color: '#ffffff',
+                              border: '1px solid ' + (statusFilter === 'active' ? 'var(--success)' : 'var(--border-light)'),
+                              padding: '8px 14px',
+                              borderRadius: '6px',
+                              fontSize: '0.85rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              minHeight: 'auto'
+                            }}
+                          >
+                            Activos
+                          </button>
+                          <button
+                            onClick={() => setStatusFilter('inactive')}
+                            style={{
+                              background: statusFilter === 'inactive' ? 'var(--error)' : 'rgba(255,255,255,0.03)',
+                              color: '#ffffff',
+                              border: '1px solid ' + (statusFilter === 'inactive' ? 'var(--error)' : 'var(--border-light)'),
+                              padding: '8px 14px',
+                              borderRadius: '6px',
+                              fontSize: '0.85rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              minHeight: 'auto'
+                            }}
+                          >
+                            Inactivos
+                          </button>
                         </div>
-                      ))}
+                      </div>
+
+                      {filteredAlumnos.length === 0 ? (
+                        <p className={styles.emptyText}>No se encontraron alumnos con los filtros aplicados.</p>
+                      ) : (
+                        <div className={styles.alumnosListGrid}>
+                          {filteredAlumnos.map((alumno) => (
+                            <div key={alumno.id} className={styles.alumnoCard}>
+                              <div className={styles.alumnoCardInfo}>
+                                <h3>{alumno.full_name}</h3>
+                                <p>{alumno.email}</p>
+                                <span className={alumno.status === 'active' ? styles.activeTextBadge : styles.inactiveTextBadge}>
+                                  Membresía: {alumno.status === 'active' ? 'Activa' : 'Inactiva'}
+                                </span>
+                              </div>
+                              
+                              <div className={styles.alumnoCardBtns}>
+                                <button
+                                  onClick={() => handleToggleStatus(alumno)}
+                                  className={alumno.status === 'active' ? styles.deactivateBtnSmall : styles.activateBtnSmall}
+                                  title={alumno.status === 'active' ? 'Desactivar Alumno' : 'Activar Alumno'}
+                                >
+                                  <UserCheck size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleSelectAlumno(alumno)}
+                                  className={styles.viewEditBtn}
+                                >
+                                  Ver / Evaluar <ArrowRight size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

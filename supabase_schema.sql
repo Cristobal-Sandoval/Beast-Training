@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS public.appointment_requests (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
     requested_date DATE DEFAULT CURRENT_DATE NOT NULL,
+    requested_time TEXT,
     status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

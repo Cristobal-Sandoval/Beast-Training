@@ -30,6 +30,13 @@ function DashboardContent() {
   
   // Appointment Form
   const [apptDate, setApptDate] = useState('');
+  const [apptTime, setApptTime] = useState('Mañana (08:00 - 12:00)');
+
+  // Dismissed Announcements state
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState([]);
+
+  // Chart range filter state
+  const [chartRange, setChartRange] = useState('all');
 
   // Direct Message states
   const [chatMessages, setChatMessages] = useState([]);
@@ -47,6 +54,10 @@ function DashboardContent() {
       } else {
         setUser(session.user);
         fetchData(session.user.id);
+        
+        // Load dismissed announcements
+        const dismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
+        setDismissedAnnouncements(dismissed);
       }
     });
 
@@ -148,6 +159,7 @@ function DashboardContent() {
           {
             user_id: user.id,
             requested_date: apptDate,
+            requested_time: apptTime,
             status: 'pending'
           }
         ])
@@ -166,6 +178,7 @@ function DashboardContent() {
         id: Math.random().toString(),
         user_id: user.id,
         requested_date: apptDate,
+        requested_time: apptTime,
         status: 'pending',
         created_at: new Date().toISOString()
       };
@@ -175,6 +188,12 @@ function DashboardContent() {
     } finally {
       setSubmittingAppt(false);
     }
+  };
+
+  const handleDismissAnnouncement = (annId) => {
+    const updated = [...dismissedAnnouncements, annId];
+    setDismissedAnnouncements(updated);
+    localStorage.setItem('beast_dismissed_announcements', JSON.stringify(updated));
   };
 
   const handleSendDirectMessage = async (e) => {
@@ -217,11 +236,13 @@ function DashboardContent() {
 
   // SVG progress line chart generator
   const renderSVGChart = (data, dataKey, color, label) => {
-    if (data.length < 2) {
+    const slicedData = chartRange === '3' ? data.slice(-3) : data;
+    
+    if (slicedData.length < 2) {
       return (
         <div className={styles.noChartData}>
           <TrendingUp size={20} />
-          <span>Faltan registros suficientes para graficar</span>
+          <span>Faltan registros suficientes para graficar ({chartRange === '3' ? 'Prueba seleccionando "Todo el Historial"' : 'Carga más evaluaciones'})</span>
         </div>
       );
     }
@@ -230,16 +251,16 @@ function DashboardContent() {
     const height = 180;
     const padding = 30;
 
-    const values = data.map(d => d[dataKey] || 0);
+    const values = slicedData.map(d => d[dataKey] || 0);
     const minVal = Math.min(...values) * 0.95;
     const maxVal = Math.max(...values) * 1.05;
     const valRange = maxVal - minVal;
 
-    const getX = (index) => padding + (index * (width - 2 * padding)) / (data.length - 1);
+    const getX = (index) => padding + (index * (width - 2 * padding)) / (slicedData.length - 1);
     const getY = (value) => height - padding - ((value - minVal) * (height - 2 * padding)) / valRange;
 
     let pathD = '';
-    data.forEach((d, i) => {
+    slicedData.forEach((d, i) => {
       const x = getX(i);
       const y = getY(d[dataKey] || 0);
       if (i === 0) pathD = `M ${x} ${y}`;
@@ -256,7 +277,7 @@ function DashboardContent() {
 
           <path d={pathD} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={styles.chartPath} />
 
-          {data.map((d, i) => {
+          {slicedData.map((d, i) => {
             const x = getX(i);
             const y = getY(d[dataKey] || 0);
             return (
@@ -323,6 +344,7 @@ function DashboardContent() {
 
   const statComp = getStatsWithComparatives();
   const pendingAppt = appointments.find(a => a.status === 'pending');
+  const visibleAnnouncements = announcements.filter(a => !dismissedAnnouncements.includes(a.id));
 
   if (loading) {
     return (
@@ -438,7 +460,45 @@ function DashboardContent() {
 
           {/* Charts Panel */}
           <div className={`${styles.cardPanel} glass`}>
-            <h2>Tu Evolución Física</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '8px' }}>
+              <h2 style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>Tu Evolución Física</h2>
+              
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  onClick={() => setChartRange('3')}
+                  style={{
+                    background: chartRange === '3' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid ' + (chartRange === '3' ? 'var(--primary)' : 'var(--border-light)'),
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minHeight: 'auto'
+                  }}
+                >
+                  Últimos 3
+                </button>
+                <button
+                  onClick={() => setChartRange('all')}
+                  style={{
+                    background: chartRange === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid ' + (chartRange === 'all' ? 'var(--primary)' : 'var(--border-light)'),
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    minHeight: 'auto'
+                  }}
+                >
+                  Historial
+                </button>
+              </div>
+            </div>
+
             <div className={styles.chartsContainer}>
               {renderSVGChart(progressData, 'weight', '#FF5700', 'Evolución de Peso (kg)')}
               {renderSVGChart(progressData, 'body_fat', '#10B981', 'Grasa Corporal (%)')}
@@ -550,6 +610,11 @@ function DashboardContent() {
               <div className={styles.apptAlertPending}>
                 <p>Tienes una solicitud de evaluación pendiente para el:</p>
                 <strong>{new Date(pendingAppt.requested_date).toLocaleDateString('es-CL')}</strong>
+                {pendingAppt.requested_time && (
+                  <div style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>
+                    Jornada: {pendingAppt.requested_time}
+                  </div>
+                )}
                 <p className={styles.apptDetails}>El administrador confirmará la hora contigo a la brevedad.</p>
               </div>
             ) : (
@@ -565,8 +630,24 @@ function DashboardContent() {
                     required
                   />
                 </div>
-                {apptSuccess && <p className={styles.successFormText}>¡Solicitud enviada con éxito!</p>}
-                <button type="submit" disabled={submittingAppt} className={styles.apptBtn}>
+                
+                <div className={styles.inputGroup} style={{ marginTop: '10px' }}>
+                  <label htmlFor="apptTime">Jornada Preferida</label>
+                  <select
+                    id="apptTime"
+                    value={apptTime}
+                    onChange={(e) => setApptTime(e.target.value)}
+                    className={styles.selectInput}
+                    style={{ background: 'rgba(255, 255, 255, 0.04)', color: 'var(--text-primary)', border: '1px solid var(--border-light)', width: '100%', padding: '8px', borderRadius: '6px' }}
+                  >
+                    <option value="Mañana (08:00 - 12:00)">Mañana (08:00 - 12:00)</option>
+                    <option value="Tarde (14:00 - 18:00)">Tarde (14:00 - 18:00)</option>
+                    <option value="Noche (18:00 - 21:00)">Noche (18:00 - 21:00)</option>
+                  </select>
+                </div>
+                
+                {apptSuccess && <p className={styles.successFormText} style={{ marginTop: '8px' }}>¡Solicitud enviada con éxito!</p>}
+                <button type="submit" disabled={submittingAppt} className={styles.apptBtn} style={{ marginTop: '12px' }}>
                   {submittingAppt ? 'Enviando...' : 'Solicitar Evaluación'}
                 </button>
               </form>
@@ -581,21 +662,43 @@ function DashboardContent() {
             </div>
             <p className={styles.panelSubtitle}>Avisos y mensajes directos del staff para todos los miembros activos.</p>
             <div className={styles.announcementsContainer}>
-              {announcements.map((ann) => (
-                <div
-                  key={ann.id}
-                  className={`${styles.annCard} ${ann.priority === 'priority' ? styles.annPriority : styles.annNormal}`}
-                >
-                  <div className={styles.annHeader}>
-                    <h4>{ann.title}</h4>
-                    {ann.priority === 'priority' && <span className={styles.priorityBadge}>Urgente</span>}
+              {visibleAnnouncements.length === 0 ? (
+                <p className={styles.emptyText}>No tienes comunicados pendientes de lectura.</p>
+              ) : (
+                visibleAnnouncements.map((ann) => (
+                  <div
+                    key={ann.id}
+                    className={`${styles.annCard} ${ann.priority === 'priority' ? styles.annPriority : styles.annNormal}`}
+                  >
+                    <div className={styles.annHeader}>
+                      <h4>{ann.title}</h4>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {ann.priority === 'priority' && <span className={styles.priorityBadge}>Urgente</span>}
+                        <button
+                          onClick={() => handleDismissAnnouncement(ann.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-muted)',
+                            fontSize: '0.75rem',
+                            cursor: 'pointer',
+                            padding: '2px 4px',
+                            minHeight: 'auto',
+                            fontWeight: '600'
+                          }}
+                          title="Ocultar comunicado"
+                        >
+                          Entendido
+                        </button>
+                      </div>
+                    </div>
+                    <p>{ann.content}</p>
+                    <span className={styles.annDate}>
+                      {new Date(ann.created_at || ann.published_at).toLocaleDateString('es-CL')}
+                    </span>
                   </div>
-                  <p>{ann.content}</p>
-                  <span className={styles.annDate}>
-                    {new Date(ann.created_at || ann.published_at).toLocaleDateString('es-CL')}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
