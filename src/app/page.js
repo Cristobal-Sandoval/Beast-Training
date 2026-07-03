@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles } from 'lucide-react';
+import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './page.module.css';
 
 // Fallback banners if database is not set up yet
@@ -131,17 +131,25 @@ export default function Home() {
             </div>
           </div>
         ))}
-        {/* Carousel Indicators */}
-        <div className={styles.carouselIndicators}>
-          {banners.map((_, index) => (
+        {/* Carousel Arrow Navigation */}
+        {banners.length > 1 && (
+          <>
             <button
-              key={index}
-              className={`${styles.indicator} ${index === activeBannerIndex ? styles.activeIndicator : ''}`}
-              onClick={() => setActiveBannerIndex(index)}
-              aria-label={`Slide ${index + 1}`}
-            />
-          ))}
-        </div>
+              className={`${styles.carouselArrow} ${styles.carouselArrowLeft}`}
+              onClick={() => setActiveBannerIndex((prev) => (prev - 1 + banners.length) % banners.length)}
+              aria-label="Banner anterior"
+            >
+              <ChevronLeft size={28} />
+            </button>
+            <button
+              className={`${styles.carouselArrow} ${styles.carouselArrowRight}`}
+              onClick={() => setActiveBannerIndex((prev) => (prev + 1) % banners.length)}
+              aria-label="Banner siguiente"
+            >
+              <ChevronRight size={28} />
+            </button>
+          </>
+        )}
       </section>
 
       {/* Pillars Section */}
