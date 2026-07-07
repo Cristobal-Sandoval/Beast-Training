@@ -257,4 +257,20 @@ ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for active promo codes" ON public.promo_codes FOR SELECT USING (true);
 CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL USING (public.is_admin());
 
+-- 17. Create Payments Table (for MercadoPago webhook)
+CREATE TABLE IF NOT EXISTS public.payments (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+    plan_id TEXT,
+    amount NUMERIC(10, 0) NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('approved', 'rejected', 'in_process', 'refunded')),
+    mp_payment_id TEXT,
+    mp_merchant_order_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow users to read their own payments" ON public.payments FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Allow admins to manage payments" ON public.payments FOR ALL USING (public.is_admin());
+
 

@@ -124,8 +124,18 @@ export default function Home() {
           <div
             key={banner.id}
             className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`}
-            style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url(${banner.image_url})` }}
           >
+            {banner.image_url && (
+              <Image
+                src={banner.image_url}
+                alt={banner.title || 'Beast Training'}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className={styles.heroBgImage}
+              />
+            )}
+            <div className={styles.heroOverlay} />
             <div 
               className={styles.heroContent}
               style={{
@@ -161,17 +171,36 @@ export default function Home() {
               className={`${styles.carouselArrow} ${styles.carouselArrowLeft}`}
               onClick={() => setActiveBannerIndex((prev) => (prev - 1 + banners.length) % banners.length)}
               aria-label="Banner anterior"
+              type="button"
             >
-              <ChevronLeft size={28} />
+              <ChevronLeft size={24} />
             </button>
             <button
               className={`${styles.carouselArrow} ${styles.carouselArrowRight}`}
               onClick={() => setActiveBannerIndex((prev) => (prev + 1) % banners.length)}
               aria-label="Banner siguiente"
+              type="button"
             >
-              <ChevronRight size={28} />
+              <ChevronRight size={24} />
             </button>
           </>
+        )}
+
+        {/* Carousel Dots */}
+        {banners.length > 1 && (
+          <div className={styles.carouselDots} role="tablist" aria-label="Navegación de slides">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.carouselDot} ${index === activeBannerIndex ? styles.activeDot : ''}`}
+                onClick={() => setActiveBannerIndex(index)}
+                aria-label={`Ir al slide ${index + 1}`}
+                role="tab"
+                aria-selected={index === activeBannerIndex}
+                type="button"
+              />
+            ))}
+          </div>
         )}
       </section>
 

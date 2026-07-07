@@ -10,13 +10,13 @@ import "./globals.css";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700", "800"],
 });
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata = {
@@ -31,7 +31,10 @@ export const metadata = {
     icon: '/favicon.ico',
   },
   alternates: {
-    canonical: './',
+    canonical: 'https://beasttraining.cl',
+    languages: {
+      'es-CL': 'https://beasttraining.cl',
+    },
   },
   openGraph: {
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
@@ -52,9 +55,13 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
-    description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento.",
+    description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, seguimiento digital y el mejor ambiente de entrenamiento.",
     images: ["https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop"],
-  }
+  },
+};
+
+export const viewport = {
+  themeColor: '#070708',
 };
 
 export default function RootLayout({ children }) {

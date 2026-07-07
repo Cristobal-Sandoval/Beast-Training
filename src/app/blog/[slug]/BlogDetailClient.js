@@ -128,8 +128,53 @@ export default function BlogDetailClient({ params }) {
     );
   }
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt,
+    image: post.image_url,
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    datePublished: post.published_at,
+    dateModified: post.published_at,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Beast Training',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://beasttraining.cl/favicon.ico',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://beasttraining.cl/blog/${post.slug}`,
+    },
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://beasttraining.cl/' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://beasttraining.cl/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `https://beasttraining.cl/blog/${post.slug}` },
+    ],
+  };
+
   return (
     <div className={styles.wrapper}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       {/* Breadcrumbs */}
       <div className={styles.breadcrumb}>
         <div className={styles.breadcrumbContent}>
@@ -152,7 +197,7 @@ export default function BlogDetailClient({ params }) {
             </div>
             <div className={styles.metaItem}>
               <Calendar size={16} className={styles.icon} />
-              <span>{new Date(post.published_at).toLocaleDateString('es-CL')}</span>
+              <span>{new Date(post.published_at).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
           </div>
         </header>

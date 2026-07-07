@@ -36,11 +36,11 @@ export default function Footer() {
             </li>
             <li className={styles.item}>
               <Phone size={18} className={styles.icon} />
-              <span>+56 9 1234 5678</span>
+              <a href="tel:+56912345678" style={{ color: 'inherit', textDecoration: 'none' }}>+56 9 1234 5678</a>
             </li>
             <li className={styles.item}>
               <Mail size={18} className={styles.icon} />
-              <span>contacto@beasttraining.cl</span>
+              <a href="mailto:contacto@beasttraining.cl" style={{ color: 'inherit', textDecoration: 'none' }}>contacto@beasttraining.cl</a>
             </li>
           </ul>
         </div>

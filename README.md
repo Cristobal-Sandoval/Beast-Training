@@ -1,169 +1,217 @@
-# 🦁 Beast Training — Plataforma Web & App de Gestión de Gimnasio
+# Beast Training — Plataforma Web de Gestión de Gimnasio
 
-Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento en Concepción, Chile. Incluye landing page pública, blog, venta de planes, y dashboards privados para alumnos y administradores.
+Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento en Concepción, Chile. Incluye landing page pública, blog, venta de planes con MercadoPago Chile, y dashboards privados para alumnos y administradores.
 
 ---
 
-## 🚀 Stack Tecnológico
+## Stack Tecnológico
 
 | Capa | Tecnología |
 |---|---|
 | Framework | [Next.js 16](https://nextjs.org/) (App Router) |
-| Estilos | CSS Modules + Variables CSS globales |
-| Tipografía | Google Fonts — Outfit & Inter |
-| Backend / Auth | [Supabase](https://supabase.com/) (PostgreSQL + Auth + Storage) |
-| Pagos | MercadoPago Checkout Pro |
+| Estilos | CSS Modules + Variables CSS + Glassmorphism |
+| Tipografía | Google Fonts — Outfit (display) & Inter (sans) |
+| Backend / Auth | [Supabase](https://supabase.com/) (PostgreSQL + Auth + RLS) |
+| Pagos | MercadoPago Checkout Pro (Chile) |
 | Íconos | [Lucide React](https://lucide.dev/) |
-| Deploy recomendado | [Vercel](https://vercel.com/) |
+| SEO | Sitemap dinámico, JSON-LD (Article, Breadcrumb, SportsActivityLocation) |
+| Performance | next/image, next/font, ISR-ready, tree-shaking |
+| Deploy | [Vercel](https://vercel.com/) |
 
 ---
 
-## ✨ Funcionalidades Principales
+## Funcionalidades Principales
 
-### 🌐 Página Pública
-- **Hero Carousel** — banners totalmente editables desde el panel de admin (imagen, título H1/H2/H3, alineación, color, link)
-- **Cintillo de anuncio flotante** — con animación marquee en mobile, configurable desde el admin
-- **Sección "¿Por qué entrenar con nosotros?"** — pilares de valor con iconos
-- **Sección Blog** — artículo destacado en card grande + grilla de posts secundarios
-- **CTA de conversión** — sección de llamada a la acción con link a planes
-- **Botón WhatsApp flotante** — visible solo en páginas públicas (oculto en dashboards)
+### Pagina Publica
+- **Hero Carousel** con `next/image`, overlay gradiente, navegación por arrows + dots
+- **Cintillo de anuncio** con marquee en mobile, configurable desde admin
+- **Pilares de valor** con glassmorphism y scroll reveal
+- **Blog preview** con las ultimas 2 publicaciones
+- **CTA** a planes
+- **WhatsApp flotante** (solo en paginas publicas)
 
-### 📋 Planes & Pagos
-- Página de planes con precios, características y botones de compra
-- Integración con **MercadoPago Checkout Pro** (`/api/checkout`)
-- Webhook de confirmación de pagos (`/api/webhook/mercadopago`)
-- **Códigos de descuento** para primera compra (ej: `BEAST20` = 20% off), administrables desde el admin
+### Planes & MercadoPago (Chile)
+- 3 planes (Mensual, Trimestral, Anual) con feature lists
+- Integración MercadoPago Checkout Pro con idempotency key
+- Webhook con validación contra API de MercadoPago + merchant_orders
+- Simulación local offline cuando no hay access token
+- Códigos de descuento para primera compra
 
-### 📰 Blog
-- Listado con artículo destacado prominente + grid secundario
-- Página de artículo individual (`/blog/[slug]`)
-- Sin buscador (diseño limpio y editorial)
+### Blog
+- Listado con artículo destacado + grid secundario
+- Articulo individual con `generateStaticParams` (SSG)
+- Schema JSON-LD `Article` + `BreadcrumbList`
+- Open Graph, Twitter Cards, meta tags dinámicos
 
-### 👤 Dashboard del Alumno (`/dashboard`)
-- Saludo personalizado + estado de membresía
-- **Comunicados Beast** al inicio (avisos del admin)
-- Estadísticas: peso actual, % grasa, masa muscular vs evaluación anterior
-- **Gráficos SVG animados** de evolución de peso y grasa corporal
-- **Historial de evaluaciones** en tabla horizontal scrolleable
-- Plan de entrenamiento del alumno
-- **Chat directo con el coach**
-- **Selección de cita** — el admin propone 3 fechas/horarios disponibles, el alumno elige uno
+### Dashboard Alumno (`/dashboard`)
+- Estado de membresía y saludo personalizado
+- Comunicados Beast con prioridad (normal/urgente)
+- Estadísticas: peso, % grasa, masa muscular vs mes anterior
+- Gráficos SVG animados responsivos
+- Historial de evaluaciones en tabla scrolleable
+- Plan de entrenamiento
+- Chat directo con el coach
+- Selección de cita entre slots propuestos
 
-### 🛡️ Dashboard Admin (`/admin`)
-- Gestión de usuarios: ver perfiles, activar/desactivar, asignar planes de entrenamiento
-- **Editor de banners del hero** — crear, editar y eliminar banners con control de texto, imagen, alineación y link
-- **Editor del cintillo de anuncio** — texto, link y activación/desactivación
-- **Gestión de códigos promo** — crear, editar y eliminar cupones de descuento
-- **Registro de evaluaciones físicas** — peso, % grasa, masa muscular, cintura por alumno
-- **Comunicados Beast** — publicar anuncios para los alumnos (prioridad normal/urgente)
-- **Sistema de citas** — proponer hasta 3 slots de fecha/hora disponibles por alumno
-- **Chat con alumnos** — mensajería individual privada
+### Panel Admin (`/admin`)
+- Gestión de alumnos (activar/desactivar, editar perfil)
+- Editor de banners del hero
+- Editor de cintillo de anuncio
+- Códigos promo CRUD
+- Evaluaciones físicas por alumno
+- Comunicados Beast (normal/urgente)
+- Sistema de citas (proponer slots)
+- Chat con alumnos
 
 ---
 
-## 🗂️ Estructura del Proyecto
+## Mejoras Recientes (Julio 2026)
+
+### Rendimiento
+- Hero images migradas de CSS `background-image` a `next/image` con `fill`, `priority` y `sizes`
+- Fuentes reducidas: Outfit 4 pesos, Inter 4 pesos (antes 6 y 5 respectivamente)
+- MockSupabase extraído a archivo separado para mejor tree-shaking en producción
+- Idempotency key en requests a MercadoPago
+
+### SEO
+- Sitemap dinámico que incluye blog posts desde Supabase
+- `generateStaticParams` para blog posts pre-renderizados (SSG)
+- Schema JSON-LD `Article` + `BreadcrumbList` en blog detail
+- Canonical URLs absolutas, `hreflang="es-CL"`, `theme-color`
+- Meta `article:published_time`, `article:author`, `robots` por pagina
+
+### UX/UI
+- Carousel dots de navegación + touch targets de 44px en arrows
+- Confirm dialog al cerrar sesión
+- `prefers-reduced-motion` respetado globalmente
+- Empty states con iconos en dashboard (chat, plan de trabajo)
+- Feedback táctil (`:active` scale) en dispositivos touch
+- Footer con links `tel:` y `mailto:`
+- Simulación MercadoPago condicional según modo (local vs producción)
+
+### Pagos (MercadoPago Chile)
+- Tabla `payments` agregada a `supabase_schema.sql` con RLS
+- Webhook valida contra `merchant_orders` API (seguridad)
+- Almacenamiento de pagos aprobados en Supabase + activación automática de perfil
+
+### Accesibilidad
+- `prefers-reduced-motion` desactiva animaciones completas
+- Skip-to-content link, roles ARIA, etiquetas en botones
+- Contraste de color, focus-visible outlines
+
+---
+
+## Estructura del Proyecto
 
 ```
 src/
 ├── app/
-│   ├── page.js                  # Landing page principal
-│   ├── layout.js                # Layout raíz (Navbar, Footer, WhatsApp, Cintillo)
-│   ├── globals.css              # Variables CSS globales y utilidades
-│   ├── blog/                    # Listado y artículos del blog
-│   ├── planes/                  # Página de planes y precios
-│   ├── dashboard/               # Dashboard privado del alumno
-│   ├── admin/                   # Panel de administración
-│   ├── login/                   # Login y registro
-│   ├── registro/                # Formulario de registro
+│   ├── page.js                    # Landing page
+│   ├── sitemap.js                 # Sitemap dinámico (blog + estáticas)
+│   ├── layout.js                  # Layout raíz
+│   ├── globals.css                # Variables, utilidades, prefers-reduced-motion
+│   ├── blog/                      # Blog list + [slug]/ detail
+│   ├── planes/                    # Planes + MercadoPago checkout
+│   ├── dashboard/                 # Dashboard alumno
+│   ├── admin/                     # Panel admin
+│   ├── login/                     # Login
+│   ├── registro/                  # Registro
 │   └── api/
-│       ├── checkout/            # Endpoint MercadoPago Checkout
-│       └── webhook/mercadopago/ # Webhook de confirmación de pago
+│       ├── checkout/              # POST crear preferencia MP
+│       └── webhook/mercadopago/   # POST webhook MP
 ├── components/
-│   ├── Navbar.js                # Barra de navegación responsiva
-│   ├── Footer.js                # Pie de página
-│   ├── WhatsAppButton.js        # Botón flotante de WhatsApp (solo en páginas públicas)
-│   └── TopAnnouncementBar.js   # Cintillo de anuncio con marquee mobile
+│   ├── Navbar.js                  # Nav responsiva con auth state
+│   ├── Footer.js                  # Footer con contacto
+│   ├── WhatsAppButton.js          # Botón flotante WhatsApp
+│   ├── ScrollToTop.js            # Botón scroll to top
+│   ├── TopAnnouncementBar.js     # Cintillo de anuncio
+│   └── ToastProvider.js          # Sistema de notificaciones
 └── lib/
-    └── supabaseClient.js        # Cliente Supabase + mock local para desarrollo
+    ├── supabaseClient.js          # Cliente Supabase
+    ├── mockSupabase.js            # Mock offline para desarrollo
+    └── toast.js                   # Pub/sub de notificaciones
 ```
 
 ---
 
-## 🛠️ Configuración y Desarrollo Local
+## Configuración y Desarrollo Local
 
-### 1. Clonar el repositorio
+### 1. Instalar dependencias
 ```bash
-git clone https://github.com/Cristobal-Sandoval/Beast-Training.git
-cd beast-training
 npm install
 ```
 
 ### 2. Variables de entorno
-Crea un archivo `.env.local` en la raíz:
+Crea `.env.local` en la raíz:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<tu-proyecto>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<tu-anon-key>
 MERCADOPAGO_ACCESS_TOKEN=<tu-access-token>
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+SUPABASE_SERVICE_ROLE_KEY=<tu-service-role-key>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-> **Modo demo local**: Si no configuras Supabase, la app usa un simulador local basado en `localStorage` con datos de ejemplo precargados. Ideal para desarrollo sin backend.
+> **Modo demo local**: Si no configuras Supabase, la app usa un simulador local basado en `localStorage` con datos de ejemplo. Ideal para desarrollo sin backend. Usa `beast123` como contraseña y `admin@beasttraining.cl` o `user@beasttraining.cl` como email.
 
-### 3. Iniciar servidor de desarrollo
+### 3. Iniciar servidor
 ```bash
 npm run dev
 ```
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+Abre [http://localhost:3000](http://localhost:3000).
+
+### 4. Base de datos
+Ejecuta `supabase_schema.sql` en el SQL Editor de Supabase para crear todas las tablas, RLS policies y datos de seed.
 
 ---
 
-## 🗄️ Base de Datos (Supabase)
-
-El archivo `supabase_schema.sql` contiene el esquema completo de la base de datos. Ejecutarlo en el **SQL Editor de Supabase** crea las siguientes tablas:
+## Base de Datos (Supabase)
 
 | Tabla | Descripción |
 |---|---|
-| `profiles` | Perfiles de usuarios (rol, plan, datos físicos) |
-| `banners` | Banners del hero carousel |
-| `announcement_bar` | Configuración del cintillo de anuncios |
-| `promo_codes` | Códigos de descuento para primera compra |
-| `announcements` | Comunicados Beast para alumnos |
-| `evaluations` | Historial de evaluaciones físicas por usuario |
-| `messages` | Mensajes del chat privado alumno-admin |
-| `appointments` | Citas de evaluación programadas |
+| `profiles` | Perfiles (rol, plan, workout, citas) |
+| `banners` | Hero carousel |
+| `announcement_bar` | Cintillo de anuncios |
+| `promo_codes` | Códigos de descuento |
+| `announcements` | Comunicados Beast |
+| `physical_progress` | Evaluaciones físicas (peso, grasa, musculo) |
+| `direct_messages` | Chat alumno-admin |
+| `appointment_requests` | Solicitudes de cita |
 | `blog_posts` | Artículos del blog |
+| `plans` | Planes de membresía |
+| `payments` | Pagos registrados via webhook MP |
 
 ---
 
-## 🔐 Cuentas Demo (modo local)
+## Cuentas Demo (modo local)
 
 | Rol | Email | Contraseña |
 |---|---|---|
-| Administrador | `admin@beasttraining.cl` | `admin123` |
-| Alumno | `user@beasttraining.cl` | `user123` |
+| Administrador | `admin@beasttraining.cl` | `beast123` |
+| Alumno | `user@beasttraining.cl` | `beast123` |
 
 ---
 
-## 📱 Mobile-First
+## Mobile-First
 
-La interfaz está optimizada para Android e iOS:
-- Cintillo con animación marquee automática en pantallas ≤ 640px
+- Touch targets mínimos de 44px
+- Carousel con dots y arrows touch-friendly
 - Dashboard con tablas scrolleables horizontalmente
-- Gráficos SVG responsivos sin desbordamiento
-- Botones con área mínima táctil de 44px
-- Navegación con menú hamburguesa en mobile
+- Gráficos SVG responsivos via `viewBox`
+- Menú hamburguesa con animación slide-in
+- Cintillo con marquee automático en pantallas <= 640px
+- `prefers-reduced-motion` respetado
 
 ---
 
-## 🚀 Deploy en Vercel
+## Deploy en Vercel
 
 1. Conecta el repositorio a Vercel
-2. Añade las variables de entorno en el panel de Vercel
-3. Vercel detecta automáticamente Next.js — sin configuración adicional
-4. El webhook de MercadoPago debe apuntar a `https://tu-dominio.vercel.app/api/webhook/mercadopago`
+2. Añade las variables de entorno
+3. Vercel detecta Next.js automáticamente
+4. Webhook MP debe apuntar a `https://tu-dominio.vercel.app/api/webhook/mercadopago`
 
 ---
 
-## 📄 Licencia
+## Licencia
 
-Proyecto privado — Beast Training Concepción © 2026
+Proyecto privado — Beast Training Concepcion © 2026

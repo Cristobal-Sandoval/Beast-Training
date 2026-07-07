@@ -54,6 +54,9 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
+    if (typeof window !== 'undefined' && !window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      return;
+    }
     await supabase.auth.signOut();
     setIsMenuOpen(false);
   };

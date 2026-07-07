@@ -49,6 +49,7 @@ export async function POST(request) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
+        'X-Idempotency-Key': `${userId}-${planId}-${Date.now()}`,
       },
       body: JSON.stringify(preference),
     });

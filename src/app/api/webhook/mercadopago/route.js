@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize a supabase admin client (with service role key) since webhooks run server-side
-// and need to bypass RLS policies to update user subscription status.
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-// Initialize if env keys are present, otherwise log warning
-const supabaseAdmin = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey) 
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
 export async function POST(request) {
@@ -17,7 +14,7 @@ export async function POST(request) {
     const action = searchParams.get('action') || searchParams.get('type');
     const paymentId = searchParams.get('data.id') || searchParams.get('id');
 
-    console.log(`Recibiendo webhook de Mercado Pago. Acción: ${action}, ID: ${paymentId}`);
+    console.log(`Webhook MP recibido. Acción: ${action}, ID: ${paymentId}`);
 
     const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
@@ -25,48 +22,65 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Mercado Pago token not configured' }, { status: 500 });
     }
 
-    // Only process if it is a payment event
     if (action === 'payment' || action === 'payment.created' || action === 'payment.updated' || !action) {
-      // 1. Fetch payment status from Mercado Pago API
-      const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      // 1. Fetch payment from Mercado Pago API
+      const paymentRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      if (!response.ok) {
-        throw new Error('Error al consultar pago en Mercado Pago');
+      if (!paymentRes.ok) {
+        throw new Error(`Error al consultar pago ${paymentId} en MP: ${paymentRes.status}`);
       }
 
-      const paymentData = await response.json();
-      const status = paymentData.status; // approved, rejected, in_process, etc.
+      const paymentData = await paymentRes.json();
+      const status = paymentData.status;
       const userId = paymentData.metadata?.user_id;
       const planId = paymentData.metadata?.plan_id;
       const amount = paymentData.transaction_amount;
 
-      console.log(`Pago ${paymentId} de usuario ${userId}. Estado: ${status}, Monto: ${amount}`);
+      console.log(`Pago ${paymentId}: status=${status}, user=${userId}, monto=${amount}`);
 
-      if (status === 'approved' && userId && supabaseAdmin) {
-        // 2. Register subscription or active payment status in Supabase profiles/payments table
-        // For example, log payment log
-        const { error: paymentLogError } = await supabaseAdmin
-          .from('payments')
-          .insert([
-            {
-              user_id: userId,
-              plan_id: planId,
-              amount: amount,
-              status: 'approved',
-              mp_payment_id: String(paymentId),
-            }
-          ]);
-        
-        if (paymentLogError) {
-          console.warn('Error al registrar log de pago (tal vez falte tabla payments, omitiendo):', paymentLogError.message);
+      // 2. Verify with merchant_order if available (security: double-check)
+      const merchantOrderId = paymentData.order?.id;
+      if (merchantOrderId) {
+        const orderRes = await fetch(`https://api.mercadopago.com/v1/merchant_orders/${merchantOrderId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (orderRes.ok) {
+          const orderData = await orderRes.json();
+          const orderTotal = orderData.total_amount;
+          if (Math.abs(orderTotal - amount) > 1) {
+            console.warn(`DISCREPANCIA: merchant_order total ${orderTotal} !== payment amount ${amount}`);
+          }
         }
+      }
 
-        // We can also trigger notifications or custom logic
-        console.log(`Suscripción activada con éxito para usuario ${userId}`);
+      // 3. Store in Supabase payments table
+      if (status === 'approved' && userId && supabaseAdmin) {
+        const paymentRecord = {
+          user_id: userId,
+          plan_id: planId,
+          amount: amount,
+          status: 'approved',
+          mp_payment_id: String(paymentId),
+          mp_merchant_order_id: merchantOrderId ? String(merchantOrderId) : null,
+        };
+
+        const { error: insertError } = await supabaseAdmin
+          .from('payments')
+          .insert([paymentRecord]);
+
+        if (insertError) {
+          console.error('Error al insertar payment en Supabase:', insertError.message);
+        } else {
+          // Update user profile status to active
+          await supabaseAdmin
+            .from('profiles')
+            .update({ status: 'active' })
+            .eq('id', userId);
+
+          console.log(`Suscripción activada para usuario ${userId}`);
+        }
       }
     }
 

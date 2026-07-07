@@ -494,7 +494,11 @@ function DashboardContent() {
                   <p key={idx} style={{ marginBottom: line.startsWith('•') ? '6px' : '12px' }}>{line}</p>
                 ))
               ) : (
-                <p className={styles.emptyText}>No hay plan cargado aún para este mes. Acércate a tus entrenadores.</p>
+                <div style={{ textAlign: 'center', padding: '20px 12px' }}>
+                  <FileText size={36} style={{ opacity: 0.12, marginBottom: '12px' }} />
+                  <p className={styles.emptyText}>No hay plan cargado aún para este mes</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '4px' }}>Acércate a tus entrenadores en tu próxima clase para que te diseñen una rutina personalizada.</p>
+                </div>
               )}
             </div>
           </div>
@@ -590,7 +594,11 @@ function DashboardContent() {
             
             <div className={styles.chatBox} style={{ maxHeight: '280px' }}>
               {chatMessages.length === 0 ? (
-                <p className={styles.emptyText}>No hay mensajes registrados. Escribe uno abajo para iniciar la conversación.</p>
+                <div style={{ textAlign: 'center', padding: '24px 12px' }}>
+                  <MessageSquare size={36} style={{ opacity: 0.15, marginBottom: '12px' }} />
+                  <p className={styles.emptyText} style={{ marginBottom: '6px' }}>No hay mensajes aún</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Escribe tu primera consulta al Coach. Te responderá en breve.</p>
+                </div>
               ) : (
                 <div className={styles.chatMessagesWrapper}>
                   {chatMessages.map((msg, idx) => {

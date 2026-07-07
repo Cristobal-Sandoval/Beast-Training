@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase, isPlaceholderMode } from '@/lib/supabaseClient';
 import { Check, Dumbbell, AlertTriangle, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 import styles from './planes.module.css';
@@ -291,10 +291,10 @@ export default function PlanesClient() {
                   <h3>Pasarela de Pago (Pruebas)</h3>
                 </div>
                 <div className={styles.modalBody}>
-                  <div className={styles.alertNotice}>
-                    <AlertTriangle size={20} />
-                    <span>Entorno Sandbox Local</span>
-                  </div>
+                    <div className={styles.alertNotice}>
+                      <AlertTriangle size={20} />
+                      <span>{isPlaceholderMode ? 'Entorno de Pruebas Local' : 'Conectando con Mercado Pago Chile...'}</span>
+                    </div>
                   <p>Estás comprando la membresía:</p>
                   <div className={styles.selectedPlanDetails}>
                     <strong>{selectedPlan.name}</strong>
@@ -387,7 +387,9 @@ export default function PlanesClient() {
                   </div>
 
                   <p className={styles.instructionText} style={{ marginTop: '16px' }}>
-                    Esta es una simulación de la pasarela de Mercado Pago Chile para probar el flujo completo localmente. 
+                    {isPlaceholderMode
+                      ? 'Esta es una simulación de la pasarela de Mercado Pago Chile para probar el flujo completo localmente.'
+                      : 'Serás redirigido a Mercado Pago Chile para completar el pago de forma segura.'}
                   </p>
                 </div>
                 <div className={styles.modalFooter}>
@@ -395,7 +397,7 @@ export default function PlanesClient() {
                     Cancelar
                   </button>
                   <button onClick={confirmSimulatedPayment} className={styles.confirmBtn}>
-                    Pagar con Tarjeta (Demo)
+                    {isPlaceholderMode ? 'Pagar con Tarjeta (Demo)' : 'Pagar con Mercado Pago'}
                   </button>
                 </div>
               </>
