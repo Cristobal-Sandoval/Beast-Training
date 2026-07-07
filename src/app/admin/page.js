@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import styles from './admin.module.css';
 
 export default function AdminDashboard() {
@@ -92,7 +93,20 @@ export default function AdminDashboard() {
 
   const router = useRouter();
 
+  // Override alert globally inside this component
+  const alert = (msg) => {
+    showToast(msg, 'error');
+  };
+
   useEffect(() => {
+    if (successMsg) {
+      showToast(successMsg, 'success');
+      setSuccessMsg(null);
+    }
+  }, [successMsg]);
+
+  useEffect(() => {
+    document.title = "Panel de Administración | Beast Training";
     // Check auth
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {

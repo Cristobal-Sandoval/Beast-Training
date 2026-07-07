@@ -10,7 +10,7 @@
   
   --text-primary: #FFFFFF;
   --text-secondary: #A0A0A5;
-  --text-muted: #62626A;
+  --text-muted: #8a8a94;
   
   --border-light: rgba(255, 255, 255, 0.08);
   --border-primary: rgba(255, 87, 0, 0.3);
@@ -155,5 +155,114 @@ a {
   textarea {
     min-height: 44px;
   }
+}
+
+/* Accessibility: Keyboard focus outlines */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+/* Scroll Animation classes */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.revealVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Page fade-in transition */
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pageFadeIn {
+  animation: fadeInPage 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Floating Toast Notification */
+.toastContainer {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 14px 20px;
+  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  max-width: 400px;
+  transform: translateY(-20px);
+  opacity: 0;
+  animation: toastFadeIn 0.35s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+  border-left: 4px solid var(--primary);
+  border-top: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.toastSuccess {
+  border-left-color: var(--success);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+}
+
+.toastError {
+  border-left-color: var(--error);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.12);
+}
+
+@keyframes toastFadeIn {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Accessibility: Skip Link */
+.skipLink {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 100000;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.4);
+  transition: top 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.skipLink:focus {
+  top: 16px;
+  outline: none;
 }
 

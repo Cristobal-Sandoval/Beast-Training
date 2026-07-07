@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import styles from './page.module.css';
 
 // Fallback banners if database is not set up yet
@@ -93,6 +94,28 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
+  // Scroll reveal animation observer
+  useEffect(() => {
+    const revealElements = document.querySelectorAll('.reveal');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealVisible');
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      revealElements.forEach((el) => observer.unobserve(el));
+    };
+  }, [latestPosts, banners]);
+
   return (
     <div className={styles.container}>
       {/* Hero Carousel */}
@@ -153,7 +176,7 @@ export default function Home() {
       </section>
 
       {/* Pillars Section */}
-      <section className="section">
+      <section className="section reveal">
         <div className={styles.sectionHeader}>
           <span className={styles.subtitle}>nuestro método</span>
           <h2>¿por qué entrenar con nosotros?</h2>
@@ -188,7 +211,7 @@ export default function Home() {
       </section>
 
       {/* Call to Action Banner */}
-      <section className={styles.ctaBannerSection}>
+      <section className={`${styles.ctaBannerSection} reveal`}>
         <div className={`${styles.ctaContainer} glass glow-orange`}>
           <div className={styles.ctaContent}>
             <h2>LLEVA TU CUERPO AL SIGUIENTE NIVEL</h2>
@@ -203,7 +226,7 @@ export default function Home() {
       </section>
 
       {/* Latest News / Blog Preview */}
-      <section className="section">
+      <section className="section reveal">
         <div className={styles.sectionHeader}>
           <span className={styles.subtitle}>consejos de expertos</span>
           <h2>Últimas Noticias & Tips</h2>
@@ -215,8 +238,13 @@ export default function Home() {
             <article key={post.id} className={`${styles.blogCard} glass`}>
               {post.image_url && (
                 <div className={styles.blogImageWrapper}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={post.image_url} alt={post.title} className={styles.blogImage} />
+                  <Image
+                    src={post.image_url}
+                    alt={post.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className={styles.blogImage}
+                  />
                 </div>
               )}
               <div className={styles.blogContent}>
