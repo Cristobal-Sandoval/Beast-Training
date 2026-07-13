@@ -87,18 +87,19 @@ export default function RootLayout({ children }) {
     },
     "url": "https://beasttraining.cl",
     "telephone": "+56912345678",
+    "email": "btrainingchile@gmail.com",
     "openingHoursSpecification": [
       {
         "@type": "OpeningHoursSpecification",
         "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "opens": "07:00",
-        "closes": "22:00"
+        "opens": "10:00",
+        "closes": "13:00"
       },
       {
         "@type": "OpeningHoursSpecification",
-        "dayOfWeek": "Saturday",
-        "opens": "09:00",
-        "closes": "14:00"
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "15:30",
+        "closes": "21:30"
       }
     ],
     "priceRange": "$$"

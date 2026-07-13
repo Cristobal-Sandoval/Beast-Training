@@ -40,7 +40,7 @@ export default function Footer() {
             </li>
             <li className={styles.item}>
               <Mail size={18} className={styles.icon} />
-              <a href="mailto:contacto@beasttraining.cl" style={{ color: 'inherit', textDecoration: 'none' }}>contacto@beasttraining.cl</a>
+              <a href="mailto:btrainingchile@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>btrainingchile@gmail.com</a>
             </li>
           </ul>
         </div>
@@ -53,14 +53,8 @@ export default function Footer() {
               <Clock size={18} className={styles.icon} />
               <div>
                 <p className={styles.days}>Lunes a Viernes</p>
-                <p className={styles.hours}>07:00 - 22:00</p>
-              </div>
-            </li>
-            <li className={styles.item}>
-              <Clock size={18} className={styles.icon} />
-              <div>
-                <p className={styles.days}>Sábado</p>
-                <p className={styles.hours}>09:00 - 14:00</p>
+                <p className={styles.hours}>10:00 - 13:00 hrs.</p>
+                <p className={styles.hours}>15:30 - 21:30 hrs.</p>
               </div>
             </li>
           </ul>
