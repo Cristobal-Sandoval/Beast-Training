@@ -63,7 +63,7 @@ function DashboardContent() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        router.push('/login');
+        router.push('/');
       } else {
         setUser(session.user);
       }

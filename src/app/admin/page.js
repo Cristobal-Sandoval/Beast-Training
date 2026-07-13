@@ -136,6 +136,7 @@ export default function AdminDashboard() {
       } else {
         setProfile(null);
         setLoading(false);
+        router.push('/');
       }
     });
   }, []);

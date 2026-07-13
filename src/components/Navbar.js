@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Dumbbell, User, LogOut, Menu, X, Shield } from 'lucide-react';
 import styles from './Navbar.module.css';
@@ -12,6 +12,7 @@ export default function Navbar() {
   const [profile, setProfile] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     // Check active session
@@ -59,6 +60,7 @@ export default function Navbar() {
     }
     await supabase.auth.signOut();
     setIsMenuOpen(false);
+    router.push('/');
   };
 
   const isActive = (path) => pathname === path;
