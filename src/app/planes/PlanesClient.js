@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase, isPlaceholderMode } from '@/lib/supabaseClient';
-import { Check, Dumbbell, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Check, Dumbbell, AlertTriangle, ShieldCheck, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import styles from './planes.module.css';
 
 // Fallback plans if database is not seeded yet
-const defaultBanners = [
+const defaultPlans = [
   {
-    id: 'p1',
-    name: 'Plan Mensual',
+    id: 'p1_ind',
+    name: 'Mensual Individual',
+    category: 'individual',
     description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
     price: 35000,
     duration_months: 1,
@@ -19,8 +20,9 @@ const defaultBanners = [
     popular: false,
   },
   {
-    id: 'p2',
-    name: 'Plan Trimestral',
+    id: 'p2_ind',
+    name: 'Trimestral Individual',
+    category: 'individual',
     description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
     price: 90000,
     duration_months: 3,
@@ -28,18 +30,50 @@ const defaultBanners = [
     popular: true,
   },
   {
-    id: 'p3',
-    name: 'Plan Anual',
+    id: 'p3_ind',
+    name: 'Anual Individual',
+    category: 'individual',
     description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
     price: 320000,
     duration_months: 12,
     features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'],
     popular: false,
+  },
+  {
+    id: 'p1_duo',
+    name: 'Mensual Dúo',
+    category: 'duo',
+    description: 'Entrena acompañado. Acceso ilimitado para ti y tu partner.',
+    price: 60000,
+    duration_months: 1,
+    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial individual', 'Casilleros y duchas'],
+    popular: false,
+  },
+  {
+    id: 'p2_duo',
+    name: 'Trimestral Dúo',
+    category: 'duo',
+    description: 'La mejor opción en parejas para consolidar hábitos saludables.',
+    price: 160000,
+    duration_months: 3,
+    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional básica para ambos', 'Casilleros y duchas'],
+    popular: true,
+  },
+  {
+    id: 'p3_duo',
+    name: 'Anual Dúo',
+    category: 'duo',
+    description: 'Ahorro masivo y compromiso a largo plazo entrenando de a dos.',
+    price: 580000,
+    duration_months: 12,
+    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional avanzada para ambos', 'Casilleros y duchas', '2 poleras oficiales Beast Training'],
+    popular: false,
   }
 ];
 
 export default function PlanesClient() {
-  const [plans, setPlans] = useState(defaultBanners);
+  const [plans, setPlans] = useState(defaultPlans);
+  const [activeCategory, setActiveCategory] = useState('individual'); // 'individual' or 'duo'
   const [user, setUser] = useState(null);
   const [loadingPlanId, setLoadingPlanId] = useState(null);
   const [showSimulatedModal, setShowSimulatedModal] = useState(false);
@@ -213,6 +247,8 @@ export default function PlanesClient() {
     }).format(value);
   };
 
+  const filteredPlans = plans.filter(p => (p.category || 'individual') === activeCategory);
+
   return (
     <div className={styles.wrapper}>
       {/* Background Decor */}
@@ -228,8 +264,26 @@ export default function PlanesClient() {
           <div className={styles.headerBar}></div>
         </div>
 
+        {/* Category Tabs Switch */}
+        <div className={styles.tabsContainer}>
+          <button
+            onClick={() => setActiveCategory('individual')}
+            className={`${styles.tabToggleBtn} ${activeCategory === 'individual' ? styles.activeTabToggle : ''}`}
+            type="button"
+          >
+            Membresía Individual
+          </button>
+          <button
+            onClick={() => setActiveCategory('duo')}
+            className={`${styles.tabToggleBtn} ${activeCategory === 'duo' ? styles.activeTabToggle : ''}`}
+            type="button"
+          >
+            Plan Dúo <span className={styles.discountBadge}>Ahorro Extra</span>
+          </button>
+        </div>
+
         <div className={styles.plansGrid}>
-          {plans.map((plan) => (
+          {filteredPlans.map((plan) => (
             <div
               key={plan.id}
               className={`${styles.planCard} glass ${plan.popular ? styles.popularCard : ''}`}
@@ -256,13 +310,26 @@ export default function PlanesClient() {
                 ))}
               </div>
 
-              <button
-                className={`${styles.buyBtn} ${plan.popular ? styles.popularBuyBtn : ''}`}
-                onClick={() => handlePurchase(plan)}
-                disabled={loadingPlanId === plan.id}
-              >
-                {loadingPlanId === plan.id ? 'Cargando Pago...' : 'Pagar Membresía'}
-              </button>
+              <div className={styles.actionsContainer}>
+                <button
+                  className={`${styles.buyBtn} ${plan.popular ? styles.popularBuyBtn : ''}`}
+                  onClick={() => handlePurchase(plan)}
+                  disabled={loadingPlanId === plan.id}
+                  type="button"
+                >
+                  {loadingPlanId === plan.id ? 'Cargando Pago...' : 'Pagar con Tarjeta'}
+                </button>
+
+                <a
+                  href={`https://wa.me/56987654321?text=¡Hola!%20Me%20interesa%20inscribirme%20en%20el%20${encodeURIComponent(plan.name)}.%20¿Me%20podrías%20dar%20más%20información%20para%20comenzar?`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.whatsappBtn}
+                >
+                  <MessageCircle size={18} />
+                  Contactar por WhatsApp
+                </a>
+              </div>
             </div>
           ))}
         </div>

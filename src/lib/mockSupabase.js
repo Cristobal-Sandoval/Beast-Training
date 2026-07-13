@@ -488,6 +488,79 @@ export default class MockSupabase {
                 data = data[0] || null;
               }
             }
+          } else if (table === 'plans') {
+            const storedKey = 'beast_plans_list';
+            let storedPlans = JSON.parse(localStorage.getItem(storedKey) || '[]');
+            
+            if (storedPlans.length === 0) {
+              storedPlans = [
+                {
+                  id: 'p1_ind',
+                  name: 'Mensual Individual',
+                  category: 'individual',
+                  description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
+                  price: 35000,
+                  duration_months: 1,
+                  features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial', 'Casilleros y duchas'],
+                  popular: false,
+                },
+                {
+                  id: 'p2_ind',
+                  name: 'Trimestral Individual',
+                  category: 'individual',
+                  description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
+                  price: 90000,
+                  duration_months: 3,
+                  features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica', 'Casilleros y duchas'],
+                  popular: true,
+                },
+                {
+                  id: 'p3_ind',
+                  name: 'Anual Individual',
+                  category: 'individual',
+                  description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
+                  price: 320000,
+                  duration_months: 12,
+                  features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'],
+                  popular: false,
+                },
+                {
+                  id: 'p1_duo',
+                  name: 'Mensual Dúo',
+                  category: 'duo',
+                  description: 'Entrena acompañado. Acceso ilimitado para ti y tu partner.',
+                  price: 60000,
+                  duration_months: 1,
+                  features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial individual', 'Casilleros y duchas'],
+                  popular: false,
+                },
+                {
+                  id: 'p2_duo',
+                  name: 'Trimestral Dúo',
+                  category: 'duo',
+                  description: 'La mejor opción en parejas para consolidar hábitos saludables.',
+                  price: 160000,
+                  duration_months: 3,
+                  features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional básica para ambos', 'Casilleros y duchas'],
+                  popular: true,
+                },
+                {
+                  id: 'p3_duo',
+                  name: 'Anual Dúo',
+                  category: 'duo',
+                  description: 'Ahorro masivo y compromiso a largo plazo entrenando de a dos.',
+                  price: 580000,
+                  duration_months: 12,
+                  features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional avanzada para ambos', 'Casilleros y duchas', '2 poleras oficiales Beast Training'],
+                  popular: false,
+                }
+              ];
+              localStorage.setItem(storedKey, JSON.stringify(storedPlans));
+            }
+            data = storedPlans;
+            if (this._orderField === 'price') {
+              data.sort((a, b) => a.price - b.price);
+            }
           } else if (table === 'about_info') {
             const storedKey = 'beast_about_info';
             let info = JSON.parse(localStorage.getItem(storedKey) || 'null');

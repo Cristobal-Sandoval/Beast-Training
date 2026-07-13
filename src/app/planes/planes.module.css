@@ -373,3 +373,87 @@
   color: var(--text-muted);
   margin-top: 10px;
 }
+
+/* Category Switch Tabs */
+.tabsContainer {
+  display: flex;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  padding: 6px;
+  border-radius: 50px;
+  max-width: 440px;
+  margin: 0 auto 50px auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.tabToggleBtn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.activeTabToggle {
+  background: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.3);
+}
+
+.discountBadge {
+  background: rgba(37, 211, 102, 0.18);
+  color: #25d366;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+}
+
+/* Actions Container on Plan Card */
+.actionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+  width: 100%;
+}
+
+.whatsappBtn {
+  width: 100%;
+  background: transparent;
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.4);
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.whatsappBtn:hover {
+  background: rgba(37, 211, 102, 0.08);
+  border-color: #25d366;
+  box-shadow: 0 0 10px rgba(37, 211, 102, 0.15);
+  transform: translateY(-1px);
+}
