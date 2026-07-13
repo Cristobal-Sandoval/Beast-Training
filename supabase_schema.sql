@@ -67,8 +67,10 @@ CREATE TABLE IF NOT EXISTS public.plans (
     description TEXT,
     price INTEGER NOT NULL, -- in CLP
     duration_months INTEGER DEFAULT 1 NOT NULL,
+    category TEXT DEFAULT 'individual' CHECK (category IN ('individual', 'couple', 'family')) NOT NULL,
     features TEXT[] DEFAULT '{}'::TEXT[] NOT NULL,
     popular BOOLEAN DEFAULT false NOT NULL,
+    visible BOOLEAN DEFAULT true NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -188,10 +190,12 @@ CREATE POLICY "Allow users to manage their own appointment requests" ON public.a
     FOR ALL USING (auth.uid() = user_id OR public.is_admin());
 
 -- 12. Seed Initial Plans Data
-INSERT INTO public.plans (name, description, price, duration_months, features, popular) VALUES
-('Plan Mensual', 'Acceso ilimitado a todas nuestras clases y sala de musculación.', 35000, 1, ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial', 'Casilleros y duchas'], false),
-('Plan Trimestral', 'Nuestra opción recomendada para ver los primeros cambios reales.', 90000, 3, ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica', 'Casilleros y duchas'], true),
-('Plan Anual', 'Compromiso total con tu salud y rendimiento físico al mejor precio.', 320000, 12, ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'], false)
+INSERT INTO public.plans (name, description, price, duration_months, category, features, popular, visible) VALUES
+('Plan Mensual', 'Acceso ilimitado a todas nuestras clases y sala de musculación.', 35000, 1, 'individual', ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial', 'Casilleros y duchas'], false, true),
+('Plan Trimestral', 'Nuestra opción recomendada para ver los primeros cambios reales.', 90000, 3, 'individual', ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica', 'Casilleros y duchas'], true, true),
+('Plan Anual', 'Compromiso total con tu salud y rendimiento físico al mejor precio.', 320000, 12, 'individual', ARRAY['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'], false, true),
+('Plan Dúo Mensual', 'Entrená con quien más quieras. Acceso completo para dos personas.', 55000, 1, 'couple', ARRAY['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial c/u', 'Casilleros y duchas'], false, true),
+('Plan Dúo Trimestral', 'La mejor opción en pareja para ver resultados juntos.', 145000, 3, 'couple', ARRAY['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional básica', 'Casilleros y duchas'], true, true)
 ON CONFLICT DO NOTHING;
 
 -- 13. Seed Initial Banners
@@ -257,20 +261,24 @@ ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for active promo codes" ON public.promo_codes FOR SELECT USING (true);
 CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL USING (public.is_admin());
 
--- 17. Create Payments Table (for MercadoPago webhook)
-CREATE TABLE IF NOT EXISTS public.payments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-    plan_id TEXT,
-    amount NUMERIC(10, 0) NOT NULL,
-    status TEXT NOT NULL CHECK (status IN ('approved', 'rejected', 'in_process', 'refunded')),
-    mp_payment_id TEXT,
-    mp_merchant_order_id TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+-- 17. Create About Info Table (for "Nosotros" page)
+CREATE TABLE IF NOT EXISTS public.about_info (
+    id TEXT PRIMARY KEY DEFAULT 'coach-settings',
+    title TEXT NOT NULL DEFAULT 'Sobre Beast Training',
+    description TEXT NOT NULL DEFAULT '',
+    coach_name TEXT DEFAULT '',
+    coach_bio TEXT DEFAULT '',
+    coach_image TEXT DEFAULT '',
+    history TEXT DEFAULT '',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow users to read their own payments" ON public.payments FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
-CREATE POLICY "Allow admins to manage payments" ON public.payments FOR ALL USING (public.is_admin());
+ALTER TABLE public.about_info ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for about_info" ON public.about_info FOR SELECT USING (true);
+CREATE POLICY "Allow admins to manage about_info" ON public.about_info FOR ALL USING (public.is_admin());
+
+INSERT INTO public.about_info (id, title, description, coach_name, coach_bio, history)
+VALUES ('coach-settings', 'Sobre Beast Training', 'Beast Training es un gimnasio de alto rendimiento en Concepción, Chile.', 'Coach Javier', 'Entrenador certificado con más de 10 años de experiencia.', 'Beast Training nació en 2020 con la misión de transformar vidas a través del entrenamiento funcional de alta intensidad.')
+ON CONFLICT (id) DO NOTHING;
 
 

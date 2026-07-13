@@ -81,15 +81,15 @@
 }
 
 /* Layout */
-.adminLayout {
+.dashboardLayout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 40px;
+  gap: 30px;
   align-items: start;
 }
 
 @media (max-width: 768px) {
-  .adminLayout {
+  .dashboardLayout {
     grid-template-columns: 1fr;
     gap: 20px;
   }
@@ -321,9 +321,9 @@
 
 /* List Items Grid */
 .listGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .listItemCard {
@@ -893,4 +893,309 @@
   flex-direction: column;
   width: 100%;
 }
+
+/* Toolbar & Filters (Alumnos) */
+.tabHeader {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-grow: 1;
+  max-width: 700px;
+}
+
+@media (max-width: 768px) {
+  .filterGroup {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+}
+
+.searchInput {
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--border-light) !important;
+  color: var(--text-primary) !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--primary) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 10px rgba(255, 87, 0, 0.15);
+}
+
+.statusFilterGroup {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+@media (max-width: 768px) {
+  .statusFilterGroup {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .statusFilterGroup button {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+.filterBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.activeFilterBtn {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+/* Student Card Grid */
+.studentCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+  min-width: 0;
+  position: relative;
+}
+
+.studentCard:hover {
+  border-color: rgba(255, 87, 0, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  position: relative;
+  padding-right: 60px; /* Space for the status badge */
+}
+
+.studentAvatar {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 87, 0, 0.1);
+  border: 1px solid rgba(255, 87, 0, 0.3);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.cardTopRow h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+}
+
+.cardTopRow p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 2px 0 0 0;
+}
+
+.cardActions {
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 14px;
+  width: 100%;
+}
+
+.cardActions button, .cardActions a {
+  flex: 1;
+}
+
+/* Status Badges */
+.statusBadgeActive {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.statusBadgeInactive {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* Modal Styling */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: modalFadeIn 0.25s ease;
+}
+
+.modalContent {
+  background: rgba(15, 15, 17, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  margin: 0;
+  color: #ffffff;
+}
+
+.modalCloseBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(15px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Detail view Header */
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.detailInfo h2 {
+  font-size: 1.6rem;
+  margin: 0;
+  color: #ffffff;
+}
+
+.detailInfo p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.detailInfo .statusBadgeActive, 
+.detailInfo .statusBadgeInactive {
+  position: static;
+  display: inline-block;
+  margin-left: 0;
+  margin-top: 0;
+}
+
 

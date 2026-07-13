@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Calendar, TrendingUp, Heart, CheckCircle, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
+import { Calendar, TrendingUp, Heart, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import styles from './dashboard.module.css';
 
@@ -41,6 +41,7 @@ function DashboardContent() {
   const [chatMessages, setChatMessages] = useState([]);
   const [newDirectMessage, setNewDirectMessage] = useState('');
   const [submittingChat, setSubmittingChat] = useState(false);
+  const [adminUserId, setAdminUserId] = useState('admin-uuid-123');
 
   // Change Password states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -130,14 +131,23 @@ function DashboardContent() {
         setAppointments(apptData);
       }
 
-      // 5. Fetch Direct Messages
+      // 5. Find admin user ID
+      const { data: adminProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .limit(1);
+      const adminId = adminProfiles?.[0]?.id || 'admin-uuid-123';
+      setAdminUserId(adminId);
+
+      // 6. Fetch Direct Messages
       const { data: dmData } = await supabase
         .from('direct_messages')
         .select('*');
       if (dmData) {
         const filtered = dmData.filter(m => 
-          (m.sender_id === userId && m.receiver_id === 'admin-uuid-123') ||
-          (m.sender_id === 'admin-uuid-123' && m.receiver_id === userId)
+          (m.sender_id === userId && m.receiver_id === adminId) ||
+          (m.sender_id === adminId && m.receiver_id === userId)
         );
         setChatMessages(filtered);
       }
@@ -226,7 +236,7 @@ function DashboardContent() {
 
     const newMsg = {
       sender_id: user.id,
-      receiver_id: 'admin-uuid-123',
+      receiver_id: adminUserId,
       content: newDirectMessage.trim()
     };
 
@@ -246,7 +256,7 @@ function DashboardContent() {
       const mockDm = {
         id: Math.random().toString(),
         sender_id: user.id,
-        receiver_id: 'admin-uuid-123',
+        receiver_id: adminUserId,
         content: newDirectMessage.trim(),
         created_at: new Date().toISOString()
       };
@@ -441,7 +451,7 @@ function DashboardContent() {
               </span>
             </div>
           </div>
-          <button
+          <button type="button"
             onClick={() => setShowPasswordModal(true)}
             style={{
               background: 'var(--primary)',
@@ -525,7 +535,7 @@ function DashboardContent() {
               </span>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => window.open(`https://wa.me/56948925193?text=Hola%20Coach!%20Tengo%20mi%20cuenta%20inactiva%20en%20el%20sistema%20(${profile?.email || user?.email}).%20%C2%BFMe%20podr%C3%ADas%20ayudar%20a%20activar%20mi%20membres%C3%ADa?`, '_blank')}
               style={{
                 background: '#25D366',
@@ -573,7 +583,7 @@ function DashboardContent() {
                     <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700' }}>{ann.title}</h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {ann.priority === 'priority' && <span className={styles.priorityBadge}>Urgente</span>}
-                      <button
+                      <button type="button"
                         onClick={() => handleDismissAnnouncement(ann.id)}
                         style={{
                           background: 'rgba(255,255,255,0.06)',
@@ -687,7 +697,7 @@ function DashboardContent() {
               <h2 style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>Tu Evolución Física</h2>
               
               <div style={{ display: 'flex', gap: '6px' }}>
-                <button
+                <button type="button"
                   onClick={() => setChartRange('3')}
                   style={{
                     background: chartRange === '3' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
@@ -703,7 +713,7 @@ function DashboardContent() {
                 >
                   Últimos 3
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setChartRange('all')}
                   style={{
                     background: chartRange === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
@@ -931,7 +941,7 @@ function DashboardContent() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
               <h2 style={{ fontSize: '1.3rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Actualizar Contraseña</h2>
-              <button 
+              <button type="button" 
                 onClick={() => setShowPasswordModal(false)}
                 style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
                 type="button"

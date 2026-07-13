@@ -107,7 +107,7 @@ export default function Navbar() {
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>{profile?.full_name || user.email}</span>
-              <button onClick={handleLogout} className={styles.logoutBtn} title="Cerrar Sesión">
+              <button type="button" onClick={handleLogout} className={styles.logoutBtn} title="Cerrar Sesión">
                 <LogOut size={18} />
               </button>
             </div>
@@ -120,7 +120,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <button type="button" className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -154,7 +154,7 @@ export default function Navbar() {
             {user ? (
               <div className={styles.mobileUserInfo}>
                 <span className={styles.mobileUserName}>{profile?.full_name || user.email}</span>
-                <button onClick={handleLogout} className={styles.mobileLogoutBtn}>
+                <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn}>
                   <LogOut size={16} /> Cerrar Sesión
                 </button>
               </div>

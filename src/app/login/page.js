@@ -1,13 +1,22 @@
 import LoginClient from './LoginClient';
 
 export const metadata = {
-  title: "Iniciar Sesión",
-  description: "Ingresa a tu panel de alumno en Beast Training para revisar tus evaluaciones físicas, gráficos de evolución, comunicados del gimnasio y planes de entrenamiento.",
+  title: "Iniciar Sesión — Alumnos Beast Training",
+  description: "Accede a tu panel de alumno en Beast Training Concepción. Revisa tus evaluaciones físicas, evolución, rutinas y mensajes del coach.",
   openGraph: {
     title: "Iniciar Sesión | Beast Training",
-    description: "Ingresa a tu panel de alumno en Beast Training para revisar tus evaluaciones físicas, gráficos de evolución, comunicados del gimnasio y planes de entrenamiento.",
+    description: "Accede a tu panel de alumno en Beast Training Concepción.",
     url: "https://beasttraining.cl/login",
-  }
+    siteName: "Beast Training",
+    locale: "es_CL",
+  },
+  alternates: {
+    canonical: "https://beasttraining.cl/login",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function LoginPage() {

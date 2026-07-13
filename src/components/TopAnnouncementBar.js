@@ -126,7 +126,7 @@ export default function TopAnnouncementBar() {
           <Sparkles size={14} style={{ flexShrink: 0 }} />
           <span>{bar.text}</span>
           {linkEl && <span style={{ marginLeft: '4px' }}>{linkEl}</span>}
-          <button
+          <button type="button"
             onClick={() => setVisible(false)}
             style={{
               position: 'absolute',
@@ -161,7 +161,7 @@ export default function TopAnnouncementBar() {
               {bar.text}
             </span>
           </span>
-          <button
+          <button type="button"
             className="ann-bar-close"
             onClick={() => setVisible(false)}
             aria-label="Cerrar aviso"

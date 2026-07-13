@@ -29,7 +29,7 @@ export default function ScrollToTop() {
   if (!isVisible) return null;
 
   return (
-    <button
+    <button type="button"
       onClick={scrollToTop}
       aria-label="Volver al inicio"
       style={{

@@ -1,125 +1,87 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase, isPlaceholderMode } from '@/lib/supabaseClient';
-import { Check, Dumbbell, ShieldCheck, MessageCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { Check, MessageCircle, ShieldCheck, User, Users } from 'lucide-react';
 import styles from './planes.module.css';
 
-// Fallback plans if database is not seeded yet
 const defaultPlans = [
   {
-    id: 'p1_ind',
-    name: 'Mensual Individual',
-    category: 'individual',
-    description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
-    price: 35000,
-    duration_months: 1,
+    id: 'p1', name: 'Plan Mensual', description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
+    price: 35000, duration_months: 1, category: 'individual',
     features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial', 'Casilleros y duchas'],
-    popular: false,
+    popular: false, visible: true,
   },
   {
-    id: 'p2_ind',
-    name: 'Trimestral Individual',
-    category: 'individual',
-    description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
-    price: 90000,
-    duration_months: 3,
+    id: 'p2', name: 'Plan Trimestral', description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
+    price: 90000, duration_months: 3, category: 'individual',
     features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica', 'Casilleros y duchas'],
-    popular: true,
+    popular: true, visible: true,
   },
   {
-    id: 'p3_ind',
-    name: 'Anual Individual',
-    category: 'individual',
-    description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
-    price: 320000,
-    duration_months: 12,
+    id: 'p3', name: 'Plan Anual', description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
+    price: 320000, duration_months: 12, category: 'individual',
     features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'],
-    popular: false,
+    popular: false, visible: true,
   },
   {
-    id: 'p1_duo',
-    name: 'Mensual Dúo',
-    category: 'duo',
-    description: 'Entrena acompañado. Acceso ilimitado para ti y tu partner.',
-    price: 60000,
-    duration_months: 1,
-    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial individual', 'Casilleros y duchas'],
-    popular: false,
+    id: 'p4', name: 'Plan Dúo Mensual', description: 'Acceso completo para dos personas. Entrená con quien más quieras.',
+    price: 50000, duration_months: 1, category: 'couple',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial c/u', 'Casilleros y duchas'],
+    popular: false, visible: true,
   },
   {
-    id: 'p2_duo',
-    name: 'Trimestral Dúo',
-    category: 'duo',
-    description: 'La mejor opción en parejas para consolidar hábitos saludables.',
-    price: 160000,
-    duration_months: 3,
-    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional básica para ambos', 'Casilleros y duchas'],
-    popular: true,
+    id: 'p5', name: 'Plan Dúo Trimestral', description: 'La opción recomendada en pareja para ver resultados juntos.',
+    price: 135000, duration_months: 3, category: 'couple',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional básica', 'Casilleros y duchas'],
+    popular: true, visible: true,
   },
   {
-    id: 'p3_duo',
-    name: 'Anual Dúo',
-    category: 'duo',
-    description: 'Ahorro masivo y compromiso a largo plazo entrenando de a dos.',
-    price: 580000,
-    duration_months: 12,
-    features: ['Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física mensual individual', 'Asesoría nutricional avanzada para ambos', 'Casilleros y duchas', '2 poleras oficiales Beast Training'],
-    popular: false,
-  }
+    id: 'p6', name: 'Plan Dúo Anual', description: 'Máximo ahorro para dos. Un año de entrenamiento juntos.',
+    price: 480000, duration_months: 12, category: 'couple',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '2 poleras oficiales Beast Training'],
+    popular: false, visible: true,
+  },
+];
+
+const WHATSAPP_NUMBER = '56987654321';
+
+const categories = [
+  { id: 'individual', label: 'Individual', icon: User },
+  { id: 'couple', label: 'Dúo / Pareja', icon: Users },
 ];
 
 export default function PlanesClient() {
   const [plans, setPlans] = useState(defaultPlans);
-  const [activeCategory, setActiveCategory] = useState('individual'); // 'individual' or 'duo'
-  const [user, setUser] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('individual');
 
-  useEffect(() => {
-    // Get user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    fetchPlans();
-  }, []);
+  useEffect(() => { fetchPlans(); }, []);
 
   const fetchPlans = async () => {
     try {
-      const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .order('price', { ascending: true });
-      if (!error && data && data.length > 0) {
-        setPlans(data);
+      const { data, error } = await supabase.from('plans').select('*').order('price', { ascending: true });
+      if (!error && data && data.length > 0 && data.some(p => p.category)) {
+        const visible = data.filter(p => p.visible !== false);
+        const categoriesInDb = new Set(visible.map(p => p.category));
+        const supplements = defaultPlans.filter(dp => !categoriesInDb.has(dp.category));
+        setPlans([...visible, ...supplements]);
       }
-    } catch (err) {
-      console.warn('Usando planes predeterminados:', err);
-    }
+    } catch (err) { console.warn('Usando planes predeterminados:', err); }
   };
 
-  const handlePurchase = (plan) => {
-    const text = `¡Hola Coach! Me interesa inscribirme en el plan *${plan.name}* (valor: ${formatCLP(plan.price)}). ¿Me podrías dar las instrucciones para realizar la transferencia y activar mi cuenta?`;
-    const waUrl = `https://wa.me/56948925193?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank');
+  const filteredPlans = plans.filter(p => p.category === activeCategory);
+
+  const handleWhatsAppContact = (plan) => {
+    const message = encodeURIComponent(`Hola! Me gustaría contratar el ${plan.name} de Beast Training ($${plan.price.toLocaleString('es-CL')}). ¿Cómo puedo inscribirme?`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
   };
 
   const formatCLP = (value) => {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0,
-    }).format(value);
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(value);
   };
-
-  const filteredPlans = plans.filter(p => (p.category || 'individual') === activeCategory);
 
   return (
     <div className={styles.wrapper}>
-      {/* Background Decor */}
       <div className={styles.glowBg} />
 
       <section className="section">
@@ -132,30 +94,30 @@ export default function PlanesClient() {
           <div className={styles.headerBar}></div>
         </div>
 
-        {/* Category Tabs Switch */}
-        <div className={styles.tabsContainer}>
-          <button
-            onClick={() => setActiveCategory('individual')}
-            className={`${styles.tabToggleBtn} ${activeCategory === 'individual' ? styles.activeTabToggle : ''}`}
-            type="button"
-          >
-            Membresía Individual
-          </button>
-          <button
-            onClick={() => setActiveCategory('duo')}
-            className={`${styles.tabToggleBtn} ${activeCategory === 'duo' ? styles.activeTabToggle : ''}`}
-            type="button"
-          >
-            Plan Dúo <span className={styles.discountBadge}>Ahorro Extra</span>
-          </button>
+        {/* Category Tabs */}
+        <div className={styles.tabsContainer} role="tablist">
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                role="tab"
+                aria-selected={activeCategory === cat.id}
+                className={`${styles.tabToggleBtn} ${activeCategory === cat.id ? styles.activeTabToggle : ''}`}
+                onClick={() => setActiveCategory(cat.id)}
+              >
+                <Icon size={18} />
+                {cat.label}
+                {cat.id === 'couple' && <span className={styles.discountBadge}>Ahorra</span>}
+              </button>
+            );
+          })}
         </div>
 
         <div className={styles.plansGrid}>
           {filteredPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`${styles.planCard} glass ${plan.popular ? styles.popularCard : ''}`}
-            >
+            <div key={plan.id} className={`${styles.planCard} glass ${plan.popular ? styles.popularCard : ''}`}>
               {plan.popular && <span className={styles.popularBadge}>Más Popular</span>}
 
               <div className={styles.cardHeader}>
@@ -178,22 +140,21 @@ export default function PlanesClient() {
                 ))}
               </div>
 
-              <div className={styles.actionsContainer}>
-                <button
-                  className={`${styles.buyBtn} ${plan.popular ? styles.popularBuyBtn : ''}`}
-                  onClick={() => handlePurchase(plan)}
-                  type="button"
-                >
-                  Inscribirme en este Plan
-                </button>
-              </div>
+              <button
+                type="button"
+                className={`${styles.whatsappBtn} ${plan.popular ? styles.popularWhatsappBtn : ''}`}
+                onClick={() => handleWhatsAppContact(plan)}
+              >
+                <MessageCircle size={20} />
+                Contratar por WhatsApp
+              </button>
             </div>
           ))}
         </div>
 
         <div className={styles.secureBadgeSection}>
           <ShieldCheck size={20} className={styles.secureIcon} />
-          <span>Inscripciones y activaciones de cuenta coordinadas de forma directa y segura vía WhatsApp</span>
+          <span>Contáctanos vía WhatsApp para contratar tu plan. Consulta sin compromiso.</span>
         </div>
       </section>
     </div>

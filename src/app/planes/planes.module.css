@@ -168,11 +168,16 @@
   flex-shrink: 0;
 }
 
-.buyBtn {
+/* WhatsApp contact button */
+.whatsappBtn {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border: 1px solid var(--border-light);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #25d366;
+  color: #ffffff;
+  border: none;
   padding: 14px;
   border-radius: 8px;
   font-weight: 700;
@@ -181,22 +186,18 @@
   transition: all 0.2s ease;
 }
 
-.buyBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--text-primary);
+.whatsappBtn:hover {
+  background: #20ba5a;
   transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
 }
 
-.popularBuyBtn {
-  background: var(--primary);
-  color: var(--text-primary);
-  border: none;
-  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.25);
+.popularWhatsappBtn {
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.25);
 }
 
-.popularBuyBtn:hover {
-  background: var(--primary-hover);
-  box-shadow: 0 4px 20px rgba(255, 87, 0, 0.4);
+.popularWhatsappBtn:hover {
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
 }
 
 .secureBadgeSection {
@@ -214,177 +215,18 @@
   color: var(--success);
 }
 
-/* Modal simulated checkout */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.modalCard {
-  width: 100%;
-  max-width: 480px;
-  border-radius: 16px;
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  background: var(--background-card);
-}
-
-.modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 16px;
-}
-
-.modalHeader h3 {
-  font-size: 1.25rem;
-}
-
-.alertNotice {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fcd34d;
-  padding: 10px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.modalBody {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.selectedPlanDetails {
-  display: flex;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 14px;
-  border-radius: 8px;
-  margin: 12px 0;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  border: 1px solid var(--border-light);
-}
-
-.instructionText {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.modalFooter {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  border-top: 1px solid var(--border-light);
-  padding-top: 16px;
-}
-
-.cancelBtn {
-  background: none;
-  border: 1px solid var(--border-light);
-  color: var(--text-secondary);
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-}
-
-.confirmBtn {
-  background: #009ee3; /* Mercado Pago Blue */
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.confirmBtn:hover {
-  background: #0081bb;
-  transform: translateY(-1px);
-}
-
-/* Processing */
-.processingContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
-  padding: 40px 0;
-}
-
-.spinningDumbbell {
-  color: var(--primary);
-  animation: spin 1.5s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Success */
-.successContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 16px;
-  padding: 40px 0;
-}
-
-.paymentSuccessIcon {
-  color: var(--success);
-  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.3));
-}
-
-.redirectText {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 10px;
-}
-
 /* Category Switch Tabs */
 .tabsContainer {
   display: flex;
   justify-content: center;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-light);
-  padding: 6px;
+  padding: 4px;
   border-radius: 50px;
-  max-width: 440px;
+  max-width: 360px;
   margin: 0 auto 50px auto;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  isolation: isolate;
 }
 
 .tabToggleBtn {
@@ -392,23 +234,40 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.95rem;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: 50px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: color 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
 }
 
 .activeTabToggle {
-  background: var(--primary);
   color: var(--text-primary);
+  font-weight: 700;
+}
+
+.activeTabToggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  border-radius: 50px;
+  z-index: -1;
   box-shadow: 0 4px 15px rgba(255, 87, 0, 0.3);
+  animation: tabSlideIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes tabSlideIn {
+  from { opacity: 0; transform: scaleX(0.85); }
+  to { opacity: 1; transform: scaleX(1); }
 }
 
 .discountBadge {
@@ -421,39 +280,4 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: 1px solid rgba(37, 211, 102, 0.2);
-}
-
-/* Actions Container on Plan Card */
-.actionsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: auto;
-  width: 100%;
-}
-
-.whatsappBtn {
-  width: 100%;
-  background: transparent;
-  color: #25d366;
-  border: 1px solid rgba(37, 211, 102, 0.4);
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-}
-
-.whatsappBtn:hover {
-  background: rgba(37, 211, 102, 0.08);
-  border-color: #25d366;
-  box-shadow: 0 0 10px rgba(37, 211, 102, 0.15);
-  transform: translateY(-1px);
 }
