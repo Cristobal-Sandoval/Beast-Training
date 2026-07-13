@@ -6,6 +6,14 @@ import { supabase } from '@/lib/supabaseClient';
 import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar, UserPlus, Dumbbell } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import styles from './admin.module.css';
+const formatCLP = (price) => {
+  if (!price && price !== 0) return '';
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0
+  }).format(price);
+};
 
 export default function AdminDashboard() {
   const [user, setUser] = useState(null);
