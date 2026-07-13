@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { Dumbbell, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import styles from './login.module.css';
@@ -129,7 +128,6 @@ export default function LoginClient() {
 
         {/* Footer info */}
         <div className={styles.cardFooter}>
-          <p>¿No tienes cuenta? <Link href="/registro" className={styles.link}>Regístrate aquí</Link></p>
           <div className={styles.demoAccounts}>
             <p className={styles.demoTitle}>Cuentas de prueba:</p>
             <p>Admin: <code>admin@beasttraining.cl</code> / <code>beast123</code></p>
