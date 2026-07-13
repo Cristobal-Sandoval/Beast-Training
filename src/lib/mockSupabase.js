@@ -488,6 +488,34 @@ export default class MockSupabase {
                 data = data[0] || null;
               }
             }
+          } else if (table === 'about_info') {
+            const storedKey = 'beast_about_info';
+            let info = JSON.parse(localStorage.getItem(storedKey) || 'null');
+            
+            if (!info) {
+              info = {
+                id: 'coach-settings',
+                subtitle: 'sobre nosotros',
+                title: 'Entrenamiento Inteligente, Resultados Reales',
+                bio_p1: 'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
+                bio_p2: 'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
+                image_url: '/images/coach.png',
+                badge_text: 'Coach Fundador',
+                spec_1: 'Certificación CrossFit L-2',
+                spec_2: 'Preparación Física & Musculación (IPCH)',
+                spec_3: 'Especialista en Biomecánica aplicada al Fitness',
+                spec_4: 'Asesoría Nutricional Deportiva Avanzada'
+              };
+              localStorage.setItem(storedKey, JSON.stringify(info));
+            }
+
+            if (this._queryType === 'update') {
+              info = { ...info, ...this._updateData };
+              localStorage.setItem(storedKey, JSON.stringify(info));
+              data = info;
+            } else {
+              data = info;
+            }
           }
         } catch (err) {
           error = err;

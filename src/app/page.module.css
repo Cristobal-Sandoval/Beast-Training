@@ -714,3 +714,7 @@
 .aboutBtnWrapper {
   margin-top: 10px;
 }
+
+.aboutSection {
+  padding-bottom: 12px !important;
+}

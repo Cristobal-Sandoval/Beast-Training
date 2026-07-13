@@ -88,6 +88,18 @@ export default function AdminDashboard() {
   const [annContent, setAnnContent] = useState('');
   const [annPriority, setAnnPriority] = useState('normal');
 
+  // Nosotros / Coach Form State
+  const [aboutSubtitle, setAboutSubtitle] = useState('');
+  const [aboutTitle, setAboutTitle] = useState('');
+  const [aboutBioP1, setAboutBioP1] = useState('');
+  const [aboutBioP2, setAboutBioP2] = useState('');
+  const [aboutImgUrl, setAboutImgUrl] = useState('');
+  const [aboutBadgeText, setAboutBadgeText] = useState('');
+  const [aboutSpec1, setAboutSpec1] = useState('');
+  const [aboutSpec2, setAboutSpec2] = useState('');
+  const [aboutSpec3, setAboutSpec3] = useState('');
+  const [aboutSpec4, setAboutSpec4] = useState('');
+
   const [actionLoading, setActionLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -154,6 +166,7 @@ export default function AdminDashboard() {
       fetchAnnouncements();
       fetchAnnouncementBar();
       fetchPromoCodes();
+      fetchAboutInfo();
     }
   }, [profile, demoAdminMode]);
 
@@ -211,6 +224,58 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.warn('Error fetching promo codes:', err);
+    }
+  };
+
+  const fetchAboutInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('about_info')
+        .select('*')
+        .single();
+      if (!error && data) {
+        setAboutSubtitle(data.subtitle || '');
+        setAboutTitle(data.title || '');
+        setAboutBioP1(data.bio_p1 || '');
+        setAboutBioP2(data.bio_p2 || '');
+        setAboutImgUrl(data.image_url || '');
+        setAboutBadgeText(data.badge_text || '');
+        setAboutSpec1(data.spec_1 || '');
+        setAboutSpec2(data.spec_2 || '');
+        setAboutSpec3(data.spec_3 || '');
+        setAboutSpec4(data.spec_4 || '');
+      }
+    } catch (err) {
+      console.warn('Error fetching about info:', err);
+    }
+  };
+
+  const handleSaveAboutInfo = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('about_info')
+        .update({
+          subtitle: aboutSubtitle,
+          title: aboutTitle,
+          bio_p1: aboutBioP1,
+          bio_p2: aboutBioP2,
+          image_url: aboutImgUrl,
+          badge_text: aboutBadgeText,
+          spec_1: aboutSpec1,
+          spec_2: aboutSpec2,
+          spec_3: aboutSpec3,
+          spec_4: aboutSpec4,
+        })
+        .eq('id', 'coach-settings');
+
+      if (error) throw error;
+      setSuccessMsg('Información de Nosotros/Coach actualizada con éxito.');
+    } catch (err) {
+      alert('Error al guardar la información: ' + err.message);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -1347,6 +1412,13 @@ export default function AdminDashboard() {
                 <Sparkles size={18} />
                 <span>Promociones & Cupones</span>
               </button>
+              <button
+                onClick={() => { setActiveTab('about'); setSuccessMsg(null); }}
+                className={`${styles.tabBtn} ${activeTab === 'about' ? styles.activeTab : ''}`}
+              >
+                <UserCheck size={18} />
+                <span>Nosotros (Coach)</span>
+              </button>
             </aside>
 
             {/* main Content area */}
@@ -1939,6 +2011,140 @@ export default function AdminDashboard() {
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'about' && (
+                <div className={styles.tabSection}>
+                  <div className={styles.cardPanel} style={{ border: 'none', background: 'transparent', padding: 0 }}>
+                    <h2>Editar Sección Nosotros (Coach)</h2>
+                    <p className={styles.emptyText} style={{ textAlign: 'left', marginBottom: '20px' }}>
+                      Modifica la información, biografía, foto y certificaciones del Coach que se muestran en la página principal.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleSaveAboutInfo} className={`${styles.adminForm} glass`}>
+                    <div className={styles.formGrid}>
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Subtítulo de la Sección</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutSubtitle}
+                          onChange={(e) => setAboutSubtitle(e.target.value)}
+                          placeholder="Ej: sobre nosotros, nuestro coach"
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Título Principal</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutTitle}
+                          onChange={(e) => setAboutTitle(e.target.value)}
+                          placeholder="Ej: Entrenamiento Inteligente, Resultados Reales"
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Texto de Badge en Imagen</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutBadgeText}
+                          onChange={(e) => setAboutBadgeText(e.target.value)}
+                          placeholder="Ej: Coach Fundador"
+                          required
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>URL de la Imagen de Perfil</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutImgUrl}
+                          onChange={(e) => setAboutImgUrl(e.target.value)}
+                          placeholder="Ej: /images/coach.png"
+                          required
+                        />
+                      </div>
+
+                      <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                        <label className={styles.formLabel}>Párrafo de Biografía 1</label>
+                        <textarea
+                          rows={4}
+                          className={styles.formTextarea}
+                          value={aboutBioP1}
+                          onChange={(e) => setAboutBioP1(e.target.value)}
+                          placeholder="Escribe el primer párrafo sobre el coach..."
+                          required
+                        />
+                      </div>
+
+                      <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                        <label className={styles.formLabel}>Párrafo de Biografía 2</label>
+                        <textarea
+                          rows={4}
+                          className={styles.formTextarea}
+                          value={aboutBioP2}
+                          onChange={(e) => setAboutBioP2(e.target.value)}
+                          placeholder="Escribe el segundo párrafo (filosofía de entrenamiento)..."
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Certificación / Especialidad 1</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutSpec1}
+                          onChange={(e) => setAboutSpec1(e.target.value)}
+                          placeholder="Ej: Certificación CrossFit L-2"
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Certificación / Especialidad 2</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutSpec2}
+                          onChange={(e) => setAboutSpec2(e.target.value)}
+                          placeholder="Ej: Preparación Física & Musculación (IPCH)"
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Certificación / Especialidad 3</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutSpec3}
+                          onChange={(e) => setAboutSpec3(e.target.value)}
+                          placeholder="Ej: Especialista en Biomecánica aplicada al Fitness"
+                        />
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Certificación / Especialidad 4</label>
+                        <input
+                          type="text"
+                          className={styles.formInput}
+                          value={aboutSpec4}
+                          onChange={(e) => setAboutSpec4(e.target.value)}
+                          placeholder="Ej: Asesoría Nutricional Deportiva Avanzada"
+                        />
+                      </div>
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '20px' }}>
+                      {actionLoading ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
+                  </form>
                 </div>
               )}
             </main>
