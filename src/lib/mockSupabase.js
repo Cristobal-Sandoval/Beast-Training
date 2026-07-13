@@ -678,7 +678,11 @@ export default class MockSupabase {
                 spec_1: 'Certificación CrossFit L-2',
                 spec_2: 'Preparación Física & Musculación (IPCH)',
                 spec_3: 'Especialista en Biomecánica aplicada al Fitness',
-                spec_4: 'Asesoría Nutricional Deportiva Avanzada'
+                spec_4: 'Asesoría Nutricional Deportiva Avanzada',
+                coach_instagram: 'https://instagram.com/',
+                coach_tiktok: 'https://tiktok.com/',
+                gym_instagram: 'https://instagram.com/',
+                gym_facebook: 'https://facebook.com/'
               };
               localStorage.setItem(storedKey, JSON.stringify(info));
             }

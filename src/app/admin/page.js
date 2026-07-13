@@ -107,6 +107,10 @@ export default function AdminDashboard() {
   const [aboutSpec2, setAboutSpec2] = useState('');
   const [aboutSpec3, setAboutSpec3] = useState('');
   const [aboutSpec4, setAboutSpec4] = useState('');
+  const [coachInstagram, setCoachInstagram] = useState('');
+  const [coachTiktok, setCoachTiktok] = useState('');
+  const [gymInstagram, setGymInstagram] = useState('');
+  const [gymFacebook, setGymFacebook] = useState('');
 
   // Create Alumno Form State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -291,6 +295,10 @@ export default function AdminDashboard() {
         setAboutSpec2(data.spec_2 || '');
         setAboutSpec3(data.spec_3 || '');
         setAboutSpec4(data.spec_4 || '');
+        setCoachInstagram(data.coach_instagram || '');
+        setCoachTiktok(data.coach_tiktok || '');
+        setGymInstagram(data.gym_instagram || '');
+        setGymFacebook(data.gym_facebook || '');
       }
     } catch (err) {
       console.warn('Error fetching about info:', err);
@@ -314,11 +322,15 @@ export default function AdminDashboard() {
           spec_2: aboutSpec2,
           spec_3: aboutSpec3,
           spec_4: aboutSpec4,
+          coach_instagram: coachInstagram,
+          coach_tiktok: coachTiktok,
+          gym_instagram: gymInstagram,
+          gym_facebook: gymFacebook,
         })
         .eq('id', 'coach-settings');
 
       if (error) throw error;
-      setSuccessMsg('Información de Nosotros/Coach actualizada con éxito.');
+      setSuccessMsg('Información de Nosotros/Coach y Redes Sociales actualizada.');
     } catch (err) {
       alert('Error al guardar la información: ' + err.message);
     } finally {
@@ -2468,7 +2480,49 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '10px' }}>
+                    <div className={styles.formRow} style={{ marginTop: '16px' }}>
+                      <div className={styles.inputGroup}>
+                        <label>Instagram del Coach (URL)</label>
+                        <input
+                          type="url"
+                          value={coachInstagram}
+                          onChange={(e) => setCoachInstagram(e.target.value)}
+                          placeholder="Ej: https://instagram.com/coach_javier"
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label>TikTok del Coach (URL)</label>
+                        <input
+                          type="url"
+                          value={coachTiktok}
+                          onChange={(e) => setCoachTiktok(e.target.value)}
+                          placeholder="Ej: https://tiktok.com/@coach_javier"
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label>Instagram de Beast Training (URL)</label>
+                        <input
+                          type="url"
+                          value={gymInstagram}
+                          onChange={(e) => setGymInstagram(e.target.value)}
+                          placeholder="Ej: https://instagram.com/btrainingconcepcion"
+                        />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label>Facebook de Beast Training (URL)</label>
+                        <input
+                          type="url"
+                          value={gymFacebook}
+                          onChange={(e) => setGymFacebook(e.target.value)}
+                          placeholder="Ej: https://facebook.com/btrainingconcepcion"
+                        />
+                      </div>
+                    </div>
+
+                    <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '20px' }}>
                       {actionLoading ? 'Guardando...' : 'Guardar Cambios'}
                     </button>
                   </form>

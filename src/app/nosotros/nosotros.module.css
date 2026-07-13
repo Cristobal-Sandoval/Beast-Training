@@ -184,3 +184,14 @@
   box-shadow: 0 4px 20px rgba(255, 87, 0, 0.4);
   transform: translateY(-2px);
 }
+
+.socialBtn {
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.socialBtn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(255, 87, 0, 0.15);
+  filter: brightness(1.15);
+}
