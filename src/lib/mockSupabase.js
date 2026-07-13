@@ -557,9 +557,29 @@ export default class MockSupabase {
               ];
               localStorage.setItem(storedKey, JSON.stringify(storedPlans));
             }
-            data = storedPlans;
-            if (this._orderField === 'price') {
-              data.sort((a, b) => a.price - b.price);
+            if (this._queryType === 'insert') {
+              const newPlans = this._records.map(p => ({ id: p.id || 'plan-uuid-' + Math.random().toString(36).substr(2, 9), ...p }));
+              storedPlans = [...storedPlans, ...newPlans];
+              localStorage.setItem(storedKey, JSON.stringify(storedPlans));
+              data = this._single ? newPlans[0] : newPlans;
+            } else if (this._queryType === 'update') {
+              storedPlans = storedPlans.map(p => p.id === this._eqValue ? { ...p, ...this._updateData } : p);
+              localStorage.setItem(storedKey, JSON.stringify(storedPlans));
+              data = storedPlans.filter(p => p.id === this._eqValue);
+            } else if (this._queryType === 'delete') {
+              if (this._eqField === 'id') {
+                storedPlans = storedPlans.filter(p => p.id !== this._eqValue);
+                localStorage.setItem(storedKey, JSON.stringify(storedPlans));
+                data = storedPlans;
+              }
+            } else {
+              data = storedPlans;
+              if (this._eqField === 'id') {
+                data = storedPlans.find(p => p.id === this._eqValue) || null;
+              }
+              if (this._orderField === 'price') {
+                data.sort((a, b) => a.price - b.price);
+              }
             }
           } else if (table === 'about_info') {
             const storedKey = 'beast_about_info';

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar, UserPlus } from 'lucide-react';
+import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar, UserPlus, Dumbbell } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import styles from './admin.module.css';
 
@@ -108,6 +108,18 @@ export default function AdminDashboard() {
   const [newAlumnoAge, setNewAlumnoAge] = useState('');
   const [newAlumnoPassword, setNewAlumnoPassword] = useState('beast123');
 
+  // Gym Plans Form State
+  const [plansList, setPlansList] = useState([]);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [planName, setPlanName] = useState('');
+  const [planCategory, setPlanCategory] = useState('individual');
+  const [planPrice, setPlanPrice] = useState('');
+  const [planDuration, setPlanDuration] = useState(1);
+  const [planDesc, setPlanDesc] = useState('');
+  const [planFeatures, setPlanFeatures] = useState('');
+  const [planPopular, setPlanPopular] = useState(false);
+
   const [actionLoading, setActionLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -176,6 +188,7 @@ export default function AdminDashboard() {
       fetchAnnouncementBar();
       fetchPromoCodes();
       fetchAboutInfo();
+      fetchPlansList();
     }
   }, [profile, demoAdminMode]);
 
@@ -190,6 +203,20 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.warn('Error fetching profiles:', err);
+    }
+  };
+
+  const fetchPlansList = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('plans')
+        .select('*')
+        .order('price', { ascending: true });
+      if (!error && data) {
+        setPlansList(data);
+      }
+    } catch (err) {
+      console.warn('Error fetching plans list:', err);
     }
   };
 
@@ -606,6 +633,95 @@ export default function AdminDashboard() {
     } finally {
       setActionLoading(false);
     }
+  };
+
+  const handleSavePlan = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    const featuresArray = planFeatures
+      .split('\n')
+      .map(f => f.trim())
+      .filter(f => f !== '');
+
+    const planData = {
+      name: planName.trim(),
+      category: planCategory,
+      price: parseInt(planPrice),
+      duration_months: parseInt(planDuration),
+      description: planDesc.trim(),
+      features: featuresArray,
+      popular: planPopular
+    };
+
+    try {
+      if (editingPlan) {
+        const { error } = await supabase
+          .from('plans')
+          .update(planData)
+          .eq('id', editingPlan.id);
+        if (error) throw error;
+        showToast('¡Plan actualizado con éxito!', 'success');
+      } else {
+        const { error } = await supabase
+          .from('plans')
+          .insert([planData]);
+        if (error) throw error;
+        showToast('¡Nuevo plan creado con éxito!', 'success');
+      }
+
+      setShowPlanModal(false);
+      fetchPlansList();
+    } catch (err) {
+      showToast('Error al guardar el plan: ' + err.message, 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este plan? Esto afectará lo que ven los clientes en la página de planes.')) {
+      return;
+    }
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from('plans')
+        .delete()
+        .eq('id', planId);
+      if (error) throw error;
+      showToast('¡Plan de entrenamiento eliminado!', 'success');
+      fetchPlansList();
+    } catch (err) {
+      showToast('Error al eliminar el plan: ' + err.message, 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditPlanClick = (plan) => {
+    setEditingPlan(plan);
+    setPlanName(plan.name);
+    setPlanCategory(plan.category || 'individual');
+    setPlanPrice(plan.price);
+    setPlanDuration(plan.duration_months);
+    setPlanDesc(plan.description || '');
+    setPlanFeatures(plan.features ? plan.features.join('\n') : '');
+    setPlanPopular(plan.popular || false);
+    setShowPlanModal(true);
+  };
+
+  const handleAddPlanClick = () => {
+    setEditingPlan(null);
+    setPlanName('');
+    setPlanCategory('individual');
+    setPlanPrice('');
+    setPlanDuration(1);
+    setPlanDesc('');
+    setPlanFeatures('Clases ilimitadas\nAcceso a musculación y cardio\nEvaluación física mensual\nCasilleros y duchas');
+    setPlanPopular(false);
+    setShowPlanModal(true);
   };
 
   const handleDeleteProgress = async (recordId) => {
@@ -1464,6 +1580,13 @@ export default function AdminDashboard() {
               >
                 <Sparkles size={18} />
                 <span>Promociones & Cupones</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab('plans'); setSuccessMsg(null); }}
+                className={`${styles.tabBtn} ${activeTab === 'plans' ? styles.activeTab : ''}`}
+              >
+                <Dumbbell size={18} />
+                <span>Planes de Gimnasio</span>
               </button>
               <button
                 onClick={() => { setActiveTab('about'); setSuccessMsg(null); }}
@@ -2338,6 +2461,286 @@ export default function AdminDashboard() {
                       {actionLoading ? 'Guardando...' : 'Guardar Cambios'}
                     </button>
                   </form>
+                </div>
+              )}
+
+              {activeTab === 'plans' && (
+                <div className={styles.tabContent}>
+                  {/* Header card panel */}
+                  <div className={styles.cardPanel} style={{ border: 'none', background: 'transparent', padding: 0, marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <h2>Planes de Entrenamiento</h2>
+                        <p className={styles.emptyText} style={{ textAlign: 'left', margin: '4px 0 0 0' }}>
+                          Modifica, elimina y agrega planes de gimnasio (Individual y Dúo) que se visualizan en la web.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleAddPlanClick}
+                        style={{
+                          background: 'var(--primary)',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '10px 18px',
+                          borderRadius: '6px',
+                          fontSize: '0.9rem',
+                          fontWeight: '700',
+                          textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: '0 4px 15px rgba(255, 87, 0, 0.25)'
+                        }}
+                        type="button"
+                      >
+                        <Plus size={16} />
+                        Agregar Nuevo Plan
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Plans list */}
+                  {plansList.length === 0 ? (
+                    <p className={styles.emptyText}>No hay planes de entrenamiento registrados.</p>
+                  ) : (
+                    <div className={styles.listGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                      {plansList.map((plan) => (
+                        <div key={plan.id} className={`${styles.listItemCard} glass`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '24px', gap: '16px', position: 'relative' }}>
+                          {plan.popular && (
+                            <span style={{
+                              position: 'absolute',
+                              top: '16px',
+                              right: '16px',
+                              background: 'var(--primary)',
+                              color: '#ffffff',
+                              fontSize: '0.7rem',
+                              fontWeight: '700',
+                              textTransform: 'uppercase',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Destacado
+                            </span>
+                          )}
+
+                          <div className={styles.itemInfo} style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '16px' }}>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              fontWeight: '600',
+                              color: plan.category === 'duo' ? 'var(--success)' : 'var(--primary)',
+                              display: 'inline-block',
+                              marginBottom: '6px'
+                            }}>
+                              {plan.category === 'duo' ? 'Plan Dúo' : 'Membresía Individual'}
+                            </span>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, color: '#ffffff' }}>{plan.name}</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '6px', minHeight: '40px', lineHeight: '1.4' }}>{plan.description}</p>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Valor del Plan</span>
+                              <strong style={{ fontSize: '1.3rem', color: '#ffffff' }}>{formatCLP(plan.price)}</strong>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right' }}>Duración</span>
+                              <span style={{ fontSize: '0.95rem', fontWeight: '600', color: '#ffffff' }}>
+                                {plan.duration_months === 1 ? '1 Mes' : `${plan.duration_months} Meses`}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)' }}>Características:</span>
+                            <ul style={{ paddingLeft: '16px', margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {plan.features?.slice(0, 3).map((f, idx) => (
+                                <li key={idx}>{f}</li>
+                              ))}
+                              {plan.features?.length > 3 && (
+                                <li style={{ listStyle: 'none', color: 'var(--text-muted)', fontStyle: 'italic' }}>+ {plan.features.length - 3} más</li>
+                              )}
+                            </ul>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '16px', marginTop: 'auto' }}>
+                            <button
+                              onClick={() => handleEditPlanClick(plan)}
+                              className={styles.submitBtn}
+                              style={{ flex: 1, margin: 0, padding: '8px 14px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-light)' }}
+                              type="button"
+                            >
+                              <Edit size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleDeletePlan(plan.id)}
+                              className={styles.deleteBtn}
+                              style={{ flex: 0.3, padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                              type="button"
+                              title="Eliminar Plan"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Modal: Agregar / Editar Plan */}
+                  {showPlanModal && (
+                    <div style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0, 0, 0, 0.75)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 1000,
+                      padding: '20px'
+                    }}>
+                      <div className={`${styles.form} glass`} style={{
+                        maxWidth: '550px',
+                        width: '100%',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        border: '1px solid var(--border-light)',
+                        boxShadow: '0 15px 40px rgba(0,0,0,0.5)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
+                          <h2 style={{ fontSize: '1.4rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>
+                            {editingPlan ? 'Editar Plan de Entrenamiento' : 'Crear Nuevo Plan'}
+                          </h2>
+                          <button 
+                            onClick={() => setShowPlanModal(false)}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
+                            type="button"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <form onSubmit={handleSavePlan} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div className={styles.inputGroup}>
+                            <label>Nombre del Plan</label>
+                            <input
+                              type="text"
+                              value={planName}
+                              onChange={(e) => setPlanName(e.target.value)}
+                              placeholder="Ej: Mensual Individual"
+                              required
+                            />
+                          </div>
+
+                          <div className={styles.formRow}>
+                            <div className={styles.inputGroup}>
+                              <label>Categoría</label>
+                              <select
+                                className={styles.selectInput}
+                                value={planCategory}
+                                onChange={(e) => setPlanCategory(e.target.value)}
+                                style={{ width: '100%' }}
+                              >
+                                <option value="individual">Membresía Individual</option>
+                                <option value="duo">Plan Dúo</option>
+                              </select>
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                              <label>Duración (en meses)</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="12"
+                                value={planDuration}
+                                onChange={(e) => setPlanDuration(e.target.value)}
+                                placeholder="Ej: 3"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div className={styles.formRow}>
+                            <div className={styles.inputGroup}>
+                              <label>Precio del Plan (CLP)</label>
+                              <input
+                                type="number"
+                                min="1000"
+                                value={planPrice}
+                                onChange={(e) => setPlanPrice(e.target.value)}
+                                placeholder="Ej: 35000"
+                                required
+                              />
+                            </div>
+
+                            <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={planPopular}
+                                  onChange={(e) => setPlanPopular(e.target.checked)}
+                                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                />
+                                <span>¿Destacar como Más Popular?</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          <div className={styles.inputGroup}>
+                            <label>Descripción Corta del Plan</label>
+                            <input
+                              type="text"
+                              value={planDesc}
+                              onChange={(e) => setPlanDesc(e.target.value)}
+                              placeholder="Ej: Acceso ilimitado a todas nuestras clases y sala de musculación."
+                              required
+                            />
+                          </div>
+
+                          <div className={styles.inputGroup}>
+                            <label>Características / Lo que incluye (Una por línea)</label>
+                            <textarea
+                              rows={5}
+                              value={planFeatures}
+                              onChange={(e) => setPlanFeatures(e.target.value)}
+                              placeholder="Ej:&#10;Clases ilimitadas&#10;Acceso a musculación y cardio&#10;Evaluación física mensual"
+                              required
+                            />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                              * Ingresa cada beneficio en una línea distinta. Se ordenarán automáticamente con un icono de ticket en la web.
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setShowPlanModal(false)}
+                              className={styles.deactivateBtn}
+                              style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-light)', color: '#ffffff' }}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="submit"
+                              className={styles.submitBtn}
+                              disabled={actionLoading}
+                              style={{ flex: 1.5, margin: 0 }}
+                            >
+                              {actionLoading ? 'Guardando...' : 'Guardar Plan'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </main>
