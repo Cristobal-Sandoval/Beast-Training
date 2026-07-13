@@ -575,3 +575,142 @@
   color: var(--text-primary);
   border-color: var(--text-primary);
 }
+
+/* Nosotros / About Section */
+.aboutContainer {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px;
+  align-items: center;
+  margin-top: 40px;
+}
+
+@media (max-width: 992px) {
+  .aboutContainer {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-top: 20px;
+  }
+}
+
+.aboutImageCol {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.aboutImageWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 520px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+  .aboutImageWrapper {
+    height: 420px;
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutImageWrapper {
+    height: 340px;
+  }
+}
+
+.aboutImage {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.aboutImageWrapper:hover .aboutImage {
+  transform: scale(1.03);
+}
+
+.aboutImageBadge {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: var(--primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.4);
+  z-index: 2;
+}
+
+.aboutTextCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  text-align: left;
+}
+
+.aboutTextCol h2 {
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+@media (max-width: 576px) {
+  .aboutTextCol h2 {
+    font-size: 1.8rem;
+  }
+}
+
+.aboutDivider {
+  width: 50px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.aboutBio {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.aboutSpecs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  margin: 10px 0;
+}
+
+@media (max-width: 576px) {
+  .aboutSpecs {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.specItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.specIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.aboutBtnWrapper {
+  margin-top: 10px;
+}

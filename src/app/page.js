@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import Image from 'next/image';
 import styles from './page.module.css';
 
@@ -235,6 +235,65 @@ export default function Home() {
             </div>
             <h3>Progreso Integrado</h3>
             <p>Registra tu peso, % de grasa y masa muscular en nuestra plataforma y ve tu evolución con gráficos.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Nosotros / Nuestro Coach Section */}
+      <section className="section reveal" id="nosotros">
+        <div className={styles.aboutContainer}>
+          <div className={styles.aboutImageCol}>
+            <div className={styles.aboutImageWrapper}>
+              <Image
+                src="/images/coach.png"
+                alt="Coach Javier - Beast Training"
+                fill
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className={styles.aboutImage}
+                style={{ objectFit: 'cover' }}
+              />
+              <div className={styles.aboutImageBadge}>
+                <Sparkles size={16} />
+                <span>Coach Fundador</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.aboutTextCol}>
+            <span className={styles.subtitle}>sobre nosotros</span>
+            <h2>Entrenamiento Inteligente, Resultados Reales</h2>
+            <div className={styles.aboutDivider}></div>
+            <p className={styles.aboutBio}>
+              Hola, soy <strong>Javier</strong>. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.
+            </p>
+            <p className={styles.aboutBio}>
+              Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.
+            </p>
+
+            <div className={styles.aboutSpecs}>
+              <div className={styles.specItem}>
+                <Award size={18} className={styles.specIcon} />
+                <span>Certificación CrossFit L-2</span>
+              </div>
+              <div className={styles.specItem}>
+                <Award size={18} className={styles.specIcon} />
+                <span>Preparación Física & Musculación (IPCH)</span>
+              </div>
+              <div className={styles.specItem}>
+                <Award size={18} className={styles.specIcon} />
+                <span>Especialista en Biomecánica aplicada al Fitness</span>
+              </div>
+              <div className={styles.specItem}>
+                <Award size={18} className={styles.specIcon} />
+                <span>Asesoría Nutricional Deportiva Avanzada</span>
+              </div>
+            </div>
+
+            <div className={styles.aboutBtnWrapper}>
+              <Link href="/planes" className={styles.primaryBtn}>
+                Ver Planes <ArrowRight size={18} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
