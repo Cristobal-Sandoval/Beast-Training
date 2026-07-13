@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar } from 'lucide-react';
+import { ShieldAlert, Image, FileText, Plus, Check, Trash2, ShieldCheck, Sparkles, Users, UserCheck, MessageSquare, Scale, ChevronLeft, ArrowRight, Mail, TrendingUp, Edit, Calendar, UserPlus } from 'lucide-react';
 import { showToast } from '@/lib/toast';
 import styles from './admin.module.css';
 
@@ -99,6 +99,14 @@ export default function AdminDashboard() {
   const [aboutSpec2, setAboutSpec2] = useState('');
   const [aboutSpec3, setAboutSpec3] = useState('');
   const [aboutSpec4, setAboutSpec4] = useState('');
+
+  // Create Alumno Form State
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newAlumnoName, setNewAlumnoName] = useState('');
+  const [newAlumnoEmail, setNewAlumnoEmail] = useState('');
+  const [newAlumnoPhone, setNewAlumnoPhone] = useState('');
+  const [newAlumnoAge, setNewAlumnoAge] = useState('');
+  const [newAlumnoPassword, setNewAlumnoPassword] = useState('beast123');
 
   const [actionLoading, setActionLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
@@ -551,6 +559,50 @@ export default function AdminDashboard() {
       setSuccessMsg('¡Fechas y horas de evaluación propuestas con éxito al alumno!');
     } catch (err) {
       alert('Error al proponer fechas: ' + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCreateAlumno = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setSuccessMsg(null);
+
+    const emailLower = newAlumnoEmail.trim().toLowerCase();
+
+    try {
+      // Create user
+      const { data, error } = await supabase.auth.signUp({
+        email: emailLower,
+        password: newAlumnoPassword,
+        options: {
+          data: {
+            full_name: newAlumnoName.trim(),
+            phone: newAlumnoPhone.trim(),
+            age: newAlumnoAge ? parseInt(newAlumnoAge) : 20,
+            role: 'user',
+            status: 'active'
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      showToast('¡Alumno registrado con éxito! Se ha creado su perfil con membresía activa.', 'success');
+      
+      // Reset form
+      setNewAlumnoName('');
+      setNewAlumnoEmail('');
+      setNewAlumnoPhone('');
+      setNewAlumnoAge('');
+      setNewAlumnoPassword('beast123');
+      setShowCreateModal(false);
+      
+      // Reload alumnos list
+      fetchAlumnos();
+    } catch (err) {
+      showToast('Error al crear alumno: ' + err.message, 'error');
     } finally {
       setActionLoading(false);
     }
@@ -1427,7 +1479,151 @@ export default function AdminDashboard() {
               {/* Tab: Alumnos */}
               {activeTab === 'alumnos' && (
                 <div className={`${styles.cardPanel} glass`}>
-                  <h2>Directorio de Alumnos</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                    <h2>Directorio de Alumnos</h2>
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      style={{
+                        background: 'var(--primary)',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '10px 18px',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 15px rgba(255, 87, 0, 0.25)'
+                      }}
+                      type="button"
+                    >
+                      <UserPlus size={16} />
+                      Registrar Nuevo Alumno
+                    </button>
+                  </div>
+
+                  {/* Modal: Crear Nuevo Alumno */}
+                  {showCreateModal && (
+                    <div style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0, 0, 0, 0.75)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 1000,
+                      padding: '20px'
+                    }}>
+                      <div className={`${styles.form} glass`} style={{
+                        maxWidth: '500px',
+                        width: '100%',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        maxHeight: '90vh',
+                        overflowY: 'auto',
+                        border: '1px solid var(--border-light)',
+                        boxShadow: '0 15px 40px rgba(0,0,0,0.5)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
+                          <h2 style={{ fontSize: '1.4rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Crear Nuevo Alumno</h2>
+                          <button 
+                            onClick={() => setShowCreateModal(false)}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
+                            type="button"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <form onSubmit={handleCreateAlumno} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          <div className={styles.inputGroup}>
+                            <label>Nombre Completo</label>
+                            <input
+                              type="text"
+                              value={newAlumnoName}
+                              onChange={(e) => setNewAlumnoName(e.target.value)}
+                              placeholder="Ej: Cristóbal Sandoval"
+                              required
+                            />
+                          </div>
+
+                          <div className={styles.inputGroup}>
+                            <label>Correo Electrónico</label>
+                            <input
+                              type="email"
+                              value={newAlumnoEmail}
+                              onChange={(e) => setNewAlumnoEmail(e.target.value)}
+                              placeholder="Ej: alumno@gmail.com"
+                              required
+                            />
+                          </div>
+
+                          <div className={styles.formRow}>
+                            <div className={styles.inputGroup}>
+                              <label>Teléfono</label>
+                              <input
+                                type="text"
+                                value={newAlumnoPhone}
+                                onChange={(e) => setNewAlumnoPhone(e.target.value)}
+                                placeholder="Ej: +56912345678"
+                                required
+                              />
+                            </div>
+
+                            <div className={styles.inputGroup}>
+                              <label>Edad</label>
+                              <input
+                                type="number"
+                                value={newAlumnoAge}
+                                onChange={(e) => setNewAlumnoAge(e.target.value)}
+                                placeholder="Ej: 24"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <div className={styles.inputGroup}>
+                            <label>Contraseña de Acceso</label>
+                            <input
+                              type="text"
+                              value={newAlumnoPassword}
+                              onChange={(e) => setNewAlumnoPassword(e.target.value)}
+                              placeholder="Contraseña inicial del alumno"
+                              required
+                            />
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                              * Indícale esta contraseña al alumno para su primer ingreso. Podrá cambiarla después.
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                            <button
+                              type="button"
+                              onClick={() => setShowCreateModal(false)}
+                              className={styles.deactivateBtn}
+                              style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-light)', color: '#ffffff' }}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="submit"
+                              className={styles.submitBtn}
+                              disabled={actionLoading}
+                              style={{ flex: 1.5, margin: 0 }}
+                            >
+                              {actionLoading ? 'Registrando...' : 'Registrar Alumno'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
                   
                   {alumnos.length === 0 ? (
                     <p className={styles.emptyText}>No hay alumnos registrados.</p>

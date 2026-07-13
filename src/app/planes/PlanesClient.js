@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { supabase, isPlaceholderMode } from '@/lib/supabaseClient';
 import { Check, Dumbbell, ShieldCheck, MessageCircle } from 'lucide-react';
 import styles from './planes.module.css';
@@ -74,18 +73,6 @@ export default function PlanesClient() {
   const [plans, setPlans] = useState(defaultPlans);
   const [activeCategory, setActiveCategory] = useState('individual'); // 'individual' or 'duo'
   const [user, setUser] = useState(null);
-  const [loadingPlanId, setLoadingPlanId] = useState(null);
-  const [showSimulatedModal, setShowSimulatedModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
-  const [simulationStep, setSimulationStep] = useState('idle'); // idle, paying, success
-  
-  // Promo code states
-  const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState(null);
-  const [promoError, setPromoError] = useState('');
-  const [promoLoading, setPromoLoading] = useState(false);
-
-  const router = useRouter();
 
   useEffect(() => {
     // Get user
@@ -115,13 +102,9 @@ export default function PlanesClient() {
   };
 
   const handlePurchase = (plan) => {
-    if (!user) {
-      router.push('/login?redirect=/planes');
-      return;
-    }
-    setSelectedPlan(plan);
-    setShowSimulatedModal(true);
-    setSimulationStep('idle');
+    const text = `¡Hola Coach! Me interesa inscribirme en el plan *${plan.name}* (valor: ${formatCLP(plan.price)}). ¿Me podrías dar las instrucciones para realizar la transferencia y activar mi cuenta?`;
+    const waUrl = `https://wa.me/56948925193?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   };
 
   const formatCLP = (value) => {
@@ -213,63 +196,6 @@ export default function PlanesClient() {
           <span>Inscripciones y activaciones de cuenta coordinadas de forma directa y segura vía WhatsApp</span>
         </div>
       </section>
-
-      {/* Simulated Payment / WhatsApp Redirect Modal */}
-      {showSimulatedModal && selectedPlan && (
-        <div className={styles.modalOverlay}>
-          <div className={`${styles.modalCard} glass glow-orange`} style={{ maxWidth: '480px', padding: '30px' }}>
-            <div className={styles.modalHeader} style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px', marginBottom: '20px' }}>
-              <MessageCircle size={28} className={styles.secureIcon} style={{ color: '#25d366' }} />
-              <h3 style={{ textTransform: 'uppercase', fontSize: '1.25rem', fontWeight: '800' }}>Confirmar Inscripción</h3>
-            </div>
-            
-            <div className={styles.modalBody} style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                ¡Tu cuenta de Beast Training ya está lista! Para activar tu plan y coordinar el método de pago (transferencia electrónica o efectivo), comunícate directamente con el Coach por WhatsApp.
-              </p>
-
-              <div className={styles.selectedPlanDetails} style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-light)', padding: '16px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '600' }}>Plan Seleccionado</span>
-                  <strong style={{ fontSize: '1.1rem', color: '#ffffff' }}>{selectedPlan.name}</strong>
-                </div>
-                <div>
-                  <span style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '600', textAlign: 'right' }}>Total del Plan</span>
-                  <strong style={{ fontSize: '1.2rem', color: 'var(--primary)' }}>{formatCLP(selectedPlan.price)}</strong>
-                </div>
-              </div>
-
-              <div className={styles.alertNotice} style={{ background: 'rgba(37, 211, 102, 0.1)', border: '1px solid rgba(37, 211, 102, 0.2)', padding: '12px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px', color: '#25d366', fontSize: '0.9rem', fontWeight: '500' }}>
-                <ShieldCheck size={20} />
-                <span>Activación de membresía inmediata al enviar tu comprobante.</span>
-              </div>
-            </div>
-
-            <div className={styles.modalFooter} style={{ display: 'flex', gap: '12px', marginTop: '24px', borderTop: '1px solid var(--border-light)', paddingTop: '20px' }}>
-              <button 
-                onClick={() => setShowSimulatedModal(false)} 
-                className={styles.buyBtn} 
-                style={{ flex: 1, background: 'transparent', borderColor: 'var(--border-light)', color: 'var(--text-secondary)' }}
-                type="button"
-              >
-                Volver
-              </button>
-              
-              <a
-                href={`https://wa.me/56948925193?text=¡Hola%20Coach!%20Me%20acabo%20de%20registrar%20en%20Beast%20Training%20y%20quiero%20inscribirme%20en%20el%20${encodeURIComponent(selectedPlan.name)}.%20¿Me%20podrías%20dar%20las%20instrucciones%20para%20realizar%20la%20transferencia%20y%20activar%20mi%20cuenta?`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.buyBtn}
-                style={{ flex: 1.5, background: '#25d366', color: '#ffffff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', textDecoration: 'none', boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)' }}
-                onClick={() => setShowSimulatedModal(false)}
-              >
-                <MessageCircle size={18} />
-                Enviar a WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
