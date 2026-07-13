@@ -83,7 +83,7 @@ export default function Navbar() {
           <Link href="/blog" className={`${styles.link} ${isActive('/blog') ? styles.active : ''}`}>
             Blog
           </Link>
-          <Link href="/#nosotros" className={styles.link}>
+          <Link href="/nosotros" className={`${styles.link} ${isActive('/nosotros') ? styles.active : ''}`}>
             Nosotros
           </Link>
           
@@ -135,7 +135,7 @@ export default function Navbar() {
           <Link href="/blog" className={`${styles.mobileLink} ${isActive('/blog') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
             Blog
           </Link>
-          <Link href="/#nosotros" className={styles.mobileLink} onClick={() => setIsMenuOpen(false)}>
+          <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
             Nosotros
           </Link>
           {user && profile?.role !== 'admin' && (
