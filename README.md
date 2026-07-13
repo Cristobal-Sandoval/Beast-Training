@@ -1,6 +1,6 @@
 # Beast Training — Plataforma Web de Gestión de Gimnasio
 
-Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento en Concepción, Chile. Incluye landing page pública, blog, venta de planes con MercadoPago Chile, y dashboards privados para alumnos y administradores.
+Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento en Concepción, Chile. Incluye landing page pública, blog, cotización y contratación directa de planes vía WhatsApp, y dashboards privados para alumnos y administradores.
 
 ---
 
@@ -12,34 +12,32 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 | Estilos | CSS Modules + Variables CSS + Glassmorphism |
 | Tipografía | Google Fonts — Outfit (display) & Inter (sans) |
 | Backend / Auth | [Supabase](https://supabase.com/) (PostgreSQL + Auth + RLS) |
-| Pagos | MercadoPago Checkout Pro (Chile) |
 | Íconos | [Lucide React](https://lucide.dev/) |
 | SEO | Sitemap dinámico, JSON-LD (Article, Breadcrumb, SportsActivityLocation) |
-| Performance | next/image, next/font, ISR-ready, tree-shaking |
+| Performance | next/font, ISR-ready, tree-shaking, raw dynamic images |
 | Deploy | [Vercel](https://vercel.com/) |
 
 ---
 
 ## Funcionalidades Principales
 
-### Pagina Publica
+### Página Pública
 - **Hero Carousel** con `next/image`, overlay gradiente, navegación por arrows + dots
 - **Cintillo de anuncio** con marquee en mobile, configurable desde admin
 - **Pilares de valor** con glassmorphism y scroll reveal
-- **Blog preview** con las ultimas 2 publicaciones
-- **CTA** a planes
-- **WhatsApp flotante** (solo en paginas publicas)
+- **Blog preview** con las últimas 2 publicaciones
+- **Sección Nosotros (Coach)** con biografía, especialidades, imagen del Coach y enlaces a redes sociales autogestionables
+- **WhatsApp flotante** dinámico (solo en páginas públicas)
 
-### Planes & MercadoPago (Chile)
-- 3 planes (Mensual, Trimestral, Anual) con feature lists
-- Integración MercadoPago Checkout Pro con idempotency key
-- Webhook con validación contra API de MercadoPago + merchant_orders
-- Simulación local offline cuando no hay access token
-- Códigos de descuento para primera compra
+### Contratación de Planes (Vía WhatsApp)
+- Planes segmentados (Individual, Dúo/Pareja) con listas de beneficios.
+- Botones de contacto directo que abren WhatsApp con un mensaje predeterminado indicando el plan seleccionado y su valor.
+- El número de WhatsApp de contacto es totalmente configurable desde el panel de administración y se sincroniza en todo el sitio web (enlaces de planes y botón flotante).
+- Flujo de registro manual: El alumno solicita el plan al Coach, el Coach ingresa los datos en el panel y le asigna una clave provisoria para su primer inicio de sesión.
 
 ### Blog
 - Listado con artículo destacado + grid secundario
-- Articulo individual con `generateStaticParams` (SSG)
+- Artículo de blog individual con `generateStaticParams` (SSG)
 - Schema JSON-LD `Article` + `BreadcrumbList`
 - Open Graph, Twitter Cards, meta tags dinámicos
 
@@ -49,55 +47,35 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 - Estadísticas: peso, % grasa, masa muscular vs mes anterior
 - Gráficos SVG animados responsivos
 - Historial de evaluaciones en tabla scrolleable
-- Plan de entrenamiento
-- Chat directo con el coach
-- Selección de cita entre slots propuestos
+- Plan de entrenamiento (rutina) asignado por el Coach
+- Chat directo privado con el coach
+- Selección de cita entre slots propuestos para evaluación física
 
 ### Panel Admin (`/admin`)
-- Gestión de alumnos (activar/desactivar, editar perfil)
-- Editor de banners del hero
-- Editor de cintillo de anuncio
-- Códigos promo CRUD
-- Evaluaciones físicas por alumno
-- Comunicados Beast (normal/urgente)
-- Sistema de citas (proponer slots)
-- Chat con alumnos
+- **Gestión de Alumnos:** Registrar nuevos alumnos (con clave provisional), activar/desactivar cuentas, y ver fichas.
+- **Gestión de Planes:** Crear, editar, pausar y eliminar planes del catálogo públicamente en la web (precios, descripciones, características y destacar como popular).
+- **Editor de Sección Nosotros:** Modificar biografía del Coach, subir retrato (mediante URL externa libre), y configurar especialidades.
+- **Redes Sociales & Visibilidad:** Agregar enlaces a redes sociales y activar/desactivar su visibilidad individual en la web pública mediante casillas de verificación.
+- **Banners del Hero:** Configurar imágenes, alineación de textos y botones de acción.
+- **Cintillo de Anuncios:** Modificar el texto promocional superior del sitio.
+- **Ficha & Rutina:** Asignar y editar las rutinas de ejercicio de los alumnos en formato texto.
+- **Evaluaciones Físicas:** Registrar peso, % grasa, masa muscular, diámetros corporales y observaciones de progreso.
+- **Sistema de Citas:** Proponer slots de evaluación y ver la opción seleccionada.
+- **Chat Privado:** Responder mensajes individuales de cada alumno.
 
 ---
 
 ## Mejoras Recientes (Julio 2026)
 
-### Rendimiento
-- Hero images migradas de CSS `background-image` a `next/image` con `fill`, `priority` y `sizes`
-- Fuentes reducidas: Outfit 4 pesos, Inter 4 pesos (antes 6 y 5 respectivamente)
-- MockSupabase extraído a archivo separado para mejor tree-shaking en producción
-- Idempotency key en requests a MercadoPago
+### Rendimiento & Estabilidad
+- **Eliminación de MercadoPago:** Se removió por completo la pasarela de pago con tarjeta, reemplazándola por un flujo de contacto directo y contratación vía WhatsApp más ágil y personalizado.
+- **Imágenes Externas Libres:** Se migró el retrato del Coach a una etiqueta `<img>` nativa de HTML, permitiendo el ingreso de URLs de cualquier servidor externo (Imgur, Pinterest, etc.) en el panel admin sin bloqueos ni necesidad de configurar dominios en `next.config.mjs`.
+- **Estructura Modular del Panel Admin:** Se refactorizaron las vistas administrativas hacia subpaneles modulares e independientes (`Sidebar`, `PlansPanel`, `AboutPanel`, `BlogPanel`, etc.) utilizando hooks de React centralizados para un código limpio y de fácil mantenimiento.
 
-### SEO
-- Sitemap dinámico que incluye blog posts desde Supabase
-- `generateStaticParams` para blog posts pre-renderizados (SSG)
-- Schema JSON-LD `Article` + `BreadcrumbList` en blog detail
-- Canonical URLs absolutas, `hreflang="es-CL"`, `theme-color`
-- Meta `article:published_time`, `article:author`, `robots` por pagina
-
-### UX/UI
-- Carousel dots de navegación + touch targets de 44px en arrows
-- Confirm dialog al cerrar sesión
-- `prefers-reduced-motion` respetado globalmente
-- Empty states con iconos en dashboard (chat, plan de trabajo)
-- Feedback táctil (`:active` scale) en dispositivos touch
-- Footer con links `tel:` y `mailto:`
-- Simulación MercadoPago condicional según modo (local vs producción)
-
-### Pagos (MercadoPago Chile)
-- Tabla `payments` agregada a `supabase_schema.sql` con RLS
-- Webhook valida contra `merchant_orders` API (seguridad)
-- Almacenamiento de pagos aprobados en Supabase + activación automática de perfil
-
-### Accesibilidad
-- `prefers-reduced-motion` desactiva animaciones completas
-- Skip-to-content link, roles ARIA, etiquetas en botones
-- Contraste de color, focus-visible outlines
+### Usabilidad & Diseño Responsivo (UX/UI)
+- **Panel Admin Responsivo:** Se rediseñó por completo el Panel de Control Staff con grillas adaptativas fluidas que se ajustan perfectamente a teléfonos móviles, tabletas y computadoras de escritorio.
+- **Alineación Perfecta en Formularios:** Se unificó la altura mínima y alineación flexible inferior de las etiquetas (`label`) de los campos en fila de grilla, previniendo desfases visuales provocados por títulos de varias líneas.
+- **Botón `primaryBtn` Estilizado:** Implementación del estilo institucional Beast (naranja redondeado con sombras tridimensionales y micro-interacciones) en botones principales del administrador.
 
 ---
 
@@ -111,24 +89,24 @@ src/
 │   ├── layout.js                  # Layout raíz
 │   ├── globals.css                # Variables, utilidades, prefers-reduced-motion
 │   ├── blog/                      # Blog list + [slug]/ detail
-│   ├── planes/                    # Planes + MercadoPago checkout
+│   ├── planes/                    # Planes con contacto de contratación
 │   ├── dashboard/                 # Dashboard alumno
-│   ├── admin/                     # Panel admin
+│   ├── admin/                     # Panel admin modular (Dashboard, componentes y estado)
+│   │   ├── components/            # Subpaneles del administrador (PlansPanel, AboutPanel, etc.)
+│   │   └── useAdminState.js       # Hook centralizado de estados del panel
 │   ├── login/                     # Login
 │   ├── registro/                  # Registro
-│   └── api/
-│       ├── checkout/              # POST crear preferencia MP
-│       └── webhook/mercadopago/   # POST webhook MP
+│   └── api/                       # Endpoints backend
 ├── components/
 │   ├── Navbar.js                  # Nav responsiva con auth state
-│   ├── Footer.js                  # Footer con contacto
-│   ├── WhatsAppButton.js          # Botón flotante WhatsApp
+│   ├── Footer.js                  # Footer con datos de contacto actualizados
+│   ├── WhatsAppButton.js          # Botón flotante WhatsApp dinámico
 │   ├── ScrollToTop.js            # Botón scroll to top
 │   ├── TopAnnouncementBar.js     # Cintillo de anuncio
 │   └── ToastProvider.js          # Sistema de notificaciones
 └── lib/
     ├── supabaseClient.js          # Cliente Supabase
-    ├── mockSupabase.js            # Mock offline para desarrollo
+    ├── mockSupabase.js            # Mock offline para desarrollo (localStorage)
     └── toast.js                   # Pub/sub de notificaciones
 ```
 
@@ -146,7 +124,6 @@ Crea `.env.local` en la raíz:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<tu-proyecto>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<tu-anon-key>
-MERCADOPAGO_ACCESS_TOKEN=<tu-access-token>
 SUPABASE_SERVICE_ROLE_KEY=<tu-service-role-key>
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
@@ -168,17 +145,17 @@ Ejecuta `supabase_schema.sql` en el SQL Editor de Supabase para crear todas las 
 
 | Tabla | Descripción |
 |---|---|
-| `profiles` | Perfiles (rol, plan, workout, citas) |
+| `profiles` | Perfiles (rol, plan, workout, citas, estado) |
 | `banners` | Hero carousel |
 | `announcement_bar` | Cintillo de anuncios |
 | `promo_codes` | Códigos de descuento |
 | `announcements` | Comunicados Beast |
-| `physical_progress` | Evaluaciones físicas (peso, grasa, musculo) |
+| `physical_progress` | Evaluaciones físicas (peso, grasa, musculo, perímetros) |
 | `direct_messages` | Chat alumno-admin |
 | `appointment_requests` | Solicitudes de cita |
 | `blog_posts` | Artículos del blog |
-| `plans` | Planes de membresía |
-| `payments` | Pagos registrados via webhook MP |
+| `plans` | Catálogo de planes de membresía |
+| `about_info` | Configuración Nosotros, retratos, redes y WhatsApp |
 
 ---
 
@@ -191,27 +168,6 @@ Ejecuta `supabase_schema.sql` en el SQL Editor de Supabase para crear todas las 
 
 ---
 
-## Mobile-First
-
-- Touch targets mínimos de 44px
-- Carousel con dots y arrows touch-friendly
-- Dashboard con tablas scrolleables horizontalmente
-- Gráficos SVG responsivos via `viewBox`
-- Menú hamburguesa con animación slide-in
-- Cintillo con marquee automático en pantallas <= 640px
-- `prefers-reduced-motion` respetado
-
----
-
-## Deploy en Vercel
-
-1. Conecta el repositorio a Vercel
-2. Añade las variables de entorno
-3. Vercel detecta Next.js automáticamente
-4. Webhook MP debe apuntar a `https://tu-dominio.vercel.app/api/webhook/mercadopago`
-
----
-
 ## Licencia
 
-Proyecto privado — Beast Training Concepcion © 2026
+Proyecto privado — Beast Training Concepción © 2026
