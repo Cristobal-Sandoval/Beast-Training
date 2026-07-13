@@ -249,7 +249,7 @@ export default function Home() {
             </p>
           </div>
           <Link href="/planes" className={styles.ctaBtn}>
-            Comenzar Hoy <Dumbbell size={18} />
+            Únete a Nosotros <Dumbbell size={18} />
           </Link>
         </div>
       </section>
