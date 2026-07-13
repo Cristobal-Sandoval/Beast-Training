@@ -682,7 +682,8 @@ export default class MockSupabase {
                 coach_instagram: 'https://instagram.com/',
                 coach_tiktok: 'https://tiktok.com/',
                 gym_instagram: 'https://instagram.com/',
-                gym_facebook: 'https://facebook.com/'
+                gym_facebook: 'https://facebook.com/',
+                whatsapp_number: '56948925193'
               };
               localStorage.setItem(storedKey, JSON.stringify(info));
             }

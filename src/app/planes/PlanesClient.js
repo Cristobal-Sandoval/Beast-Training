@@ -44,8 +44,6 @@ const defaultPlans = [
   },
 ];
 
-const WHATSAPP_NUMBER = '56987654321';
-
 const categories = [
   { id: 'individual', label: 'Individual', icon: User },
   { id: 'couple', label: 'Dúo / Pareja', icon: Users },
@@ -54,8 +52,12 @@ const categories = [
 export default function PlanesClient() {
   const [plans, setPlans] = useState(defaultPlans);
   const [activeCategory, setActiveCategory] = useState('individual');
+  const [whatsappNumber, setWhatsappNumber] = useState('56948925193');
 
-  useEffect(() => { fetchPlans(); }, []);
+  useEffect(() => { 
+    fetchPlans(); 
+    fetchWhatsappNumber();
+  }, []);
 
   const fetchPlans = async () => {
     try {
@@ -69,11 +71,22 @@ export default function PlanesClient() {
     } catch (err) { console.warn('Usando planes predeterminados:', err); }
   };
 
+  const fetchWhatsappNumber = async () => {
+    try {
+      const { data, error } = await supabase.from('about_info').select('whatsapp_number').single();
+      if (!error && data?.whatsapp_number) {
+        setWhatsappNumber(data.whatsapp_number.replace(/\+/g, '').trim());
+      }
+    } catch (err) {
+      console.warn('Error fetching whatsapp number:', err);
+    }
+  };
+
   const filteredPlans = plans.filter(p => p.category === activeCategory);
 
   const handleWhatsAppContact = (plan) => {
     const message = encodeURIComponent(`Hola! Me gustaría contratar el ${plan.name} de Beast Training ($${plan.price.toLocaleString('es-CL')}). ¿Cómo puedo inscribirme?`);
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   const formatCLP = (value) => {

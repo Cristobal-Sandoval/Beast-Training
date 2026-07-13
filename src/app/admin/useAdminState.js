@@ -85,6 +85,7 @@ export default function useAdminState() {
   const [coachTiktok, setCoachTiktok] = useState('');
   const [gymInstagram, setGymInstagram] = useState('');
   const [gymFacebook, setGymFacebook] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('56948925193');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newAlumnoName, setNewAlumnoName] = useState('');
@@ -203,8 +204,36 @@ export default function useAdminState() {
         setAboutSpec3(data.spec_3 || ''); setAboutSpec4(data.spec_4 || '');
         setCoachInstagram(data.coach_instagram || ''); setCoachTiktok(data.coach_tiktok || '');
         setGymInstagram(data.gym_instagram || ''); setGymFacebook(data.gym_facebook || '');
+        setWhatsappNumber(data.whatsapp_number || '56948925193');
       }
     } catch (err) { console.warn('Error fetching about info:', err); }
+  };
+
+  const handleSaveAboutInfo = async (e) => {
+    e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
+    try {
+      const { error } = await supabase.from('about_info').update({
+        subtitle: aboutSubtitle,
+        title: aboutTitle,
+        bio_p1: aboutBioP1,
+        bio_p2: aboutBioP2,
+        image_url: aboutImgUrl,
+        badge_text: aboutBadgeText,
+        spec_1: aboutSpec1,
+        spec_2: aboutSpec2,
+        spec_3: aboutSpec3,
+        spec_4: aboutSpec4,
+        coach_instagram: coachInstagram,
+        coach_tiktok: coachTiktok,
+        gym_instagram: gymInstagram,
+        gym_facebook: gymFacebook,
+        whatsapp_number: whatsappNumber,
+      }).eq('id', 'coach-settings');
+
+      if (error) throw error;
+      setSuccessMsg('¡Configuración de Nosotros y WhatsApp guardada con éxito!');
+    } catch (err) { alert('Error al guardar configuración: ' + err.message); }
+    finally { setActionLoading(false); }
   };
 
   const fetchPosts = async () => {
@@ -527,7 +556,7 @@ export default function useAdminState() {
     annTitle, annContent, annPriority,
     aboutSubtitle, aboutTitle, aboutBioP1, aboutBioP2, aboutImgUrl, aboutBadgeText,
     aboutSpec1, aboutSpec2, aboutSpec3, aboutSpec4,
-    coachInstagram, coachTiktok, gymInstagram, gymFacebook,
+    coachInstagram, coachTiktok, gymInstagram, gymFacebook, whatsappNumber,
     showCreateModal, newAlumnoName, newAlumnoEmail, newAlumnoPhone, newAlumnoAge, newAlumnoPassword,
     plansList, showPlanModal, editingPlan, planName, planCategory, planPrice, planDuration, planDesc, planFeatures, planPopular,
     actionLoading, successMsg,
@@ -547,7 +576,7 @@ export default function useAdminState() {
     setAnnTitle, setAnnContent, setAnnPriority,
     setAboutSubtitle, setAboutTitle, setAboutBioP1, setAboutBioP2, setAboutImgUrl, setAboutBadgeText,
     setAboutSpec1, setAboutSpec2, setAboutSpec3, setAboutSpec4,
-    setCoachInstagram, setCoachTiktok, setGymInstagram, setGymFacebook,
+    setCoachInstagram, setCoachTiktok, setGymInstagram, setGymFacebook, setWhatsappNumber,
     setShowCreateModal, setNewAlumnoName, setNewAlumnoEmail, setNewAlumnoPhone, setNewAlumnoAge, setNewAlumnoPassword,
     setPlansList, setShowPlanModal, setEditingPlan, setPlanName, setPlanCategory, setPlanPrice, setPlanDuration, setPlanDesc, setPlanFeatures, setPlanPopular,
     setActionLoading, setSuccessMsg,
@@ -558,5 +587,6 @@ export default function useAdminState() {
     handleSavePlan, handleDeletePlan, handleEditPlanClick, handleAddPlanClick, handleDeleteProgress,
     handleBroadcastAnnouncement, handleCreateBanner, handleEditBannerSelect, handleSaveAnnouncementBar,
     handleCreatePromoCode, handleDeletePromoCode, handleCreatePost, handleDeleteBanner, handleDeletePost, handleDeleteAnnouncement,
+    handleSaveAboutInfo,
   };
 }

@@ -448,6 +448,7 @@ export default function AdminDashboard() {
                   coachTiktok={s.coachTiktok} setCoachTiktok={s.setCoachTiktok}
                   gymInstagram={s.gymInstagram} setGymInstagram={s.setGymInstagram}
                   gymFacebook={s.gymFacebook} setGymFacebook={s.setGymFacebook}
+                  whatsappNumber={s.whatsappNumber} setWhatsappNumber={s.setWhatsappNumber}
                   actionLoading={s.actionLoading}
                   handleSaveAboutInfo={s.handleSaveAboutInfo}
                 />

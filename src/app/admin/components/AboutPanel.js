@@ -9,6 +9,7 @@ export default function AboutPanel({
   aboutSpec1, setAboutSpec1, aboutSpec2, setAboutSpec2, aboutSpec3, setAboutSpec3, aboutSpec4, setAboutSpec4,
   coachInstagram, setCoachInstagram, coachTiktok, setCoachTiktok,
   gymInstagram, setGymInstagram, gymFacebook, setGymFacebook,
+  whatsappNumber, setWhatsappNumber,
   actionLoading, handleSaveAboutInfo
 }) {
   return (
@@ -87,7 +88,13 @@ export default function AboutPanel({
             </div>
           </div>
 
-          <button type="submit" className={styles.submitBtn} disabled={actionLoading}>
+          <h3 style={{ margin: '16px 0 8px', fontSize: '1rem' }}>Contacto de WhatsApp</h3>
+          <div className={styles.inputGroup}>
+            <label htmlFor="whatsappNumber">Número de WhatsApp (con código de país, ej: 56948925193)</label>
+            <input id="whatsappNumber" type="text" placeholder="56948925193" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} required />
+          </div>
+
+          <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '20px' }}>
             {actionLoading ? 'Guardando...' : 'Guardar Configuración'}
           </button>
         </form>

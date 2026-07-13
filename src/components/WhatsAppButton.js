@@ -1,9 +1,26 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
+  const [whatsappNumber, setWhatsappNumber] = useState('56948925193');
+
+  useEffect(() => {
+    async function fetchWhatsapp() {
+      try {
+        const { data } = await supabase.from('about_info').select('whatsapp_number').single();
+        if (data?.whatsapp_number) {
+          setWhatsappNumber(data.whatsapp_number.replace(/\+/g, '').trim());
+        }
+      } catch (e) {
+        // Fallback to default
+      }
+    }
+    fetchWhatsapp();
+  }, []);
 
   // Hide WhatsApp button inside user dashboards and admin panel
   const isDashboardOrAdmin = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
@@ -12,7 +29,7 @@ export default function WhatsAppButton() {
 
   return (
     <a
-      href="https://wa.me/56987654321?text=Hola!%20Me%20gustaria%20saber%20mas%20sobre%20los%20planes%20de%20Beast%20Training."
+      href={`https://wa.me/${whatsappNumber}?text=Hola!%20Me%20gustaria%20saber%20mas%20sobre%20los%20planes%20de%20Beast%20Training.`}
       target="_blank"
       rel="noopener noreferrer"
       className="whatsapp-float"
