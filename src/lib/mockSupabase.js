@@ -30,15 +30,45 @@ export default class MockSupabase {
       },
 
       async signInWithPassword({ email, password }) {
-        if (password !== 'beast123') {
-          return { data: null, error: { message: 'Contraseña incorrecta (Usa beast123 para el demo)' } };
+        const emailLower = email.toLowerCase();
+        
+        let storedPassword = 'beast123';
+        if (typeof window !== 'undefined') {
+          const pwdKey = 'beast_passwords';
+          const passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
+          storedPassword = passwords[emailLower] || 'beast123';
         }
 
-        const isAdmin = email === 'admin@beasttraining.cl';
+        if (password !== storedPassword) {
+          return { data: null, error: { message: 'Contraseña incorrecta. (Si fue creada recién por el coach, usa beast123 o la clave provisoria)' } };
+        }
+
+        const isAdmin = emailLower === 'admin@beasttraining.cl';
         const userId = isAdmin ? 'admin-uuid-123' : 'user-uuid-456';
 
+        let userMetadata = { role: 'user', status: 'inactive', password_changed: false };
+        if (typeof window !== 'undefined') {
+          const profilesKey = 'beast_profiles_list';
+          let profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
+          const p = profiles.find(profile => profile.email?.toLowerCase() === emailLower || profile.id === userId);
+          if (p) {
+            userMetadata = {
+              full_name: p.full_name,
+              phone: p.phone,
+              age: p.age,
+              role: p.role,
+              status: p.status,
+              password_changed: p.password_changed || false
+            };
+          }
+        }
+
         const session = {
-          user: { id: userId, email },
+          user: { 
+            id: userId, 
+            email,
+            user_metadata: userMetadata
+          },
           access_token: 'mock-token',
         };
 
@@ -58,6 +88,7 @@ export default class MockSupabase {
               phone: isAdmin ? null : '+56987654321',
               role: isAdmin ? 'admin' : 'user',
               status: isAdmin ? 'active' : 'inactive',
+              password_changed: false,
               workout_plan: 'Rutina de adaptación: 3 series de 12 repeticiones en circuitos de acondicionamiento general.'
             });
             localStorage.setItem(profilesKey, JSON.stringify(profiles));
@@ -70,6 +101,7 @@ export default class MockSupabase {
 
       async signUp({ email, password, options }) {
         const userId = 'user-uuid-' + Math.random().toString(36).substr(2, 9);
+        const emailLower = email.toLowerCase();
 
         if (typeof window !== 'undefined') {
           const profilesKey = 'beast_profiles_list';
@@ -77,18 +109,66 @@ export default class MockSupabase {
 
           profiles.push({
             id: userId,
-            email,
+            email: emailLower,
             full_name: options?.data?.full_name || 'Nueva Bestia',
-            age: 20,
-            phone: '+56912345678',
-            role: 'user',
-            status: 'inactive',
+            age: options?.data?.age || 20,
+            phone: options?.data?.phone || '+56912345678',
+            role: options?.data?.role || 'user',
+            status: options?.data?.status || 'inactive',
+            password_changed: options?.data?.password_changed || false,
             workout_plan: 'Rutina de adaptación: 3 series de 12 repeticiones en circuitos de acondicionamiento general.'
           });
           localStorage.setItem(profilesKey, JSON.stringify(profiles));
+
+          // Save password
+          const pwdKey = 'beast_passwords';
+          let passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
+          passwords[emailLower] = password;
+          localStorage.setItem(pwdKey, JSON.stringify(passwords));
         }
 
         return { data: { user: { id: userId, email } }, error: null };
+      },
+
+      async updateUser({ password, data }) {
+        const sessionStr = localStorage.getItem('beast_session');
+        if (!sessionStr) return { data: null, error: { message: 'No hay sesión activa' } };
+        
+        const session = JSON.parse(sessionStr);
+        const emailLower = session.user.email.toLowerCase();
+
+        if (password) {
+          const pwdKey = 'beast_passwords';
+          let passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
+          passwords[emailLower] = password;
+          localStorage.setItem(pwdKey, JSON.stringify(passwords));
+        }
+
+        if (typeof window !== 'undefined') {
+          const profilesKey = 'beast_profiles_list';
+          let profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
+          profiles = profiles.map(p => {
+            if (p.email?.toLowerCase() === emailLower) {
+              return { 
+                ...p, 
+                password_changed: true,
+                ...(data || {})
+              };
+            }
+            return p;
+          });
+          localStorage.setItem(profilesKey, JSON.stringify(profiles));
+
+          // Update active session metadata
+          session.user.user_metadata = {
+            ...session.user.user_metadata,
+            password_changed: true,
+            ...(data || {})
+          };
+          localStorage.setItem('beast_session', JSON.stringify(session));
+        }
+
+        return { data: { user: session.user }, error: null };
       },
 
       async signOut() {
@@ -106,6 +186,7 @@ export default class MockSupabase {
     this.auth.onAuthStateChange = this.auth.onAuthStateChange.bind(this.auth);
     this.auth.signInWithPassword = this.auth.signInWithPassword.bind(this.auth);
     this.auth.signUp = this.auth.signUp.bind(this.auth);
+    this.auth.updateUser = this.auth.updateUser.bind(this.auth);
     this.auth.signOut = this.auth.signOut.bind(this.auth);
     this.auth.notify = this.auth.notify.bind(this.auth);
   }

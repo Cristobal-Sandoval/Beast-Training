@@ -170,6 +170,9 @@ export default function AdminDashboard() {
         .single();
       if (!error && data) {
         setProfile(data);
+        if (data.role !== 'admin') {
+          router.push('/dashboard');
+        }
       }
     } catch (err) {
       console.error(err);

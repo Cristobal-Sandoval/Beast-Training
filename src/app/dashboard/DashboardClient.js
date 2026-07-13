@@ -41,6 +41,12 @@ function DashboardContent() {
   const [chatMessages, setChatMessages] = useState([]);
   const [newDirectMessage, setNewDirectMessage] = useState('');
   const [submittingChat, setSubmittingChat] = useState(false);
+
+  // Change Password states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -179,6 +185,38 @@ function DashboardContent() {
     const updated = [...dismissedAnnouncements, annId];
     setDismissedAnnouncements(updated);
     localStorage.setItem('beast_dismissed_announcements', JSON.stringify(updated));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmNewPassword) {
+      showToast('Las contraseñas nuevas no coinciden.', 'error');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+      return;
+    }
+    setPasswordChangeLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+        data: { password_changed: true }
+      });
+      if (error) throw error;
+      showToast('¡Contraseña cambiada con éxito!', 'success');
+      setShowPasswordModal(false);
+      setNewPassword('');
+      setConfirmNewPassword('');
+      
+      if (profile) {
+        setProfile(prev => ({ ...prev, password_changed: true }));
+      }
+    } catch (err) {
+      showToast('Error al cambiar la contraseña: ' + err.message, 'error');
+    } finally {
+      setPasswordChangeLoading(false);
+    }
   };
 
   const handleSendDirectMessage = async (e) => {
@@ -335,6 +373,7 @@ function DashboardContent() {
 
   const statComp = getStatsWithComparatives();
   const visibleAnnouncements = announcements.filter(a => !dismissedAnnouncements.includes(a.id));
+  const isDefaultPassword = profile && !profile.password_changed;
 
   if (loading) {
     return (
@@ -376,9 +415,148 @@ function DashboardContent() {
         )}
       </section>
 
-      {/* Comunicados Beast (Urgentes/Normales) */}
-      {visibleAnnouncements.length > 0 && (
-        <section style={{ marginBottom: '24px' }}>
+      {/* Contraseña Temporal Alert Banner */}
+      {isDefaultPassword && (
+        <div style={{
+          background: 'rgba(255, 87, 0, 0.12)',
+          border: '1px solid rgba(255, 87, 0, 0.3)',
+          borderRadius: '8px',
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          boxShadow: '0 4px 20px rgba(255, 87, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ShieldAlert size={24} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+            <div>
+              <strong style={{ color: '#ffffff', display: 'block', marginBottom: '2px', fontSize: '0.95rem' }}>
+                🔑 Seguridad de tu Cuenta: Contraseña Temporal Detectada
+              </strong>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                Estás ingresando con la clave inicial. Te sugerimos cambiarla por una segura para proteger tus datos de progreso.
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            style={{
+              background: 'var(--primary)',
+              color: '#ffffff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 87, 0, 0.2)',
+              whiteSpace: 'nowrap'
+            }}
+            type="button"
+          >
+            Cambiar Contraseña
+          </button>
+        </div>
+      )}
+
+      {profile?.role !== 'admin' && profile?.status !== 'active' ? (
+        <section style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '50px 20px',
+          textAlign: 'center',
+          minHeight: '400px'
+        }}>
+          <div className={`${styles.cardPanel} glass glow-orange`} style={{
+            maxWidth: '550px',
+            width: '100%',
+            padding: '40px 30px',
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px',
+            marginBottom: 0
+          }}>
+            <div style={{
+              background: 'rgba(255, 87, 0, 0.1)',
+              padding: '20px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <ShieldAlert size={50} style={{ color: 'var(--primary)' }} />
+            </div>
+
+            <h2 style={{ fontSize: '1.6rem', borderBottom: 'none', paddingBottom: 0, margin: 0, color: '#ffffff', textTransform: 'uppercase', fontWeight: '800' }}>
+              Membresía Inactiva o Vencida
+            </h2>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
+              Hola <strong>{profile?.full_name || 'Bestia'}</strong>. Para ver tus rutinas personalizadas del mes, registrar tu evolución física y programar evaluaciones corporales, necesitas activar tu cuenta.
+            </p>
+
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--border-light)',
+              padding: '16px',
+              borderRadius: '8px',
+              width: '100%',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '600' }}>¿Cómo activar mi cuenta?</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                1. Contrata un plan en la sección <a href="/planes" style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'none' }}>Planes</a> o contáctate directamente.
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                2. Realiza la transferencia o pago al Coach.
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                3. Una vez confirmado, el Coach ingresará tu matrícula al sistema y tu cuenta se activará al instante.
+              </span>
+            </div>
+
+            <button
+              onClick={() => window.open(`https://wa.me/56948925193?text=Hola%20Coach!%20Tengo%20mi%20cuenta%20inactiva%20en%20el%20sistema%20(${profile?.email || user?.email}).%20%C2%BFMe%20podr%C3%ADas%20ayudar%20a%20activar%20mi%20membres%C3%ADa?`, '_blank')}
+              style={{
+                background: '#25D366',
+                color: '#ffffff',
+                border: 'none',
+                padding: '14px 24px',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)',
+                marginTop: '10px',
+                width: '100%',
+                justifyContent: 'center'
+              }}
+              type="button"
+            >
+              <MessageSquare size={18} />
+              Contactar al Coach por WhatsApp
+            </button>
+          </div>
+        </section>
+      ) : (
+        <>
+          {/* Comunicados Beast (Urgentes/Normales) */}
+          {visibleAnnouncements.length > 0 && (
+            <section style={{ marginBottom: '24px' }}>
           <div className={`${styles.cardPanel} glass glow-orange`} style={{ padding: '16px 20px', marginBottom: 0 }}>
             <div className={styles.panelTitleWrapper} style={{ marginBottom: '12px' }}>
               <Bell className={styles.accent} size={20} />
@@ -724,6 +902,126 @@ function DashboardContent() {
           </div>
         </div>
       </section>
+        </>
+      )}
+
+      {/* Modal: Cambiar Contraseña */}
+      {showPasswordModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1100,
+          padding: '20px'
+        }}>
+          <div className={`${styles.cardPanel} glass`} style={{
+            maxWidth: '450px',
+            width: '100%',
+            padding: '30px',
+            borderRadius: '12px',
+            border: '1px solid var(--border-light)',
+            boxShadow: '0 15px 40px rgba(0,0,0,0.5)',
+            marginBottom: 0
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
+              <h2 style={{ fontSize: '1.3rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Actualizar Contraseña</h2>
+              <button 
+                onClick={() => setShowPasswordModal(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
+                type="button"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-light)',
+                    background: 'rgba(255,255,255,0.03)',
+                    color: '#ffffff',
+                    fontSize: '0.9rem'
+                  }}
+                />
+              </div>
+
+              <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Confirmar Nueva Contraseña</label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Repite la nueva contraseña"
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-light)',
+                    background: 'rgba(255,255,255,0.03)',
+                    color: '#ffffff',
+                    fontSize: '0.9rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  style={{
+                    flex: 1,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid var(--border-light)',
+                    color: '#ffffff',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordChangeLoading}
+                  style={{
+                    flex: 1.5,
+                    background: 'var(--primary)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '700',
+                    fontSize: '0.9rem',
+                    boxShadow: '0 4px 15px rgba(255, 87, 0, 0.25)'
+                  }}
+                >
+                  {passwordChangeLoading ? 'Actualizando...' : 'Guardar Nueva Clave'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

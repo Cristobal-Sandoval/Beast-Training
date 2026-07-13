@@ -157,7 +157,7 @@ export default function Home() {
                 <Link href={banner.link_url || '/planes'} className={styles.primaryBtn}>
                   Ver Planes <ArrowRight size={18} />
                 </Link>
-                <Link href="/registro" className={styles.secondaryBtn}>
+                <Link href="/planes" className={styles.secondaryBtn}>
                   Unirse Ahora
                 </Link>
               </div>
