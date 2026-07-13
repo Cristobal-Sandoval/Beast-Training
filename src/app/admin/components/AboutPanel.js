@@ -10,6 +10,8 @@ export default function AboutPanel({
   coachInstagram, setCoachInstagram, coachTiktok, setCoachTiktok,
   gymInstagram, setGymInstagram, gymFacebook, setGymFacebook,
   whatsappNumber, setWhatsappNumber,
+  showCoachSocials, setShowCoachSocials,
+  showGymSocials, setShowGymSocials,
   actionLoading, handleSaveAboutInfo
 }) {
   return (
@@ -66,7 +68,7 @@ export default function AboutPanel({
             </div>
           </div>
 
-          <h3 style={{ margin: '16px 0 8px', fontSize: '1rem' }}>Redes Sociales</h3>
+          <h3 style={{ margin: '16px 0 8px', fontSize: '1rem' }}>Redes Sociales del Coach</h3>
           <div className={styles.formRow}>
             <div className={styles.inputGroup}>
               <label htmlFor="coachInstagram">Instagram del Coach</label>
@@ -77,6 +79,14 @@ export default function AboutPanel({
               <input id="coachTiktok" type="text" placeholder="@coachjavier" value={coachTiktok} onChange={(e) => setCoachTiktok(e.target.value)} />
             </div>
           </div>
+          <div className={styles.inputGroup} style={{ marginTop: '-8px', marginBottom: '8px' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'none', fontWeight: '500', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <input type="checkbox" checked={showCoachSocials} onChange={(e) => setShowCoachSocials(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              Mostrar Redes Sociales del Coach públicamente en la web
+            </label>
+          </div>
+
+          <h3 style={{ margin: '16px 0 8px', fontSize: '1rem' }}>Redes Sociales de Beast Training</h3>
           <div className={styles.formRow}>
             <div className={styles.inputGroup}>
               <label htmlFor="gymInstagram">Instagram del Gimnasio</label>
@@ -86,6 +96,12 @@ export default function AboutPanel({
               <label htmlFor="gymFacebook">Facebook del Gimnasio</label>
               <input id="gymFacebook" type="text" placeholder="BeastTrainingCL" value={gymFacebook} onChange={(e) => setGymFacebook(e.target.value)} />
             </div>
+          </div>
+          <div className={styles.inputGroup} style={{ marginTop: '-8px', marginBottom: '8px' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textTransform: 'none', fontWeight: '500', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <input type="checkbox" checked={showGymSocials} onChange={(e) => setShowGymSocials(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+              Mostrar Redes Sociales de Beast Training públicamente en la web
+            </label>
           </div>
 
           <h3 style={{ margin: '16px 0 8px', fontSize: '1rem' }}>Contacto de WhatsApp</h3>

@@ -129,7 +129,8 @@ export default function NosotrosClient() {
             </div>
 
             {/* Social Links Block */}
-            {(aboutInfo.coach_instagram || aboutInfo.coach_tiktok || aboutInfo.gym_instagram || aboutInfo.gym_facebook) && (
+            {((aboutInfo.show_coach_socials !== false && (aboutInfo.coach_instagram || aboutInfo.coach_tiktok)) || 
+              (aboutInfo.show_gym_socials !== false && (aboutInfo.gym_instagram || aboutInfo.gym_facebook))) && (
               <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-light)', paddingTop: '20px' }}>
                 <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px', fontWeight: '700' }}>
                   Síguenos en Redes Sociales
@@ -137,7 +138,8 @@ export default function NosotrosClient() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Coach social media */}
-                  {((aboutInfo.coach_instagram && aboutInfo.coach_instagram.length > 20) || (aboutInfo.coach_tiktok && aboutInfo.coach_tiktok.length > 18)) && (
+                  {aboutInfo.show_coach_socials !== false && 
+                   ((aboutInfo.coach_instagram && aboutInfo.coach_instagram.length > 20) || (aboutInfo.coach_tiktok && aboutInfo.coach_tiktok.length > 18)) && (
                     <div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>
                         Redes del Coach Javier:
@@ -204,7 +206,8 @@ export default function NosotrosClient() {
                   )}
 
                   {/* Gym social media */}
-                  {((aboutInfo.gym_instagram && aboutInfo.gym_instagram.length > 20) || (aboutInfo.gym_facebook && aboutInfo.gym_facebook.length > 20)) && (
+                  {aboutInfo.show_gym_socials !== false &&
+                   ((aboutInfo.gym_instagram && aboutInfo.gym_instagram.length > 20) || (aboutInfo.gym_facebook && aboutInfo.gym_facebook.length > 20)) && (
                     <div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '8px' }}>
                         Redes de Beast Training:

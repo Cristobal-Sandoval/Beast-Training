@@ -86,6 +86,8 @@ export default function useAdminState() {
   const [gymInstagram, setGymInstagram] = useState('');
   const [gymFacebook, setGymFacebook] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('56948925193');
+  const [showCoachSocials, setShowCoachSocials] = useState(true);
+  const [showGymSocials, setShowGymSocials] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newAlumnoName, setNewAlumnoName] = useState('');
@@ -205,6 +207,8 @@ export default function useAdminState() {
         setCoachInstagram(data.coach_instagram || ''); setCoachTiktok(data.coach_tiktok || '');
         setGymInstagram(data.gym_instagram || ''); setGymFacebook(data.gym_facebook || '');
         setWhatsappNumber(data.whatsapp_number || '56948925193');
+        setShowCoachSocials(data.show_coach_socials !== false);
+        setShowGymSocials(data.show_gym_socials !== false);
       }
     } catch (err) { console.warn('Error fetching about info:', err); }
   };
@@ -228,6 +232,8 @@ export default function useAdminState() {
         gym_instagram: gymInstagram,
         gym_facebook: gymFacebook,
         whatsapp_number: whatsappNumber,
+        show_coach_socials: showCoachSocials,
+        show_gym_socials: showGymSocials,
       }).eq('id', 'coach-settings');
 
       if (error) throw error;
@@ -556,7 +562,7 @@ export default function useAdminState() {
     annTitle, annContent, annPriority,
     aboutSubtitle, aboutTitle, aboutBioP1, aboutBioP2, aboutImgUrl, aboutBadgeText,
     aboutSpec1, aboutSpec2, aboutSpec3, aboutSpec4,
-    coachInstagram, coachTiktok, gymInstagram, gymFacebook, whatsappNumber,
+    coachInstagram, coachTiktok, gymInstagram, gymFacebook, whatsappNumber, showCoachSocials, showGymSocials,
     showCreateModal, newAlumnoName, newAlumnoEmail, newAlumnoPhone, newAlumnoAge, newAlumnoPassword,
     plansList, showPlanModal, editingPlan, planName, planCategory, planPrice, planDuration, planDesc, planFeatures, planPopular,
     actionLoading, successMsg,
@@ -576,7 +582,7 @@ export default function useAdminState() {
     setAnnTitle, setAnnContent, setAnnPriority,
     setAboutSubtitle, setAboutTitle, setAboutBioP1, setAboutBioP2, setAboutImgUrl, setAboutBadgeText,
     setAboutSpec1, setAboutSpec2, setAboutSpec3, setAboutSpec4,
-    setCoachInstagram, setCoachTiktok, setGymInstagram, setGymFacebook, setWhatsappNumber,
+    setCoachInstagram, setCoachTiktok, setGymInstagram, setGymFacebook, setWhatsappNumber, setShowCoachSocials, setShowGymSocials,
     setShowCreateModal, setNewAlumnoName, setNewAlumnoEmail, setNewAlumnoPhone, setNewAlumnoAge, setNewAlumnoPassword,
     setPlansList, setShowPlanModal, setEditingPlan, setPlanName, setPlanCategory, setPlanPrice, setPlanDuration, setPlanDesc, setPlanFeatures, setPlanPopular,
     setActionLoading, setSuccessMsg,
