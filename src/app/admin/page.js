@@ -2023,13 +2023,12 @@ export default function AdminDashboard() {
                     </p>
                   </div>
 
-                  <form onSubmit={handleSaveAboutInfo} className={`${styles.adminForm} glass`}>
-                    <div className={styles.formGrid}>
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Subtítulo de la Sección</label>
+                  <form onSubmit={handleSaveAboutInfo} className={`${styles.form} glass`} style={{ padding: '30px', borderRadius: '12px' }}>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label>Subtítulo de la Sección</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutSubtitle}
                           onChange={(e) => setAboutSubtitle(e.target.value)}
                           placeholder="Ej: sobre nosotros, nuestro coach"
@@ -2037,23 +2036,23 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Título Principal</label>
+                      <div className={styles.inputGroup}>
+                        <label>Título Principal</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutTitle}
                           onChange={(e) => setAboutTitle(e.target.value)}
                           placeholder="Ej: Entrenamiento Inteligente, Resultados Reales"
                           required
                         />
                       </div>
+                    </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Texto de Badge en Imagen</label>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label>Texto de Badge en Imagen</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutBadgeText}
                           onChange={(e) => setAboutBadgeText(e.target.value)}
                           placeholder="Ej: Coach Fundador"
@@ -2061,79 +2060,76 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>URL de la Imagen de Perfil</label>
+                      <div className={styles.inputGroup}>
+                        <label>URL de la Imagen de Perfil</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutImgUrl}
                           onChange={(e) => setAboutImgUrl(e.target.value)}
                           placeholder="Ej: /images/coach.png"
                           required
                         />
                       </div>
+                    </div>
 
-                      <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                        <label className={styles.formLabel}>Párrafo de Biografía 1</label>
-                        <textarea
-                          rows={4}
-                          className={styles.formTextarea}
-                          value={aboutBioP1}
-                          onChange={(e) => setAboutBioP1(e.target.value)}
-                          placeholder="Escribe el primer párrafo sobre el coach..."
-                          required
-                        />
-                      </div>
+                    <div className={styles.inputGroup}>
+                      <label>Párrafo de Biografía 1</label>
+                      <textarea
+                        rows={4}
+                        value={aboutBioP1}
+                        onChange={(e) => setAboutBioP1(e.target.value)}
+                        placeholder="Escribe el primer párrafo sobre el coach..."
+                        required
+                      />
+                    </div>
 
-                      <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                        <label className={styles.formLabel}>Párrafo de Biografía 2</label>
-                        <textarea
-                          rows={4}
-                          className={styles.formTextarea}
-                          value={aboutBioP2}
-                          onChange={(e) => setAboutBioP2(e.target.value)}
-                          placeholder="Escribe el segundo párrafo (filosofía de entrenamiento)..."
-                        />
-                      </div>
+                    <div className={styles.inputGroup}>
+                      <label>Párrafo de Biografía 2</label>
+                      <textarea
+                        rows={4}
+                        value={aboutBioP2}
+                        onChange={(e) => setAboutBioP2(e.target.value)}
+                        placeholder="Escribe el segundo párrafo (filosofía de entrenamiento)..."
+                      />
+                    </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Certificación / Especialidad 1</label>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label>Certificación / Especialidad 1</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutSpec1}
                           onChange={(e) => setAboutSpec1(e.target.value)}
                           placeholder="Ej: Certificación CrossFit L-2"
                         />
                       </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Certificación / Especialidad 2</label>
+                      <div className={styles.inputGroup}>
+                        <label>Certificación / Especialidad 2</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutSpec2}
                           onChange={(e) => setAboutSpec2(e.target.value)}
                           placeholder="Ej: Preparación Física & Musculación (IPCH)"
                         />
                       </div>
+                    </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Certificación / Especialidad 3</label>
+                    <div className={styles.formRow}>
+                      <div className={styles.inputGroup}>
+                        <label>Certificación / Especialidad 3</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutSpec3}
                           onChange={(e) => setAboutSpec3(e.target.value)}
                           placeholder="Ej: Especialista en Biomecánica aplicada al Fitness"
                         />
                       </div>
 
-                      <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Certificación / Especialidad 4</label>
+                      <div className={styles.inputGroup}>
+                        <label>Certificación / Especialidad 4</label>
                         <input
                           type="text"
-                          className={styles.formInput}
                           value={aboutSpec4}
                           onChange={(e) => setAboutSpec4(e.target.value)}
                           placeholder="Ej: Asesoría Nutricional Deportiva Avanzada"
@@ -2141,7 +2137,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '20px' }}>
+                    <button type="submit" className={styles.submitBtn} disabled={actionLoading} style={{ marginTop: '10px' }}>
                       {actionLoading ? 'Guardando...' : 'Guardar Cambios'}
                     </button>
                   </form>
