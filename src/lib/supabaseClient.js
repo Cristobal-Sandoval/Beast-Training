@@ -9,7 +9,7 @@ const realSupabase = createClient(supabaseUrl, supabaseAnonKey);
 
 let supabase;
 
-if (isPlaceholderMode && process.env.NODE_ENV === 'development') {
+if (isPlaceholderMode) {
   const MockSupabase = require('./mockSupabase').default;
   supabase = new MockSupabase();
 } else {
