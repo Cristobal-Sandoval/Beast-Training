@@ -9,6 +9,7 @@ import AboutPanel from './components/AboutPanel';
 import BannersPanel from './components/BannersPanel';
 import BlogPanel from './components/BlogPanel';
 import PlansPanel from './components/PlansPanel';
+import IntegrationsPanel from './components/IntegrationsPanel';
 import styles from './admin.module.css';
 
 export default function AdminDashboard() {
@@ -454,6 +455,11 @@ export default function AdminDashboard() {
                   actionLoading={s.actionLoading}
                   handleSaveAboutInfo={s.handleSaveAboutInfo}
                 />
+              )}
+
+              {/* INTEGRATIONS TAB */}
+              {s.activeTab === 'integrations' && (
+                <IntegrationsPanel actionLoading={s.actionLoading} />
               )}
             </main>
           </div>

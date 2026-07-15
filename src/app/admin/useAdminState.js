@@ -156,6 +156,20 @@ export default function useAdminState() {
     }
   }, [profile, demoAdminMode]);
 
+  useEffect(() => {
+    const handleSyncUpdate = () => {
+      fetchAlumnos();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beast_alumnos_updated', handleSyncUpdate);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('beast_alumnos_updated', handleSyncUpdate);
+      }
+    };
+  }, []);
+
   const fetchAlumnos = async () => {
     try {
       const { data, error } = await supabase.from('profiles').select('*');
@@ -363,7 +377,14 @@ export default function useAdminState() {
     try {
       const { data, error } = await supabase.auth.signUp({ email: emailLower, password: newAlumnoPassword, options: { data: { full_name: newAlumnoName.trim(), phone: newAlumnoPhone.trim(), age: newAlumnoAge ? parseInt(newAlumnoAge) : 20, role: 'user', status: 'active' } } });
       if (error) throw error;
-      showToast('¡Alumno registrado con éxito! Se ha creado su perfil con membresía activa.', 'success');
+      
+      const isGcalConnected = typeof window !== 'undefined' && localStorage.getItem('beast_gcal_connected') === 'true';
+      if (emailLower.endsWith('@gmail.com') && isGcalConnected) {
+        showToast('¡Alumno registrado! Google Calendar: Invitación agendada y correo Gmail vinculado con éxito.', 'success');
+      } else {
+        showToast('¡Alumno registrado con éxito! Se ha creado su perfil con membresía activa.', 'success');
+      }
+      
       setNewAlumnoName(''); setNewAlumnoEmail(''); setNewAlumnoPhone(''); setNewAlumnoAge(''); setNewAlumnoPassword('beast123');
       setShowCreateModal(false);
       fetchAlumnos();

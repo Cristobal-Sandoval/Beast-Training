@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, MessageSquare, Image, FileText, Sparkles, Dumbbell, UserCheck } from 'lucide-react';
+import { Users, MessageSquare, Image, FileText, Sparkles, Dumbbell, UserCheck, Calendar } from 'lucide-react';
 import styles from '../admin.module.css';
 
 const tabs = [
@@ -11,6 +11,7 @@ const tabs = [
   { id: 'promos', icon: Sparkles, label: 'Promociones & Cupones' },
   { id: 'plans', icon: Dumbbell, label: 'Planes de Gimnasio' },
   { id: 'about', icon: UserCheck, label: 'Nosotros (Coach)' },
+  { id: 'integrations', icon: Calendar, label: 'Google Calendar' },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, setSuccessMsg }) {
