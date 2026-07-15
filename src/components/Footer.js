@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Dumbbell, MapPin, Mail, Phone, Clock } from 'lucide-react';
+import { Dumbbell, MapPin, Mail, Phone, Clock, Lock } from 'lucide-react';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -27,27 +27,27 @@ export default function Footer() {
           
           {/* Metadata Block: Copyright, Login and Signature */}
           <div className={styles.metaBlock}>
+            <Link href="/login" className={styles.loginBtn}>
+              <Lock size={12} className={styles.btnIcon} />
+              <span>Acceso Staff & Alumnos</span>
+            </Link>
+            
             <p className={styles.copyright}>
               &copy; {new Date().getFullYear()} Beast Training Chile. <br />
               Todos los derechos reservados.
             </p>
-            <div className={styles.metaLinks}>
-              <Link href="/login" className={styles.loginLink}>
-                Acceso Alumnos / Staff
-              </Link>
-              <span className={styles.separator}>•</span>
-              <span className={styles.author}>
-                Hecho por{' '}
-                <a
-                  href="https://cristobalsandoval-portafolio.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.portfolioLink}
-                >
-                  🐈
-                </a>
-              </span>
-            </div>
+            
+            <p className={styles.author}>
+              Hecho por{' '}
+              <a
+                href="https://cristobalsandoval-portafolio.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.portfolioLink}
+              >
+                🐈
+              </a>
+            </p>
           </div>
         </div>
 
