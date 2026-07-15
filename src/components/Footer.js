@@ -64,7 +64,22 @@ export default function Footer() {
       <div className={styles.bottomBar}>
         <div className={styles.bottomContainer}>
           <p>&copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.</p>
-          <p className={styles.developer}>Diseño Premium para Fitness</p>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link href="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }} className={styles.developer}>
+              Acceso Alumnos / Coach
+            </Link>
+            <p className={styles.developer}>
+              Hecho por{' '}
+              <a
+                href="https://cristobalsandoval-portafolio.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.portfolioLink}
+              >
+                🐈
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

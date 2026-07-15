@@ -111,12 +111,7 @@ export default function Navbar() {
                 <LogOut size={18} />
               </button>
             </div>
-          ) : (
-            <Link href="/login" className={styles.loginBtn}>
-              <User size={16} />
-              <span>Ingresar</span>
-            </Link>
-          )}
+          ) : null}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -158,11 +153,7 @@ export default function Navbar() {
                   <LogOut size={16} /> Cerrar Sesión
                 </button>
               </div>
-            ) : (
-              <Link href="/login" className={styles.mobileLoginBtn} onClick={() => setIsMenuOpen(false)}>
-                <User size={16} /> Ingresar
-              </Link>
-            )}
+            ) : null}
           </div>
         </div>
       )}
