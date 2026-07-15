@@ -124,6 +124,13 @@
   color: var(--text-secondary);
 }
 
+.socialsAndAccess {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .metaBlock {
   margin-top: 24px;
   display: flex;

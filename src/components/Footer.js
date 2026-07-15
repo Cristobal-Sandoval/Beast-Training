@@ -15,7 +15,7 @@ export default function Footer() {
           <p className={styles.description}>
             Entrenamiento de fuerza, funcional, HIIT y CrossFit de alto impacto. Saca la bestia que llevas dentro.
           </p>
-          <div className={styles.socials}>
+          <div className={styles.socialsAndAccess}>
             <a href="https://www.instagram.com/btrainingchile/" target="_blank" rel="noopener noreferrer" className={styles.socialLink} aria-label="Instagram">
               <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -23,15 +23,15 @@ export default function Footer() {
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
             </a>
-          </div>
-          
-          {/* Metadata Block: Copyright, Login and Signature */}
-          <div className={styles.metaBlock}>
+            
             <Link href="/login" className={styles.loginBtn}>
               <Lock size={12} className={styles.btnIcon} />
               <span>Acceso Staff & Alumnos</span>
             </Link>
-            
+          </div>
+          
+          {/* Metadata Block: Copyright and Signature */}
+          <div className={styles.metaBlock}>
             <p className={styles.copyright}>
               &copy; {new Date().getFullYear()} Beast Training Chile. <br />
               Todos los derechos reservados.
