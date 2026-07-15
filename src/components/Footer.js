@@ -24,6 +24,31 @@ export default function Footer() {
               </svg>
             </a>
           </div>
+          
+          {/* Metadata Block: Copyright, Login and Signature */}
+          <div className={styles.metaBlock}>
+            <p className={styles.copyright}>
+              &copy; {new Date().getFullYear()} Beast Training Chile. <br />
+              Todos los derechos reservados.
+            </p>
+            <div className={styles.metaLinks}>
+              <Link href="/login" className={styles.loginLink}>
+                Acceso Alumnos / Staff
+              </Link>
+              <span className={styles.separator}>•</span>
+              <span className={styles.author}>
+                Hecho por{' '}
+                <a
+                  href="https://cristobalsandoval-portafolio.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.portfolioLink}
+                >
+                  🐈
+                </a>
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Contact Column */}
@@ -58,28 +83,6 @@ export default function Footer() {
               </div>
             </li>
           </ul>
-        </div>
-      </div>
-
-      <div className={styles.bottomBar}>
-        <div className={styles.bottomContainer}>
-          <p>&copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.</p>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link href="/login" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem' }} className={styles.developer}>
-              Acceso Alumnos / Coach
-            </Link>
-            <p className={styles.developer}>
-              Hecho por{' '}
-              <a
-                href="https://cristobalsandoval-portafolio.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.portfolioLink}
-              >
-                🐈
-              </a>
-            </p>
-          </div>
         </div>
       </div>
     </footer>
