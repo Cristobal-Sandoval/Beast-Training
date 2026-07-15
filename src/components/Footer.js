@@ -33,11 +33,8 @@ export default function Footer() {
           {/* Metadata Block: Copyright and Signature */}
           <div className={styles.metaBlock}>
             <p className={styles.copyright}>
-              &copy; {new Date().getFullYear()} Beast Training Chile. <br />
-              Todos los derechos reservados.
-            </p>
-            
-            <p className={styles.author}>
+              &copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.
+              <span className={styles.separator}> • </span>
               Hecho por{' '}
               <a
                 href="https://cristobalsandoval-portafolio.vercel.app/"
