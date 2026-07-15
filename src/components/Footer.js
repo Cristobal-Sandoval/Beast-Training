@@ -30,8 +30,8 @@ export default function Footer() {
             </Link>
           </div>
           
-          {/* Metadata Block: Copyright and Signature */}
-          <div className={styles.metaBlock}>
+          {/* Metadata Block: Copyright and Signature (Desktop Only) */}
+          <div className={`${styles.metaBlock} ${styles.desktopOnly}`}>
             <p className={styles.copyright}>
               &copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.
               <span className={styles.separator}> • </span>
@@ -81,6 +81,23 @@ export default function Footer() {
             </li>
           </ul>
         </div>
+      </div>
+
+      {/* Metadata Block: Copyright and Signature (Mobile Only) */}
+      <div className={`${styles.metaBlockMobile} ${styles.mobileOnly}`}>
+        <p className={styles.copyrightMobile}>
+          &copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.
+          <span className={styles.separator}> • </span>
+          Hecho por{' '}
+          <a
+            href="https://cristobalsandoval-portafolio.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.portfolioLink}
+          >
+            🐈
+          </a>
+        </p>
       </div>
     </footer>
   );
