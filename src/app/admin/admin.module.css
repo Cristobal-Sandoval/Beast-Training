@@ -95,29 +95,24 @@
   }
 }
 
-/* Sidebar Tab buttons */
-.sidebar {
+/* Sidebar Tab buttons & Mobile Select */
+.mobileTabSelector {
+  display: none;
+}
+
+.sidebarDesktop {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    flex-direction: row;
+  .mobileTabSelector {
+    display: block;
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    position: sticky;
-    top: 62px;
-    z-index: 50;
-    background: var(--background-bg);
-    padding-top: 8px;
-    margin-bottom: -4px;
-    /* hide scrollbar but keep functionality */
-    scrollbar-width: none;
+    margin-bottom: 12px;
   }
-  .sidebar::-webkit-scrollbar {
+  .sidebarDesktop {
     display: none;
   }
 }
@@ -137,16 +132,6 @@
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
-}
-
-@media (max-width: 768px) {
-  .tabBtn {
-    width: auto;
-    white-space: nowrap;
-    padding: 10px 14px;
-    font-size: 0.85rem;
-    gap: 8px;
-  }
 }
 
 .tabBtn:hover {
@@ -1224,6 +1209,35 @@
   background: var(--primary-hover) !important;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(255, 87, 0, 0.35);
+}
+
+.formRowFlex {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.previewContainerCoach {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.previewContainerBanner {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .formRowFlex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .previewContainerCoach,
+  .previewContainerBanner {
+    width: 100%;
+  }
 }
 
 

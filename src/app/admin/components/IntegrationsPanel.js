@@ -8,6 +8,7 @@ export default function IntegrationsPanel({ actionLoading }) {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [gmailAccount, setGmailAccount] = useState('');
+  const [adminGmailInput, setAdminGmailInput] = useState('staff.beasttraining@gmail.com');
   const [autoSync, setAutoSync] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -15,10 +16,11 @@ export default function IntegrationsPanel({ actionLoading }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isConnected = localStorage.getItem('beast_gcal_connected') === 'true';
-      const email = localStorage.getItem('beast_gcal_email') || '';
+      const email = localStorage.getItem('beast_gcal_email') || 'staff.beasttraining@gmail.com';
       const auto = localStorage.getItem('beast_gcal_autosync') !== 'false';
       setConnected(isConnected);
-      setGmailAccount(email);
+      setGmailAccount(isConnected ? email : '');
+      setAdminGmailInput(email);
       setAutoSync(auto);
     }
   }, []);
@@ -35,19 +37,24 @@ export default function IntegrationsPanel({ actionLoading }) {
       return;
     }
 
+    if (!adminGmailInput.trim() || !adminGmailInput.includes('@')) {
+      alert('Por favor ingresa un correo de administrador válido.');
+      return;
+    }
+
     setConnecting(true);
     setLogs([]);
     setTimeout(() => {
       setConnecting(false);
       setConnected(true);
-      const testEmail = 'staff.beasttraining@gmail.com';
-      setGmailAccount(testEmail);
+      const emailToUse = adminGmailInput.trim().toLowerCase();
+      setGmailAccount(emailToUse);
       localStorage.setItem('beast_gcal_connected', 'true');
-      localStorage.setItem('beast_gcal_email', testEmail);
+      localStorage.setItem('beast_gcal_email', emailToUse);
       
       setLogs([
         '🔌 Estableciendo túnel con Google OAuth 2.0...',
-        '✅ Autorización exitosa para staff.beasttraining@gmail.com',
+        `✅ Autorización exitosa para ${emailToUse}`,
         '📅 Importando calendario principal: "Evaluaciones Beast & Clases"',
         '✨ Webhook de sincronización en tiempo real registrado.'
       ]);
@@ -184,11 +191,33 @@ export default function IntegrationsPanel({ actionLoading }) {
                   {connected ? 'Conectado a Google Calendar' : 'Google Calendar Desconectado'}
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                {connected 
-                  ? `Cuenta vinculada: ${gmailAccount}` 
-                  : 'Sincroniza agendas y correos automáticamente con tu calendario de Google.'}
-              </p>
+              {connected ? (
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Cuenta vinculada: <strong>{gmailAccount}</strong>
+                </p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                  <label htmlFor="adminGmailInput" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
+                    Correo Gmail del Administrador (Gimnasio)
+                  </label>
+                  <input
+                    id="adminGmailInput"
+                    type="email"
+                    value={adminGmailInput}
+                    onChange={(e) => setAdminGmailInput(e.target.value)}
+                    placeholder="ejemplo@gmail.com"
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      color: '#fff',
+                      fontSize: '0.85rem',
+                      width: '280px'
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <button

@@ -79,7 +79,7 @@ export default function NosotrosClient() {
                 src={aboutInfo.image_url || '/images/coach.png'}
                 alt="Coach Javier - Beast Training"
                 className={styles.aboutImage}
-                style={{ objectFit: 'cover', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+                style={{ objectFit: 'cover', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, objectPosition: aboutInfo.image_position || 'center' }}
               />
               <div className={styles.aboutImageBadge}>
                 <Sparkles size={16} />

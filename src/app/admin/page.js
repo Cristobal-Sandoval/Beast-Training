@@ -185,7 +185,14 @@ export default function AdminDashboard() {
                       <div className={styles.inputGroup}><label>Opción 2</label><input type="text" placeholder="Ej: Martes 8 de Julio (15:00)" value={s.proposedSlot2} onChange={(e) => s.setProposedSlot2(e.target.value)} /></div>
                       <div className={styles.inputGroup}><label>Opción 3</label><input type="text" placeholder="Ej: Miércoles 9 de Julio (18:00)" value={s.proposedSlot3} onChange={(e) => s.setProposedSlot3(e.target.value)} /></div>
                     </div>
-                    <button type="submit" className={styles.submitBtn} disabled={s.actionLoading}>{s.actionLoading ? 'Guardando...' : 'Guardar y Enviar Propuestas al Alumno'}</button>
+                    <div className={styles.inputGroup} style={{ marginTop: '12px', marginBottom: '16px' }}>
+                      <label htmlFor="invitationEmailMessage">Mensaje del Correo de Invitación (Sincronizado con Google Calendar)</label>
+                      <textarea id="invitationEmailMessage" rows={4} value={s.invitationEmailMessage} onChange={(e) => s.setInvitationEmailMessage(e.target.value)} placeholder="Escribe el cuerpo de la invitación..." style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-light)', borderRadius: '6px', color: '#fff', padding: '10px', fontSize: '0.85rem', width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                        Usa <code>{"{nombre}"}</code> y <code>{"{fechas}"}</code> para insertar dinámicamente el nombre del alumno y los horarios seleccionados arriba.
+                      </p>
+                    </div>
+                    <button type="submit" className={styles.submitBtn} disabled={s.actionLoading}>{s.actionLoading ? 'Guardando...' : 'Guardar y Enviar Correo de Invitación'}</button>
                   </form>
                 </div>
 
@@ -343,6 +350,13 @@ export default function AdminDashboard() {
                               <input id="newAlumnoPassword" type="text" value={s.newAlumnoPassword} onChange={(e) => s.setNewAlumnoPassword(e.target.value)} required />
                             </div>
                           </div>
+                          <div className={styles.inputGroup} style={{ marginTop: '8px', marginBottom: '16px' }}>
+                            <label htmlFor="welcomeEmailMessage">Mensaje Personalizado de Bienvenida (Se enviará por correo)</label>
+                            <textarea id="welcomeEmailMessage" rows={4} value={s.welcomeEmailMessage} onChange={(e) => s.setWelcomeEmailMessage(e.target.value)} placeholder="Escribe el cuerpo del correo de bienvenida..." style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-light)', borderRadius: '6px', color: '#fff', padding: '10px', fontSize: '0.85rem', width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                              Usa <code>{"{nombre}"}</code>, <code>{"{email}"}</code> y <code>{"{clave}"}</code> para insertar dinámicamente los datos del alumno.
+                            </p>
+                          </div>
                           <button type="submit" className={styles.submitBtn} disabled={s.actionLoading}>
                             {s.actionLoading ? 'Registrando...' : 'Registrar Alumno'}
                           </button>
@@ -374,7 +388,9 @@ export default function AdminDashboard() {
                   bannerDesc={s.bannerDesc} setBannerDesc={s.setBannerDesc}
                   bannerTagline={s.bannerTagline} setBannerTagline={s.setBannerTagline}
                   bannerAlign={s.bannerAlign} setBannerAlign={s.setBannerAlign}
+                  bannerTextVerticalAlign={s.bannerTextVerticalAlign} setBannerTextVerticalAlign={s.setBannerTextVerticalAlign}
                   bannerImg={s.bannerImg} setBannerImg={s.setBannerImg}
+                  bannerImgPosition={s.bannerImgPosition} setBannerImgPosition={s.setBannerImgPosition}
                   bannerLink={s.bannerLink} setBannerLink={s.setBannerLink}
                   banners={s.banners} actionLoading={s.actionLoading}
                   handleCreateBanner={s.handleCreateBanner}
@@ -439,6 +455,7 @@ export default function AdminDashboard() {
                   aboutTitle={s.aboutTitle} setAboutTitle={s.setAboutTitle}
                   aboutBadgeText={s.aboutBadgeText} setAboutBadgeText={s.setAboutBadgeText}
                   aboutImgUrl={s.aboutImgUrl} setAboutImgUrl={s.setAboutImgUrl}
+                  aboutImgPosition={s.aboutImgPosition} setAboutImgPosition={s.setAboutImgPosition}
                   aboutBioP1={s.aboutBioP1} setAboutBioP1={s.setAboutBioP1}
                   aboutBioP2={s.aboutBioP2} setAboutBioP2={s.setAboutBioP2}
                   aboutSpec1={s.aboutSpec1} setAboutSpec1={s.setAboutSpec1}

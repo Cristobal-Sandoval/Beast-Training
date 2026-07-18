@@ -67,15 +67,19 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 
 ## Mejoras Recientes (Julio 2026)
 
-### Rendimiento & Estabilidad
-- **Eliminación de MercadoPago:** Se removió por completo la pasarela de pago con tarjeta, reemplazándola por un flujo de contacto directo y contratación vía WhatsApp más ágil y personalizado.
-- **Imágenes Externas Libres:** Se migró el retrato del Coach a una etiqueta `<img>` nativa de HTML, permitiendo el ingreso de URLs de cualquier servidor externo (Imgur, Pinterest, etc.) en el panel admin sin bloqueos ni necesidad de configurar dominios en `next.config.mjs`.
-- **Estructura Modular del Panel Admin:** Se refactorizaron las vistas administrativas hacia subpaneles modulares e independientes (`Sidebar`, `PlansPanel`, `AboutPanel`, `BlogPanel`, etc.) utilizando hooks de React centralizados para un código limpio y de fácil mantenimiento.
+### Personalización de Banners & Coach por Sliders X/Y y Alineación de Texto
+- **Desplazamiento Dinámico de Imágenes (Sliders X/Y)**: Reemplazo de los antiguos selectores de alineación estática por dos barras de rango `0% - 100%` tanto para la foto del coach como para los banners de inicio. Esto permite centrar caras u objetivos visuales libremente sobre marcos fijos.
+- **Alineación Flexible de Texto en Banners**: Integración de selectores de alineación horizontal (izquierda, centro, derecha) y alineación vertical (arriba, centro, abajo) en banners del Hero, controlados por Flexbox.
+- **Vista Previa en Vivo y en Directo**: La vista previa de los banners en el panel administrativo ahora simula un slide real a escala exacta con gradiente, taglines y colocación dinámica del texto.
 
-### Usabilidad & Diseño Responsivo (UX/UI)
-- **Panel Admin Responsivo:** Se rediseñó por completo el Panel de Control Staff con grillas adaptativas fluidas que se ajustan perfectamente a teléfonos móviles, tabletas y computadoras de escritorio.
-- **Alineación Perfecta en Formularios:** Se unificó la altura mínima y alineación flexible inferior de las etiquetas (`label`) de los campos en fila de grilla, previniendo desfases visuales provocados por títulos de varias líneas.
-- **Botón `primaryBtn` Estilizado:** Implementación del estilo institucional Beast (naranja redondeado con sombras tridimensionales y micro-interacciones) en botones principales del administrador.
+### Comunicación Personalizada e Integración de Google Calendar
+- **Mensajes de Correo Editables**: Permite personalizar los cuerpos de correo electrónico en invitaciones de Google Calendar y correos de bienvenida (alumnos nuevos y slots de evaluación propuestos) mediante el uso de comodines dinámicos como `{nombre}`, `{email}`, `{clave}` y `{fechas}`.
+- **Conexión de Cuenta Gmail Editable**: Ahora el administrador puede escribir su propio correo electrónico Gmail en la integración de Google Calendar en lugar de usar un correo estático fijo.
+
+### Optimización y Accesibilidad Móvil
+- **Menú Móvil por Dropdown**: En pantallas móviles de administración (`<= 768px`), las pestañas horizontales de scroll incómodo se consolidan automáticamente en un selector desplegable interactivo.
+- **Diseño Móvil Apilable (`.formRowFlex`)**: Los sliders de posición e inputs de texto de los banners y del coach se apilan verticalmente de forma adaptativa y fluida al abrir el panel desde un smartphone.
+- **Flujos Simplificados**: Los botones de acción principal y campos de texto se ajustaron para clics táctiles cómodos.
 
 ---
 

@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS public.banners (
     description TEXT,
     h3_tagline TEXT,
     text_align TEXT DEFAULT 'center' CHECK (text_align IN ('left', 'center', 'right')) NOT NULL,
+    text_vertical_align TEXT DEFAULT 'center' CHECK (text_vertical_align IN ('top', 'center', 'bottom')) NOT NULL,
     image_url TEXT NOT NULL,
+    image_position TEXT DEFAULT '50% 50%' NOT NULL,
     link_url TEXT,
     active BOOLEAN DEFAULT true NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -199,9 +201,9 @@ INSERT INTO public.plans (name, description, price, duration_months, category, f
 ON CONFLICT DO NOTHING;
 
 -- 13. Seed Initial Banners
-INSERT INTO public.banners (title, description, image_url, link_url, active) VALUES
-('Saca la Bestia que Llevas Dentro', 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '/planes', true),
-('Promoción de Invierno', 'Suscríbete al Plan Trimestral y llévate gratis una sesión de evaluación nutricional personalizada.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '/planes', true)
+INSERT INTO public.banners (title, description, image_url, image_position, text_align, text_vertical_align, link_url, active) VALUES
+('Saca la Bestia que Llevas Dentro', 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '50% 50%', 'left', 'center', '/planes', true),
+('Promoción de Invierno', 'Suscríbete al Plan Trimestral y llévate gratis una sesión de evaluación nutricional personalizada.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '50% 50%', 'center', 'center', '/planes', true)
 ON CONFLICT DO NOTHING;
 
 -- 14. Seed Initial Blog Posts
@@ -264,12 +266,24 @@ CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL
 -- 17. Create About Info Table (for "Nosotros" page)
 CREATE TABLE IF NOT EXISTS public.about_info (
     id TEXT PRIMARY KEY DEFAULT 'coach-settings',
+    subtitle TEXT DEFAULT 'sobre nosotros',
     title TEXT NOT NULL DEFAULT 'Sobre Beast Training',
-    description TEXT NOT NULL DEFAULT '',
-    coach_name TEXT DEFAULT '',
-    coach_bio TEXT DEFAULT '',
-    coach_image TEXT DEFAULT '',
-    history TEXT DEFAULT '',
+    bio_p1 TEXT DEFAULT '',
+    bio_p2 TEXT DEFAULT '',
+    image_url TEXT DEFAULT '/images/coach.png',
+    badge_text TEXT DEFAULT 'Coach Fundador',
+    spec_1 TEXT DEFAULT '',
+    spec_2 TEXT DEFAULT '',
+    spec_3 TEXT DEFAULT '',
+    spec_4 TEXT DEFAULT '',
+    coach_instagram TEXT DEFAULT '',
+    coach_tiktok TEXT DEFAULT '',
+    gym_instagram TEXT DEFAULT '',
+    gym_facebook TEXT DEFAULT '',
+    whatsapp_number TEXT DEFAULT '56948925193',
+    show_coach_socials BOOLEAN DEFAULT true,
+    show_gym_socials BOOLEAN DEFAULT true,
+    image_position TEXT DEFAULT 'center',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -277,8 +291,31 @@ ALTER TABLE public.about_info ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for about_info" ON public.about_info FOR SELECT USING (true);
 CREATE POLICY "Allow admins to manage about_info" ON public.about_info FOR ALL USING (public.is_admin());
 
-INSERT INTO public.about_info (id, title, description, coach_name, coach_bio, history)
-VALUES ('coach-settings', 'Sobre Beast Training', 'Beast Training es un gimnasio de alto rendimiento en Concepción, Chile.', 'Coach Javier', 'Entrenador certificado con más de 10 años de experiencia.', 'Beast Training nació en 2020 con la misión de transformar vidas a través del entrenamiento funcional de alta intensidad.')
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.about_info (
+    id, subtitle, title, bio_p1, bio_p2, image_url, badge_text, 
+    spec_1, spec_2, spec_3, spec_4, 
+    coach_instagram, coach_tiktok, gym_instagram, gym_facebook, 
+    whatsapp_number, show_coach_socials, show_gym_socials, image_position
+) VALUES (
+    'coach-settings', 
+    'sobre nosotros', 
+    'Entrenamiento Inteligente, Resultados Reales', 
+    'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
+    'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
+    '/images/coach.png', 
+    'Coach Fundador',
+    'Certificación CrossFit L-2', 
+    'Preparación Física & Musculación (IPCH)', 
+    'Especialista en Biomecánica aplicada al Fitness', 
+    'Asesoría Nutricional Deportiva Avanzada',
+    'https://instagram.com/', 
+    'https://tiktok.com/', 
+    'https://instagram.com/', 
+    'https://facebook.com/',
+    '56948925193', 
+    true, 
+    true, 
+    'center'
+) ON CONFLICT (id) DO NOTHING;
 
 

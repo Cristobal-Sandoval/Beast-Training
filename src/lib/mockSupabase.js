@@ -326,8 +326,8 @@ export default class MockSupabase {
 
             if (banners.length === 0) {
               banners = [
-                { id: 'b1', title: 'Saca la Bestia que Llevas Dentro', description: 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', h3_tagline: 'beast training concepción', text_align: 'left', image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', link_url: '/planes', active: true },
-                { id: 'b2', title: 'Desafía Tus Límites Diariamente', description: 'Clases de CrossFit, HIIT y planes personalizados orientados a tus objetivos.', h3_tagline: 'beast training concepción', text_align: 'center', image_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop', link_url: '/planes', active: true }
+                { id: 'b1', title: 'Saca la Bestia que Llevas Dentro', description: 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', h3_tagline: 'beast training concepción', text_align: 'left', text_vertical_align: 'center', image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', image_position: '50% 50%', link_url: '/planes', active: true },
+                { id: 'b2', title: 'Desafía Tus Límites Diariamente', description: 'Clases de CrossFit, HIIT y planes personalizados orientados a tus objetivos.', h3_tagline: 'beast training concepción', text_align: 'center', text_vertical_align: 'center', image_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop', image_position: '50% 50%', link_url: '/planes', active: true }
               ];
               localStorage.setItem(storedKey, JSON.stringify(banners));
             }
@@ -685,7 +685,8 @@ export default class MockSupabase {
                 gym_facebook: 'https://facebook.com/',
                 whatsapp_number: '56948925193',
                 show_coach_socials: true,
-                show_gym_socials: true
+                show_gym_socials: true,
+                image_position: '50% 50%'
               };
               localStorage.setItem(storedKey, JSON.stringify(info));
             }

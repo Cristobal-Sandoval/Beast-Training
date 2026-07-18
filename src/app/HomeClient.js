@@ -54,9 +54,13 @@ export default function HomeClient({ initialBanners, initialPosts, fallbackBanne
     <div className={styles.container}>
       <section className={styles.heroSection}>
         {banners.map((banner, index) => (
-          <div key={banner.id} className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`}>
+          <div key={banner.id} className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`} style={{
+            alignItems: banner.text_vertical_align === 'top' ? 'flex-start' : banner.text_vertical_align === 'bottom' ? 'flex-end' : 'center',
+            paddingTop: banner.text_vertical_align === 'top' ? '120px' : '0',
+            paddingBottom: banner.text_vertical_align === 'bottom' ? '80px' : '0'
+          }}>
             {banner.image_url && (
-              <Image src={banner.image_url} alt={banner.title || 'Beast Training'} fill priority={index === 0} sizes="100vw" className={styles.heroBgImage} />
+              <Image src={banner.image_url} alt={banner.title || 'Beast Training'} fill priority={index === 0} sizes="100vw" className={styles.heroBgImage} style={{ objectPosition: banner.image_position || '50% 50%' }} />
             )}
             <div className={styles.heroOverlay} />
             <div className={styles.heroContent} style={{

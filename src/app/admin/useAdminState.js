@@ -44,7 +44,9 @@ export default function useAdminState() {
   const [bannerDesc, setBannerDesc] = useState('');
   const [bannerTagline, setBannerTagline] = useState('beast training concepción');
   const [bannerAlign, setBannerAlign] = useState('center');
+  const [bannerTextVerticalAlign, setBannerTextVerticalAlign] = useState('center');
   const [bannerImg, setBannerImg] = useState('');
+  const [bannerImgPosition, setBannerImgPosition] = useState('50% 50%');
   const [bannerLink, setBannerLink] = useState('');
   const [editingBannerId, setEditingBannerId] = useState(null);
 
@@ -76,6 +78,7 @@ export default function useAdminState() {
   const [aboutBioP1, setAboutBioP1] = useState('');
   const [aboutBioP2, setAboutBioP2] = useState('');
   const [aboutImgUrl, setAboutImgUrl] = useState('');
+  const [aboutImgPosition, setAboutImgPosition] = useState('50% 50%');
   const [aboutBadgeText, setAboutBadgeText] = useState('');
   const [aboutSpec1, setAboutSpec1] = useState('');
   const [aboutSpec2, setAboutSpec2] = useState('');
@@ -95,6 +98,12 @@ export default function useAdminState() {
   const [newAlumnoPhone, setNewAlumnoPhone] = useState('');
   const [newAlumnoAge, setNewAlumnoAge] = useState('');
   const [newAlumnoPassword, setNewAlumnoPassword] = useState('beast123');
+  const [welcomeEmailMessage, setWelcomeEmailMessage] = useState(
+    "¡Hola {nombre}!\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido registrada con éxito.\n\n🔑 Tus credenciales de acceso provisionales:\n• Usuario: {email}\n• Contraseña: {clave}\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña en tu primer inicio de sesión. ¡A entrenar duro!"
+  );
+  const [invitationEmailMessage, setInvitationEmailMessage] = useState(
+    "Hola {nombre},\n\nTe he propuesto los siguientes horarios para tu evaluación física mensual en Beast Training:\n\n{fechas}\n\nPor favor, ingresa al portal de alumnos en la sección de Citas y selecciona el horario que más te acomode para confirmar la fecha. ¡Nos vemos!"
+  );
 
   const [plansList, setPlansList] = useState([]);
   const [showPlanModal, setShowPlanModal] = useState(false);
@@ -216,6 +225,7 @@ export default function useAdminState() {
         setAboutSubtitle(data.subtitle || ''); setAboutTitle(data.title || '');
         setAboutBioP1(data.bio_p1 || ''); setAboutBioP2(data.bio_p2 || '');
         setAboutImgUrl(data.image_url || ''); setAboutBadgeText(data.badge_text || '');
+        setAboutImgPosition(data.image_position || 'center');
         setAboutSpec1(data.spec_1 || ''); setAboutSpec2(data.spec_2 || '');
         setAboutSpec3(data.spec_3 || ''); setAboutSpec4(data.spec_4 || '');
         setCoachInstagram(data.coach_instagram || ''); setCoachTiktok(data.coach_tiktok || '');
@@ -236,6 +246,7 @@ export default function useAdminState() {
         bio_p1: aboutBioP1,
         bio_p2: aboutBioP2,
         image_url: aboutImgUrl,
+        image_position: aboutImgPosition,
         badge_text: aboutBadgeText,
         spec_1: aboutSpec1,
         spec_2: aboutSpec2,
@@ -366,7 +377,12 @@ export default function useAdminState() {
       const updatedAlumno = { ...selectedAlumno, proposed_slots: slotsText || null, next_evaluation_date: null };
       setAlumnos(alumnos.map(a => a.id === selectedAlumno.id ? updatedAlumno : a));
       setSelectedAlumno(updatedAlumno);
-      setSuccessMsg('¡Fechas y horas de evaluación propuestas con éxito al alumno!');
+      
+      const processedMsg = invitationEmailMessage
+        .replace(/{nombre}/g, selectedAlumno.full_name || 'Bestia')
+        .replace(/{fechas}/g, slotsText || 'No especificadas');
+        
+      setSuccessMsg(`¡Fechas propuestas con éxito! Se simuló el envío del correo de invitación a ${selectedAlumno.email}:\n\n"${processedMsg}"`);
     } catch (err) { alert('Error al proponer fechas: ' + err.message); }
     finally { setActionLoading(false); }
   };
@@ -374,18 +390,27 @@ export default function useAdminState() {
   const handleCreateAlumno = async (e) => {
     e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
     const emailLower = newAlumnoEmail.trim().toLowerCase();
+    const studentName = newAlumnoName.trim();
+    const studentPassword = newAlumnoPassword;
     try {
-      const { data, error } = await supabase.auth.signUp({ email: emailLower, password: newAlumnoPassword, options: { data: { full_name: newAlumnoName.trim(), phone: newAlumnoPhone.trim(), age: newAlumnoAge ? parseInt(newAlumnoAge) : 20, role: 'user', status: 'active' } } });
+      const { data, error } = await supabase.auth.signUp({ email: emailLower, password: studentPassword, options: { data: { full_name: studentName, phone: newAlumnoPhone.trim(), age: newAlumnoAge ? parseInt(newAlumnoAge) : 20, role: 'user', status: 'active' } } });
       if (error) throw error;
       
+      const processedMsg = welcomeEmailMessage
+        .replace(/{nombre}/g, studentName || 'Bestia')
+        .replace(/{email}/g, emailLower)
+        .replace(/{clave}/g, studentPassword);
+      
       const isGcalConnected = typeof window !== 'undefined' && localStorage.getItem('beast_gcal_connected') === 'true';
+      const gcalEmail = typeof window !== 'undefined' ? localStorage.getItem('beast_gcal_email') : '';
       if (emailLower.endsWith('@gmail.com') && isGcalConnected) {
-        showToast('¡Alumno registrado! Google Calendar: Invitación agendada y correo Gmail vinculado con éxito.', 'success');
+        showToast(`¡Alumno registrado! Google Calendar (cuenta: ${gcalEmail}): Invitación y correo Gmail enviado con éxito:\n\n"${processedMsg}"`, 'success');
       } else {
-        showToast('¡Alumno registrado con éxito! Se ha creado su perfil con membresía activa.', 'success');
+        showToast(`¡Alumno registrado con éxito! Se simuló el envío del correo de bienvenida a ${emailLower}:\n\n"${processedMsg}"`, 'success');
       }
       
       setNewAlumnoName(''); setNewAlumnoEmail(''); setNewAlumnoPhone(''); setNewAlumnoAge(''); setNewAlumnoPassword('beast123');
+      setWelcomeEmailMessage("¡Hola {nombre}!\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido registrada con éxito.\n\n🔑 Tus credenciales de acceso provisionales:\n• Usuario: {email}\n• Contraseña: {clave}\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña en tu primer inicio de sesión. ¡A entrenar duro!");
       setShowCreateModal(false);
       fetchAlumnos();
     } catch (err) { showToast('Error al crear alumno: ' + err.message, 'error'); }
@@ -462,7 +487,17 @@ export default function useAdminState() {
 
   const handleCreateBanner = async (e) => {
     e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
-    const bannerData = { title: bannerTitle, description: bannerDesc, h3_tagline: bannerTagline, text_align: bannerAlign, image_url: bannerImg || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop', link_url: bannerLink || '/planes', active: true };
+    const bannerData = { 
+      title: bannerTitle, 
+      description: bannerDesc, 
+      h3_tagline: bannerTagline, 
+      text_align: bannerAlign, 
+      text_vertical_align: bannerTextVerticalAlign,
+      image_url: bannerImg || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop', 
+      image_position: bannerImgPosition || '50% 50%', 
+      link_url: bannerLink || '/planes', 
+      active: true 
+    };
     try {
       if (editingBannerId) {
         const { data, error } = await supabase.from('banners').update(bannerData).eq('id', editingBannerId).select();
@@ -475,7 +510,7 @@ export default function useAdminState() {
         if (data) setBanners([data[0], ...banners]);
         setSuccessMsg('¡Banner creado exitosamente!');
       }
-      setBannerTitle(''); setBannerDesc(''); setBannerTagline('beast training concepción'); setBannerAlign('center'); setBannerImg(''); setBannerLink('');
+      setBannerTitle(''); setBannerDesc(''); setBannerTagline('beast training concepción'); setBannerAlign('center'); setBannerTextVerticalAlign('center'); setBannerImg(''); setBannerImgPosition('50% 50%'); setBannerLink('');
     } catch (err) { alert(err.message); }
     finally { setActionLoading(false); }
   };
@@ -483,7 +518,8 @@ export default function useAdminState() {
   const handleEditBannerSelect = (banner) => {
     setEditingBannerId(banner.id); setBannerTitle(banner.title || ''); setBannerDesc(banner.description || '');
     setBannerTagline(banner.h3_tagline || 'beast training concepción'); setBannerAlign(banner.text_align || 'center');
-    setBannerImg(banner.image_url || ''); setBannerLink(banner.link_url || '');
+    setBannerTextVerticalAlign(banner.text_vertical_align || 'center');
+    setBannerImg(banner.image_url || ''); setBannerImgPosition(banner.image_position || '50% 50%'); setBannerLink(banner.link_url || '');
     const formElement = document.getElementById('bannerFormPanel');
     if (formElement) formElement.scrollIntoView({ behavior: 'smooth' });
   };
@@ -575,16 +611,17 @@ export default function useAdminState() {
     logWeight, logBodyFat, logMuscle, logWaist, logChest, logNotes, logDate,
     workoutPlanText, alumnoName, alumnoAge, alumnoPhone, alumnoStatus,
     chatMessages, newDirectMessage,
-    bannerTitle, bannerDesc, bannerTagline, bannerAlign, bannerImg, bannerLink, editingBannerId,
+    bannerTitle, bannerDesc, bannerTagline, bannerAlign, bannerTextVerticalAlign, bannerImg, bannerImgPosition, bannerLink, editingBannerId,
     annBarText, annBarLink, annBarActive, annBarId,
     promoCodes, newPromoCode, newPromoDiscount,
     postTitle, postExcerpt, postContent, postImg, postAuthor,
     proposedSlot1, proposedSlot2, proposedSlot3,
     annTitle, annContent, annPriority,
-    aboutSubtitle, aboutTitle, aboutBioP1, aboutBioP2, aboutImgUrl, aboutBadgeText,
+    aboutSubtitle, aboutTitle, aboutBioP1, aboutBioP2, aboutImgUrl, aboutImgPosition, aboutBadgeText,
     aboutSpec1, aboutSpec2, aboutSpec3, aboutSpec4,
     coachInstagram, coachTiktok, gymInstagram, gymFacebook, whatsappNumber, showCoachSocials, showGymSocials,
     showCreateModal, newAlumnoName, newAlumnoEmail, newAlumnoPhone, newAlumnoAge, newAlumnoPassword,
+    welcomeEmailMessage, invitationEmailMessage,
     plansList, showPlanModal, editingPlan, planName, planCategory, planPrice, planDuration, planDesc, planFeatures, planPopular,
     actionLoading, successMsg,
     filteredAlumnos,
@@ -595,16 +632,17 @@ export default function useAdminState() {
     setLogWeight, setLogBodyFat, setLogMuscle, setLogWaist, setLogChest, setLogNotes, setLogDate,
     setWorkoutPlanText, setAlumnoName, setAlumnoAge, setAlumnoPhone, setAlumnoStatus,
     setChatMessages, setNewDirectMessage,
-    setBannerTitle, setBannerDesc, setBannerTagline, setBannerAlign, setBannerImg, setBannerLink, setEditingBannerId,
+    setBannerTitle, setBannerDesc, setBannerTagline, setBannerAlign, setBannerTextVerticalAlign, setBannerImg, setBannerImgPosition, setBannerLink, setEditingBannerId,
     setAnnBarText, setAnnBarLink, setAnnBarActive, setAnnBarId,
     setPromoCodes, setNewPromoCode, setNewPromoDiscount,
     setPostTitle, setPostExcerpt, setPostContent, setPostImg, setPostAuthor,
     setProposedSlot1, setProposedSlot2, setProposedSlot3,
     setAnnTitle, setAnnContent, setAnnPriority,
-    setAboutSubtitle, setAboutTitle, setAboutBioP1, setAboutBioP2, setAboutImgUrl, setAboutBadgeText,
+    setAboutSubtitle, setAboutTitle, setAboutBioP1, setAboutBioP2, setAboutImgUrl, setAboutImgPosition, setAboutBadgeText,
     setAboutSpec1, setAboutSpec2, setAboutSpec3, setAboutSpec4,
     setCoachInstagram, setCoachTiktok, setGymInstagram, setGymFacebook, setWhatsappNumber, setShowCoachSocials, setShowGymSocials,
     setShowCreateModal, setNewAlumnoName, setNewAlumnoEmail, setNewAlumnoPhone, setNewAlumnoAge, setNewAlumnoPassword,
+    setWelcomeEmailMessage, setInvitationEmailMessage,
     setPlansList, setShowPlanModal, setEditingPlan, setPlanName, setPlanCategory, setPlanPrice, setPlanDuration, setPlanDesc, setPlanFeatures, setPlanPopular,
     setActionLoading, setSuccessMsg,
     // Handlers
