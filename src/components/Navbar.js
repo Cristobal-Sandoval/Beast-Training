@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
@@ -13,6 +13,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const menuRef = useRef(null);
 
   useEffect(() => {
     // Check active session
@@ -39,6 +40,17 @@ export default function Navbar() {
     };
   }, []);
 
+  // UX-06: Cerrar menú mobile con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
+
   const fetchProfile = async (userId) => {
     try {
       const { data, error } = await supabase
@@ -55,9 +67,7 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    if (typeof window !== 'undefined' && !window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-      return;
-    }
+    // UX-07: Sin window.confirm() — logout directo (reversible con login)
     await supabase.auth.signOut();
     setIsMenuOpen(false);
     router.push('/');
@@ -68,9 +78,9 @@ export default function Navbar() {
   return (
     <nav className={styles.nav}>
       <div className={styles.container}>
-        {/* Logo */}
-        <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
-          <Dumbbell className={styles.logoIcon} />
+        {/* Logo — UX-11: aria-label + aria-hidden en icono */}
+        <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)} aria-label="Beast Training — Ir al inicio">
+          <Dumbbell className={styles.logoIcon} aria-hidden="true" />
           <span>BEAST<span className={styles.accent}>TRAINING</span></span>
         </Link>
 
@@ -107,11 +117,17 @@ export default function Navbar() {
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>{profile?.full_name || user.email}</span>
-              <button type="button" onClick={handleLogout} className={styles.logoutBtn} title="Cerrar Sesión">
-                <LogOut size={18} />
+              {/* UX-04: aria-label accesible en botón logout */}
+              <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Cerrar sesión">
+                <LogOut size={18} aria-hidden="true" />
               </button>
             </div>
-          ) : null}
+          ) : (
+            // UX-01: Botón de login para usuarios no autenticados
+            <Link href="/login" className={styles.loginNavBtn}>
+              Iniciar Sesión
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -149,11 +165,15 @@ export default function Navbar() {
             {user ? (
               <div className={styles.mobileUserInfo}>
                 <span className={styles.mobileUserName}>{profile?.full_name || user.email}</span>
-                <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn}>
-                  <LogOut size={16} /> Cerrar Sesión
+                <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn} aria-label="Cerrar sesión">
+                  <LogOut size={16} aria-hidden="true" /> Cerrar Sesión
                 </button>
               </div>
-            ) : null}
+            ) : (
+              <Link href="/login" className={styles.mobileLoginBtn} onClick={() => setIsMenuOpen(false)}>
+                Iniciar Sesión
+              </Link>
+            )}
           </div>
         </div>
       )}

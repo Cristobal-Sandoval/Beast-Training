@@ -61,9 +61,18 @@ function DashboardContent() {
         setUser(session.user);
         fetchData(session.user.id);
         
-        // Load dismissed announcements
-        const dismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
-        setDismissedAnnouncements(dismissed);
+        // Load dismissed announcements with UX-10: filter expired (30 day expiry)
+        const rawDismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const validDismissed = rawDismissed.filter(item => {
+          // Support both old format (plain id string) and new format ({id, timestamp})
+          if (typeof item === 'object' && item.timestamp) {
+            return item.timestamp > thirtyDaysAgo;
+          }
+          return true; // Keep old-format items for backwards compat
+        });
+        setDismissedAnnouncements(validDismissed.map(item => typeof item === 'object' ? item.id : item));
+        localStorage.setItem('beast_dismissed_announcements', JSON.stringify(validDismissed));
       }
     });
 
@@ -140,11 +149,13 @@ function DashboardContent() {
       const adminId = adminProfiles?.[0]?.id || 'admin-uuid-123';
       setAdminUserId(adminId);
 
-      // 6. Fetch Direct Messages
+      // 6. Fetch Direct Messages — SEC-02: Filtrar en la query SQL, no en el cliente
       const { data: dmData } = await supabase
         .from('direct_messages')
-        .select('*');
+        .select('*')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       if (dmData) {
+        // Filter additional to admin conversation only
         const filtered = dmData.filter(m => 
           (m.sender_id === userId && m.receiver_id === adminId) ||
           (m.sender_id === adminId && m.receiver_id === userId)
@@ -192,8 +203,10 @@ function DashboardContent() {
   };
 
   const handleDismissAnnouncement = (annId) => {
-    const updated = [...dismissedAnnouncements, annId];
-    setDismissedAnnouncements(updated);
+    // UX-10: Guardar con timestamp de expiración (30 días)
+    const rawDismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
+    const updated = [...rawDismissed, { id: annId, timestamp: Date.now() }];
+    setDismissedAnnouncements(prev => [...prev, annId]);
     localStorage.setItem('beast_dismissed_announcements', JSON.stringify(updated));
   };
 
@@ -203,8 +216,13 @@ function DashboardContent() {
       showToast('Las contraseñas nuevas no coinciden.', 'error');
       return;
     }
-    if (newPassword.length < 6) {
-      showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+    // SEC-06: Mínimo 8 caracteres + requiere al menos una mayúscula y un número
+    if (newPassword.length < 8) {
+      showToast('La nueva contraseña debe tener al menos 8 caracteres.', 'error');
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      showToast('La contraseña debe incluir al menos una mayúscula y un número.', 'error');
       return;
     }
     setPasswordChangeLoading(true);
@@ -304,7 +322,9 @@ function DashboardContent() {
     return (
       <div className={styles.chartWrapper}>
         <div className={styles.chartTitle}>{label}</div>
-        <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgElement}>
+        {/* PERF-05: role=img y title para accesibilidad de lectores de pantalla */}
+        <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgElement} role="img" aria-label={label}>
+          <title>{label}</title>
           <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="rgba(255,255,255,0.05)" />
           <line x1={padding} y1={height / 2} x2={width - padding} y2={height / 2} stroke="rgba(255,255,255,0.05)" />
           <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(255,255,255,0.1)" />
@@ -536,7 +556,7 @@ function DashboardContent() {
             </div>
 
             <button type="button"
-              onClick={() => window.open(`https://wa.me/56948925193?text=Hola%20Coach!%20Tengo%20mi%20cuenta%20inactiva%20en%20el%20sistema%20(${profile?.email || user?.email}).%20%C2%BFMe%20podr%C3%ADas%20ayudar%20a%20activar%20mi%20membres%C3%ADa?`, '_blank')}
+              onClick={() => window.open(`https://wa.me/56948925193?text=${encodeURIComponent(`Hola Coach! Tengo mi cuenta inactiva en el sistema (${profile?.email || user?.email}). ¿Me podrías ayudar a activar mi membresía?`)}`, '_blank')}
               style={{
                 background: '#25D366',
                 color: '#ffffff',
@@ -742,15 +762,17 @@ function DashboardContent() {
           <div className={`${styles.cardPanel} glass`}>
             <h2>Historial de Evaluaciones</h2>
             <div className={styles.tableWrapper}>
+              {/* UX-02: scope="col" y caption para accesibilidad de lectores de pantalla */}
               <table className={styles.table}>
+                <caption className="sr-only">Historial de evaluaciones físicas del alumno</caption>
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Peso</th>
-                    <th>Grasa</th>
-                    <th>Masa Muscular</th>
-                    <th>Cintura</th>
-                    <th>Pecho</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Peso</th>
+                    <th scope="col">Grasa</th>
+                    <th scope="col">Masa Muscular</th>
+                    <th scope="col">Cintura</th>
+                    <th scope="col">Pecho</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -809,26 +831,34 @@ function DashboardContent() {
             </div>
 
             <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
-              <textarea
-                value={newDirectMessage}
-                onChange={(e) => setNewDirectMessage(e.target.value)}
-                placeholder="Escribe un mensaje para el Coach..."
-                rows={3}
-                required
-                style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-light)',
-                  color: 'var(--text-primary)',
-                  padding: '12px',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  width: '100%',
-                  fontFamily: 'inherit',
-                  lineHeight: '1.5',
-                  resize: 'none'
-                }}
-              />
+              {/* UX-05: maxLength + contador de caracteres */}
+              <div style={{ position: 'relative' }}>
+                <textarea
+                  value={newDirectMessage}
+                  onChange={(e) => setNewDirectMessage(e.target.value)}
+                  placeholder="Escribe un mensaje para el Coach..."
+                  rows={3}
+                  required
+                  maxLength={500}
+                  aria-label="Mensaje para el Coach"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid var(--border-light)',
+                    color: 'var(--text-primary)',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    width: '100%',
+                    fontFamily: 'inherit',
+                    lineHeight: '1.5',
+                    resize: 'none'
+                  }}
+                />
+                <span style={{ position: 'absolute', bottom: '8px', right: '10px', fontSize: '0.75rem', color: newDirectMessage.length > 450 ? 'var(--error)' : 'var(--text-muted)' }}>
+                  {newDirectMessage.length}/500
+                </span>
+              </div>
               <button type="submit" disabled={submittingChat} className={styles.apptBtn} style={{ marginTop: '10px' }}>
                 {submittingChat ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
@@ -917,19 +947,26 @@ function DashboardContent() {
 
       {/* Modal: Cambiar Contraseña */}
       {showPasswordModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1100,
-          padding: '20px'
-        }}>
+        // UX-03: role=dialog, aria-modal, aria-labelledby para accesibilidad
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="password-modal-title"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1100,
+            padding: '20px'
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPasswordModal(false); }}
+        >
           <div className={`${styles.cardPanel} glass`} style={{
             maxWidth: '450px',
             width: '100%',
@@ -940,11 +977,11 @@ function DashboardContent() {
             marginBottom: 0
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
-              <h2 style={{ fontSize: '1.3rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Actualizar Contraseña</h2>
+              <h2 id="password-modal-title" style={{ fontSize: '1.3rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Actualizar Contraseña</h2>
               <button type="button" 
                 onClick={() => setShowPasswordModal(false)}
                 style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
-                type="button"
+                aria-label="Cerrar modal de cambio de contraseña"
               >
                 ✕
               </button>
@@ -957,7 +994,7 @@ function DashboardContent() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres, 1 mayúscula y 1 número"
                   required
                   style={{
                     width: '100%',

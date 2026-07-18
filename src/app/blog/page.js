@@ -10,11 +10,13 @@ export const metadata = {
     siteName: "Beast Training",
     locale: "es_CL",
     type: "website",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Blog Beast Training" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Blog de Fitness | Beast Training",
     description: "Tips de entrenamiento, nutrición y recuperación muscular.",
+    images: ["/og-image.jpg"], // SEO-05: Añadido campo images obligatorio para summary_large_image
   },
   alternates: {
     canonical: "https://beasttraining.cl/blog",

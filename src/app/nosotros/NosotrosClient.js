@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { ArrowRight, Sparkles, Award } from 'lucide-react';
+import Image from 'next/image';
 import styles from './nosotros.module.css';
 
 export default function NosotrosClient() {
@@ -21,6 +22,7 @@ export default function NosotrosClient() {
   });
 
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     fetchAboutInfo();
@@ -42,10 +44,12 @@ export default function NosotrosClient() {
     }
   };
 
-  // Scroll reveal animation observer
+  // PERF-04: IntersectionObserver con scope al contenedor + observer.disconnect() en cleanup
   useEffect(() => {
     if (loading) return;
-    const revealElements = document.querySelectorAll('.reveal');
+    const container = containerRef.current;
+    if (!container) return;
+    const revealElements = container.querySelectorAll('.reveal');
     
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -61,12 +65,12 @@ export default function NosotrosClient() {
     revealElements.forEach((el) => observer.observe(el));
 
     return () => {
-      revealElements.forEach((el) => observer.unobserve(el));
+      observer.disconnect();
     };
   }, [loading]);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} ref={containerRef}>
       {/* Background Decor */}
       <div className={styles.glowBg} />
 
@@ -74,15 +78,18 @@ export default function NosotrosClient() {
         <div className={styles.aboutContainer} style={{ marginTop: '20px' }}>
           <div className={styles.aboutImageCol}>
             <div className={styles.aboutImageWrapper}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {/* PERF-01: Reemplazado img nativo por next/image con unoptimized para URLs externas */}
+              <Image
                 src={aboutInfo.image_url || '/images/coach.png'}
                 alt="Coach Javier - Beast Training"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className={styles.aboutImage}
-                style={{ objectFit: 'cover', width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, objectPosition: aboutInfo.image_position || 'center' }}
+                style={{ objectFit: 'cover', objectPosition: aboutInfo.image_position || 'center' }}
+                unoptimized={!!(aboutInfo.image_url && (aboutInfo.image_url.startsWith('http') && !aboutInfo.image_url.includes('supabase')))}
               />
               <div className={styles.aboutImageBadge}>
-                <Sparkles size={16} />
+                <Sparkles size={16} aria-hidden="true" />
                 <span>{aboutInfo.badge_text || 'Coach Fundador'}</span>
               </div>
             </div>
@@ -90,7 +97,8 @@ export default function NosotrosClient() {
 
           <div className={styles.aboutTextCol}>
             <span className={styles.subtitle}>{aboutInfo.subtitle || 'sobre nosotros'}</span>
-            <h2>{aboutInfo.title || 'Entrenamiento Inteligente, Resultados Reales'}</h2>
+            {/* UX-08: h1 en lugar de h2 — cada página debe tener exactamente un H1 */}
+            <h1 className={styles.aboutTitle}>{aboutInfo.title || 'Entrenamiento Inteligente, Resultados Reales'}</h1>
             <div className={styles.aboutDivider}></div>
             <p className={styles.aboutBio}>
               {aboutInfo.bio_p1}

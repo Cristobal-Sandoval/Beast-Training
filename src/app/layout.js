@@ -11,12 +11,14 @@ const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
+  display: "swap",
 });
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -26,7 +28,13 @@ export const metadata = {
     template: "%s | Beast Training"
   },
   description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento. Saca la bestia que llevas dentro.",
-  keywords: ["gym", "gimnasio", "concepcion", "chile", "funcional", "hiit", "crossfit", "fuerza", "beast training"],
+  keywords: [
+    "gym", "gimnasio", "concepción", "concepcion", "chile",
+    "funcional", "hiit", "crossfit", "fuerza", "beast training",
+    "gimnasio concepción", "gimnasio biobío", "entrenamiento funcional concepción",
+    "musculación concepción", "crossfit concepción", "entrenamiento personal concepción",
+    "fitness concepción", "gym concepción chile"
+  ],
   icons: {
     icon: '/favicon.ico',
   },
@@ -45,10 +53,10 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Beast Training Gym",
+        alt: "Beast Training — Gimnasio de Alto Rendimiento en Concepción",
       }
     ]
   },
@@ -56,7 +64,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
     description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, seguimiento digital y el mejor ambiente de entrenamiento.",
-    images: ["https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop"],
+    images: ["/og-image.jpg"],
   },
 };
 
@@ -70,7 +78,7 @@ export default function RootLayout({ children }) {
     "@type": "SportsActivityLocation",
     "@id": "https://beasttraining.cl/#gym",
     "name": "Beast Training",
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop",
+    "image": "https://beasttraining.cl/og-image.jpg",
     "description": "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados y seguimiento digital.",
     "address": {
       "@type": "PostalAddress",
@@ -86,7 +94,7 @@ export default function RootLayout({ children }) {
       "longitude": -73.048998
     },
     "url": "https://beasttraining.cl",
-    "telephone": "+56912345678",
+    "telephone": "+56948925193",
     "email": "btrainingchile@gmail.com",
     "openingHoursSpecification": [
       {

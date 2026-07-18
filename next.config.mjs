@@ -1,7 +1,12 @@
 /** @type {import('next').NextConfig} */
+
+// SEC-05: CSP más estricto. 'unsafe-eval' solo en desarrollo (requerido por Webpack HMR).
+// 'unsafe-inline' se mantiene temporalmente para el JSON-LD del layout.js.
+const isDev = process.env.NODE_ENV === 'development';
+
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co;
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://*.supabase.co;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob: https://images.unsplash.com https://logospng.org https://media.istockphoto.com https://*.supabase.co;

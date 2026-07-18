@@ -138,6 +138,28 @@
   transform: translateY(-1px);
 }
 
+/* UX-01: Botón de Iniciar Sesión en navbar (desktop) */
+.loginNavBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-primary);
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.loginNavBtn:hover {
+  background: var(--primary-glow);
+  border-color: var(--primary);
+  color: var(--text-primary);
+}
+
+
 .userInfo {
   display: flex;
   align-items: center;
