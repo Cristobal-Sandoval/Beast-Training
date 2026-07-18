@@ -7,8 +7,10 @@ export const isPlaceholderMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || supaba
 
 const realSupabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// SEC-03: Reemplazado require() (CommonJS) por import estático ESM.
-// MockSupabase se importa siempre pero solo se instancia en modo placeholder.
+// PERF-10: MockSupabase se importa estáticamente pero solo se instancia en modo placeholder.
+// En producción con Supabase real configurado, isPlaceholderMode = false y el mock no se usa.
+// Para excluir mockSupabase del bundle de producción, se requiere un refactoring más profundo
+// (separar en entry points o usar next/dynamic). Actualmente es aceptable para el tamaño del proyecto.
 import MockSupabaseClass from './mockSupabase';
 
 const supabase = isPlaceholderMode ? new MockSupabaseClass() : realSupabase;

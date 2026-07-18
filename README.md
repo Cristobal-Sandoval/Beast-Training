@@ -83,33 +83,75 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 
 ---
 
+## Auditoría UX/UI, SEO, Performance & Accessibility (Julio 2026)
+
+### SEO
+- **OG Images absolutas** (`layout.js`, `planes/page.js`, `blog/page.js`, `nosotros/page.js`): Corregidas URLs relativas a absolutas (`https://beasttraining.cl/og-image.jpg`) para que redes sociales y crawlers rendericen correctamente las imágenes de previsualización.
+- **robots.txt dinámico** (`src/app/robots.js`): Bloquea `/admin`, `/dashboard` y `/login` de indexación por motores de búsqueda.
+- **`dateModified` del blog** (`BlogDetailClient.js`): Ahora usa `post.updated_at || post.published_at` en lugar de solo `published_at`.
+
+### Accessibility (a11y)
+- **Navbar**: `aria-label`, `aria-expanded`, `aria-controls`, `role="dialog"` en toggle del menú móvil + focus trap completo (Tab cycling, Escape para cerrar, foco retorna al botón toggle).
+- **Modal de contraseña**: `role="dialog"`, `aria-modal="true"`, `aria-labelledby`.
+- **Tabla de evaluaciones**: `scope="col"` y `<caption>` para lectores de pantalla.
+- **Selector de slots de cita**: `<label>` semántico con `<input type="radio">` enlazado.
+
+### Performance
+- **Skeleton loading** (`blog/loading.js` + `blog/loading.module.css`): Estado de carga con placeholders animados mientras se resuelve el fetch del blog.
+- **TopAnnouncementBar refactorizado** (`AnnouncementBar.module.css`): Eliminación de inyección inline de `<style>` en el DOM, movido a CSS Modules. Removida la lógica de caché por visita (era innecesaria, Supabase ya cachea).
+
+### UX
+- **Custom ConfirmDialog** (`ConfirmDialog.js`): Reemplaza todos los `window.confirm()` del admin panel con un modal accesible que soporta `aria-label`, foco trap y promise-based API (`await confirmDialog()`).
+- **useAdminState refactorizado**: Decomposición de 657 líneas / 65+ `useState` en 8 hooks especializados bajo `src/app/admin/hooks/` (`useAuthState`, `useAlumnosState`, `useBannersState`, `useAnnouncementsState`, `usePromosState`, `usePlansState`, `useBlogState`, `useAboutState`). Hook compuesto reduce a ~106 líneas manteniendo la misma interfaz.
+- **DashboardClient refactorizado**: Extracción de 3 sub-componentes (`PasswordAlertBanner`, `InactiveMemberCard`, `PasswordModal`) y migración de ~50 líneas de estilos inline a CSS Modules. Reducción de ~22% en tamaño del archivo principal (1087 → ~850 líneas).
+
+---
+
 ## Estructura del Proyecto
 
 ```
 src/
 ├── app/
 │   ├── page.js                    # Landing page
+│   ├── robots.js                  # SEO: bloquea indexación de rutas privadas
 │   ├── sitemap.js                 # Sitemap dinámico (blog + estáticas)
 │   ├── layout.js                  # Layout raíz
 │   ├── globals.css                # Variables, utilidades, prefers-reduced-motion
-│   ├── blog/                      # Blog list + [slug]/ detail
+│   ├── blog/                      # Blog list + [slug]/ detail + loading skeleton
 │   ├── planes/                    # Planes con contacto de contratación
 │   ├── dashboard/                 # Dashboard alumno
-│   ├── admin/                     # Panel admin modular (Dashboard, componentes y estado)
+│   │   ├── DashboardClient.js     # Componente principal del dashboard
+│   │   ├── dashboard.module.css   # Estilos del dashboard
+│   │   └── components/            # Sub-componentes extraídos
+│   │       ├── PasswordAlertBanner.js
+│   │       ├── InactiveMemberCard.js
+│   │       └── PasswordModal.js
+│   ├── admin/                     # Panel admin modular
 │   │   ├── components/            # Subpaneles del administrador (PlansPanel, AboutPanel, etc.)
-│   │   └── useAdminState.js       # Hook centralizado de estados del panel
+│   │   ├── hooks/                 # Hooks de estado especializados
+│   │   │   ├── useAuthState.js
+│   │   │   ├── useAlumnosState.js
+│   │   │   ├── useBannersState.js
+│   │   │   ├── useAnnouncementsState.js
+│   │   │   ├── usePromosState.js
+│   │   │   ├── usePlansState.js
+│   │   │   ├── useBlogState.js
+│   │   │   └── useAboutState.js
+│   │   └── useAdminState.js       # Hook compuesto que orquesta los hooks
 │   ├── login/                     # Login
 │   ├── registro/                  # Registro
 │   └── api/                       # Endpoints backend
 ├── components/
-│   ├── Navbar.js                  # Nav responsiva con auth state
+│   ├── Navbar.js                  # Nav responsiva con auth state + focus trap
 │   ├── Footer.js                  # Footer con datos de contacto actualizados
 │   ├── WhatsAppButton.js          # Botón flotante WhatsApp dinámico
 │   ├── ScrollToTop.js            # Botón scroll to top
-│   ├── TopAnnouncementBar.js     # Cintillo de anuncio
+│   ├── TopAnnouncementBar.js     # Cintillo de anuncio (CSS Modules)
+│   ├── AnnouncementBar.module.css # Estilos del cintillo
+│   ├── ConfirmDialog.js           # Modal accesible de confirmación
 │   └── ToastProvider.js          # Sistema de notificaciones
 └── lib/
-    ├── supabaseClient.js          # Cliente Supabase
+    ├── supabaseClient.js          # Cliente Supabase (con mock offline)
     ├── mockSupabase.js            # Mock offline para desarrollo (localStorage)
     └── toast.js                   # Pub/sub de notificaciones
 ```

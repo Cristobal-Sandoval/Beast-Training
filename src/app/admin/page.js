@@ -10,6 +10,7 @@ import BannersPanel from './components/BannersPanel';
 import BlogPanel from './components/BlogPanel';
 import PlansPanel from './components/PlansPanel';
 import IntegrationsPanel from './components/IntegrationsPanel';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import styles from './admin.module.css';
 
 export default function AdminDashboard() {
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.wrapper}>
+      <ConfirmDialog />
       <div className={styles.container}>
         <div className={styles.adminIndicatorBar}>
           <div className={styles.indicatorLeft}>

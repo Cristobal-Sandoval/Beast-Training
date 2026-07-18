@@ -10,13 +10,13 @@ export const metadata = {
     siteName: "Beast Training",
     locale: "es_CL",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Coach Javier - Beast Training Concepci\u00f3n" }],
+    images: [{ url: "https://beasttraining.cl/og-image.jpg", width: 1200, height: 630, alt: "Coach Javier - Beast Training Concepci\u00f3n" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sobre Nosotros | Beast Training",
     description: "Conoce al equipo de Beast Training Concepci\u00f3n. Entrenamiento personalizado y de alto rendimiento.",
-    images: ["/og-image.jpg"],
+    images: ["https://beasttraining.cl/og-image.jpg"],
   },
   alternates: {
     canonical: "https://beasttraining.cl/nosotros",

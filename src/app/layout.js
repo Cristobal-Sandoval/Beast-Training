@@ -53,7 +53,7 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://beasttraining.cl/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Beast Training — Gimnasio de Alto Rendimiento en Concepción",
@@ -64,7 +64,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
     description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, seguimiento digital y el mejor ambiente de entrenamiento.",
-    images: ["/og-image.jpg"],
+    images: ["https://beasttraining.cl/og-image.jpg"],
   },
 };
 

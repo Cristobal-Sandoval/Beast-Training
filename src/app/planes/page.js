@@ -10,13 +10,13 @@ export const metadata = {
     siteName: "Beast Training",
     locale: "es_CL",
     type: "website",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Planes Beast Training" }],
+    images: [{ url: "https://beasttraining.cl/og-image.jpg", width: 1200, height: 630, alt: "Planes Beast Training" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Planes y Precios | Beast Training",
     description: "Planes de entrenamiento personalizados en Concepción. Contrata vía WhatsApp.",
-    images: ["/og-image.jpg"],
+    images: ["https://beasttraining.cl/og-image.jpg"],
   },
   alternates: {
     canonical: "https://beasttraining.cl/planes",
