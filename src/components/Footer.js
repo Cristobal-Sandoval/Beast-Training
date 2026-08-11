@@ -91,13 +91,11 @@ export default function Footer() {
           <div className={styles.mapWrapper}>
             <iframe
               title="Ubicación Beast Training Concepción"
-              src="https://www.google.com/maps?q=Libertador+Bernardo+O%27Higgins+940,+Concepcion,+Chile&output=embed"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.0565%2C-36.8295%2C-73.0505%2C-36.8245&amp;layer=mapnik&amp;marker=-36.8270%2C-73.0535"
               width="100%"
               height="130"
               style={{ border: 0, borderRadius: '10px' }}
-              allowFullScreen=""
               loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
               className={styles.mapIframe}
             />
             <a
