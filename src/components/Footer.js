@@ -88,26 +88,27 @@ export default function Footer() {
         {/* Location / Google Maps Column */}
         <div className={styles.linksCol}>
           <h3 className={styles.heading}>Ubicación</h3>
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Libertador+Bernardo+O'Higgins+940,+Concepcion,+Chile"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.mapCard}
-            aria-label="Ver ubicación de Beast Training en Google Maps"
-          >
-            <div className={styles.mapCardBg} />
-            <div className={styles.mapPinContainer}>
-              <div className={styles.mapPinPulse} />
-              <MapPin size={26} className={styles.mapPinIcon} />
-            </div>
-            <div className={styles.mapCardInfo}>
-              <span className={styles.mapCardTitle}>Beast Training Concepción</span>
-              <span className={styles.mapCardAddress}>O'Higgins 940, Piso 4, Of. 404</span>
-            </div>
-            <div className={styles.mapCardBadge}>
-              <span>Ver en Google Maps &rarr;</span>
-            </div>
-          </a>
+          <div className={styles.mapContainer}>
+            <iframe
+              title="Beast Training - Libertador Bernardo O'Higgins 940, Concepción"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.3764834289895!2d-73.05350862343292!3d-36.82701467223945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9626e4fb2d711a91%3A0xa64b38d38096f9a0!2sLibertador%20Gral.%20Bernardo%20O'Higgins%20940%2C%204030000%20Concepci%C3%B3n%2C%20B%C3%ADo%20B%C3%ADo!5e0!3m2!1ses!2scl!4v1710000000000!5m2!1ses!2scl"
+              width="100%"
+              height="220"
+              style={{ border: 0, borderRadius: '14px' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className={styles.mapIframe}
+            />
+            <a
+              href="https://maps.google.com/?q=Libertador+Bernardo+O'Higgins+940,+Concepci%C3%B3n"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.mapLink}
+            >
+              Ver en Google Maps &rarr;
+            </a>
+          </div>
         </div>
       </div>
 
