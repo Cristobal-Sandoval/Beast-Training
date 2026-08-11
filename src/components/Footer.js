@@ -57,7 +57,7 @@ export default function Footer() {
           <ul className={styles.list}>
             <li className={styles.item}>
               <MapPin size={18} className={styles.icon} />
-              <span>Libertador Bernardo O'Higgins 940, Concepción</span>
+              <span>Libertador Bernardo O'Higgins 940, Piso 4, Oficina 404, Concepción</span>
             </li>
             <li className={styles.item}>
               <Phone size={18} className={styles.icon} />
@@ -83,6 +83,32 @@ export default function Footer() {
               </div>
             </li>
           </ul>
+        </div>
+
+        {/* Location / Google Maps Column */}
+        <div className={styles.linksCol}>
+          <h3 className={styles.heading}>Ubicación</h3>
+          <div className={styles.mapWrapper}>
+            <iframe
+              title="Ubicación Beast Training Concepción"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.3764834289895!2d-73.053500!3d-36.827000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9626e4fb2d711a91%3A0xa64b38d38096f9a0!2sLibertador%20Gral.%20Bernardo%20O'Higgins%20940%2C%20Concepci%C3%B3n%2C%20B%C3%ADob%C3%ADo!5e0!3m2!1ses!2scl!4v1700000000000!5m2!1ses!2scl"
+              width="100%"
+              height="130"
+              style={{ border: 0, borderRadius: '10px' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className={styles.mapIframe}
+            />
+            <a
+              href="https://maps.google.com/?q=Libertador+Bernardo+O'Higgins+940,+Concepci%C3%B3n"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.mapLink}
+            >
+              Ver en Google Maps &rarr;
+            </a>
+          </div>
         </div>
       </div>
 
