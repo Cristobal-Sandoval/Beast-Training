@@ -423,7 +423,7 @@ function DashboardContent() {
       <section className={styles.dashboardHeader}>
         <div>
           <h1 className={styles.welcomeTitle}>
-            Panel de <span className={styles.accent}>{profile?.full_name || user?.email || 'Bestia'}</span>
+            Panel de <span className={styles.accent}>{user?.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : profile?.full_name || user?.email || 'Bestia'}</span>
           </h1>
           <p className={styles.welcomeSubtitle}>
             Tus datos físicos están controlados únicamente por tus preparadores.

@@ -136,7 +136,9 @@ export default function Navbar() {
         <div className={styles.authContainer}>
           {user ? (
             <div className={styles.userInfo}>
-              <span className={styles.userName}>{profile?.full_name || user.email}</span>
+              <span className={styles.userName}>
+                {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : profile?.full_name || user.email}
+              </span>
               <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Cerrar sesión">
                 <LogOut size={18} aria-hidden="true" />
               </button>

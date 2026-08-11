@@ -43,15 +43,15 @@ export default function AdminDashboard() {
         <div className={styles.adminIndicatorBar}>
           <div className={styles.indicatorLeft}>
             <ShieldCheck size={20} className={styles.successIcon} />
-            <span>{s.demoAdminMode ? 'Modo de simulación de administrador activo (local)' : 'Conectado como Administrador de Beast Training'}</span>
+            <span>{s.demoAdminMode ? 'Modo de simulación de administrador activo (local)' : 'Conectado como Pelu (Administrador de Beast Training)'}</span>
           </div>
           {s.demoAdminMode && <button type="button" onClick={() => s.setDemoAdminMode(false)} className={styles.exitDemoBtn}>Salir del Demo</button>}
         </div>
 
         <section className={styles.header}>
           <div>
-            <h1>Panel de Control Staff</h1>
-            <p>Monitorea alumnos, edita rutinas, evalúa su físico y envía comunicados importantes.</p>
+            <h1>¡Hola Pelu! 👋</h1>
+            <p>Bienvenido a tu Panel de Control Staff. Monitorea alumnos, edita rutinas, evalúa su físico y administra tu gimnasio.</p>
           </div>
         </section>
 
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className={styles.inputGroup} style={{ marginTop: '8px', marginBottom: '16px' }}>
-                            <label htmlFor="welcomeEmailMessage">Mensaje Personalizado de Bienvenida (Se enviará por correo)</label>
+                            <label htmlFor="welcomeEmailMessage">Mensaje Personalizado de Bienvenida (WhatsApp / Mensajería)</label>
                             <textarea id="welcomeEmailMessage" rows={4} value={s.welcomeEmailMessage} onChange={(e) => s.setWelcomeEmailMessage(e.target.value)} placeholder="Escribe el cuerpo del correo de bienvenida..." style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-light)', borderRadius: '6px', color: '#fff', padding: '10px', fontSize: '0.85rem', width: '100%', resize: 'vertical', fontFamily: 'inherit' }} />
                             <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                               Usa <code>{"{nombre}"}</code>, <code>{"{email}"}</code> y <code>{"{clave}"}</code> para insertar dinámicamente los datos del alumno.
