@@ -113,7 +113,13 @@ BEGIN
             ELSE 'inactive'
         END,
         'Rutina de adaptación: 3 series de 12 repeticiones en circuitos de acondicionamiento general.'
-    );
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET email = EXCLUDED.email,
+        role = EXCLUDED.role,
+        status = EXCLUDED.status;
+    RETURN new;
+EXCEPTION WHEN OTHERS THEN
     RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
