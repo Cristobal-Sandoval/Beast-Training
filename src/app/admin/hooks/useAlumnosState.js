@@ -78,10 +78,23 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
-      if (!error && data) {
-        setAlumnos(data.filter(p => p.email?.toLowerCase() !== 'btrainingchile@gmail.com' && p.role !== 'admin'));
+      
+      if (error) {
+        console.error('fetchAlumnos RLS/query error:', error);
+        return;
       }
-    } catch (err) { console.warn('Error fetching profiles:', err); }
+      
+      if (data) {
+        const filtered = data.filter(p => p.email?.toLowerCase() !== 'btrainingchile@gmail.com' && p.role !== 'admin');
+        console.log(`fetchAlumnos: ${data.length} total profiles, ${filtered.length} non-admin alumnos`, filtered);
+        setAlumnos(filtered);
+      } else {
+        console.warn('fetchAlumnos: data is null/undefined');
+        setAlumnos([]);
+      }
+    } catch (err) {
+      console.error('fetchAlumnos exception:', err);
+    }
   };
 
   const fetchDirectMessages = async (alumnoId) => {

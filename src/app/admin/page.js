@@ -294,6 +294,15 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className={styles.listGrid}>
+                    {s.filteredAlumnos.length === 0 && (
+                      <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 24px', color: 'var(--text-secondary)' }}>
+                        <p style={{ fontSize: '1.1rem', marginBottom: '8px' }}>No se encontraron alumnos {s.statusFilter !== 'all' ? (s.statusFilter === 'active' ? 'activos' : 'inactivos') : ''}.</p>
+                        <p style={{ fontSize: '0.85rem' }}>Total cargados: {s.alumnos?.length || 0} alumnos en el sistema.</p>
+                        <button type="button" onClick={() => s.fetchAlumnos()} style={{ marginTop: '16px', padding: '8px 20px', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>
+                          🔄 Recargar Lista
+                        </button>
+                      </div>
+                    )}
                     {s.filteredAlumnos.map(alumno => (
                       <div key={alumno.id} className={`${styles.studentCard} glass`}>
                         <div className={styles.cardTopRow}>

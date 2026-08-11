@@ -158,6 +158,9 @@ CREATE POLICY "Allow public read for profiles" ON public.profiles
 CREATE POLICY "Allow users to update their own profile or admins" ON public.profiles
     FOR UPDATE USING (auth.uid() = id OR public.is_admin());
 
+CREATE POLICY "Allow admins to insert profiles" ON public.profiles
+    FOR INSERT WITH CHECK (public.is_admin());
+
 -- Policies for physical progress (Admin writes, User reads)
 CREATE POLICY "Allow users to read their own progress" ON public.physical_progress
     FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
