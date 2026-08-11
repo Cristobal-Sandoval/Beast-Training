@@ -1,0 +1,93 @@
+@keyframes marqueeScroll {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.annBarWrapper {
+  background: linear-gradient(90deg, #FF5700, #E04E00);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 10000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.annBarInnerDesktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 48px 8px 16px;
+  text-align: center;
+  position: relative;
+}
+
+.annBarInnerMobile {
+  display: none;
+  align-items: center;
+  height: 36px;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .annBarInnerDesktop {
+    display: none;
+  }
+  .annBarInnerMobile {
+    display: flex !important;
+  }
+}
+
+.annBarTicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  animation: marqueeScroll 30s linear infinite;
+  padding-right: 48px;
+}
+
+.annBarClose {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding: 0 10px;
+  background: rgba(0,0,0,0.15);
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.annBarDesktopClose {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+}
+
+.annBarLink {
+  color: #ffffff;
+  textDecoration: 'underline';
+  font-weight: 700;
+}
+
+.annBarTickerSpacer {
+  marginLeft: 48px;
+}

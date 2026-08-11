@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
@@ -13,9 +13,11 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const menuRef = useRef(null);
+  const menuToggleRef = useRef(null);
+  const firstLinkRef = useRef(null);
 
   useEffect(() => {
-    // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -23,7 +25,6 @@ export default function Navbar() {
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -38,6 +39,39 @@ export default function Navbar() {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Focus trap for mobile menu
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsMenuOpen(false);
+        menuToggleRef.current?.focus();
+        return;
+      }
+      if (e.key === 'Tab' && menuRef.current) {
+        const focusable = menuRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    firstLinkRef.current?.focus();
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
 
   const fetchProfile = async (userId) => {
     try {
@@ -55,26 +89,23 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    if (typeof window !== 'undefined' && !window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-      return;
-    }
     await supabase.auth.signOut();
     setIsMenuOpen(false);
     router.push('/');
   };
+
+  const closeMobileMenu = useCallback(() => setIsMenuOpen(false), []);
 
   const isActive = (path) => pathname === path;
 
   return (
     <nav className={styles.nav}>
       <div className={styles.container}>
-        {/* Logo */}
-        <Link href="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
-          <Dumbbell className={styles.logoIcon} />
+        <Link href="/" className={styles.logo} onClick={closeMobileMenu} aria-label="Beast Training — Ir al inicio">
+          <Dumbbell className={styles.logoIcon} aria-hidden="true" />
           <span>BEAST<span className={styles.accent}>TRAINING</span></span>
         </Link>
 
-        {/* Desktop Links */}
         <div className={styles.links}>
           <Link href="/" className={`${styles.link} ${isActive('/') ? styles.active : ''}`}>
             Inicio
@@ -102,46 +133,55 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Auth Button */}
         <div className={styles.authContainer}>
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>{profile?.full_name || user.email}</span>
-              <button type="button" onClick={handleLogout} className={styles.logoutBtn} title="Cerrar Sesión">
-                <LogOut size={18} />
+              <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Cerrar sesión">
+                <LogOut size={18} aria-hidden="true" />
               </button>
             </div>
-          ) : null}
+          ) : (
+            <Link href="/login" className={styles.loginNavBtn}>
+              Iniciar Sesión
+            </Link>
+          )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button type="button" className={styles.menuToggle} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        <button
+          ref={menuToggleRef}
+          type="button"
+          className={styles.menuToggle}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
+        >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile Links Overlay */}
       {isMenuOpen && (
-        <div className={styles.mobileMenu}>
-          <Link href="/" className={`${styles.mobileLink} ${isActive('/') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+        <div ref={menuRef} id="mobile-menu" className={styles.mobileMenu} role="dialog" aria-label="Menú de navegación móvil">
+          <Link ref={firstLinkRef} href="/" className={`${styles.mobileLink} ${isActive('/') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
             Inicio
           </Link>
-          <Link href="/planes" className={`${styles.mobileLink} ${isActive('/planes') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+          <Link href="/planes" className={`${styles.mobileLink} ${isActive('/planes') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
             Planes
           </Link>
-          <Link href="/blog" className={`${styles.mobileLink} ${isActive('/blog') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+          <Link href="/blog" className={`${styles.mobileLink} ${isActive('/blog') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
             Blog
           </Link>
-          <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+          <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
             Nosotros
           </Link>
           {user && profile?.role !== 'admin' && (
-            <Link href="/dashboard" className={`${styles.mobileLink} ${isActive('/dashboard') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/dashboard" className={`${styles.mobileLink} ${isActive('/dashboard') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
               Mi Progreso
             </Link>
           )}
           {profile?.role === 'admin' && (
-            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
               Panel Admin
             </Link>
           )}
@@ -149,11 +189,15 @@ export default function Navbar() {
             {user ? (
               <div className={styles.mobileUserInfo}>
                 <span className={styles.mobileUserName}>{profile?.full_name || user.email}</span>
-                <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn}>
-                  <LogOut size={16} /> Cerrar Sesión
+                <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn} aria-label="Cerrar sesión">
+                  <LogOut size={16} aria-hidden="true" /> Cerrar Sesión
                 </button>
               </div>
-            ) : null}
+            ) : (
+              <Link href="/login" className={styles.mobileLoginBtn} onClick={closeMobileMenu}>
+                Iniciar Sesión
+              </Link>
+            )}
           </div>
         </div>
       )}

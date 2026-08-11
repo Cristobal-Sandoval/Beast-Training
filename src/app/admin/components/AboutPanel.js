@@ -5,6 +5,7 @@ import styles from '../admin.module.css';
 export default function AboutPanel({
   aboutSubtitle, setAboutSubtitle, aboutTitle, setAboutTitle,
   aboutBadgeText, setAboutBadgeText, aboutImgUrl, setAboutImgUrl,
+  aboutImgPosition, setAboutImgPosition,
   aboutBioP1, setAboutBioP1, aboutBioP2, setAboutBioP2,
   aboutSpec1, setAboutSpec1, aboutSpec2, setAboutSpec2, aboutSpec3, setAboutSpec3, aboutSpec4, setAboutSpec4,
   coachInstagram, setCoachInstagram, coachTiktok, setCoachTiktok,
@@ -34,10 +35,116 @@ export default function AboutPanel({
             <label htmlFor="aboutBadgeText">Texto de la Insignia (Badge)</label>
             <input id="aboutBadgeText" type="text" placeholder="Ej: entrenador certificado" value={aboutBadgeText} onChange={(e) => setAboutBadgeText(e.target.value)} />
           </div>
-          <div className={styles.inputGroup}>
-            <label htmlFor="aboutImgUrl">URL de Imagen del Coach</label>
-            <input id="aboutImgUrl" type="text" placeholder="https://images.unsplash.com/..." value={aboutImgUrl} onChange={(e) => setAboutImgUrl(e.target.value)} />
-          </div>
+          {/* Logic to parse image position for sliders */}
+          {(() => {
+            const parsePosition = (pos) => {
+              if (!pos) return { x: 50, y: 50 };
+              if (pos === 'center') return { x: 50, y: 50 };
+              if (pos === 'top') return { x: 50, y: 0 };
+              if (pos === 'bottom') return { x: 50, y: 100 };
+              if (pos === 'left') return { x: 0, y: 50 };
+              if (pos === 'right') return { x: 100, y: 50 };
+              const parts = pos.split(' ').map(p => p.trim());
+              if (parts.length >= 2) {
+                const px = parseInt(parts[0]);
+                const py = parseInt(parts[1]);
+                return { 
+                  x: isNaN(px) ? 50 : px, 
+                  y: isNaN(py) ? 50 : py 
+                };
+              }
+              if (parts.length === 1) {
+                const val = parseInt(parts[0]);
+                if (!isNaN(val)) return { x: val, y: 50 };
+              }
+              return { x: 50, y: 50 };
+            };
+            const { x: imgX, y: imgY } = parsePosition(aboutImgPosition);
+
+            return (
+              <div className={styles.formRowFlex}>
+                <div className={styles.inputGroup} style={{ flex: 1 }}>
+                  <label htmlFor="aboutImgUrl">URL de Imagen del Coach (Desde servidor externo)</label>
+                  <input id="aboutImgUrl" type="text" placeholder="https://images.unsplash.com/..." value={aboutImgUrl || ''} onChange={(e) => setAboutImgUrl(e.target.value)} />
+                  
+                  <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        <span>Ajustar Horizontal (Izquierda / Derecha)</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{imgX}%</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Izq</span>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={imgX} 
+                          onChange={(e) => setAboutImgPosition(`${e.target.value}% ${imgY}%`)} 
+                          style={{ flexGrow: 1, accentColor: 'var(--primary)', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Der</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        <span>Ajustar Vertical (Arriba / Abajo)</span>
+                        <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>{imgY}%</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Arriba</span>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={imgY} 
+                          onChange={(e) => setAboutImgPosition(`${imgX}% ${e.target.value}%`)} 
+                          style={{ flexGrow: 1, accentColor: 'var(--primary)', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Abajo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {aboutImgUrl && (
+                  <div className={`${styles.inputGroup} ${styles.previewContainerCoach}`}>
+                    <label>Previsualización en Marco</label>
+                    <div style={{
+                      position: 'relative',
+                      width: '100%',
+                      height: '220px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      border: '1px solid var(--border-light)',
+                      background: 'rgba(0,0,0,0.2)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={aboutImgUrl} alt="Preview Coach" style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: `${imgX}% ${imgY}%`
+                      }} />
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '8px',
+                        left: '8px',
+                        background: 'var(--primary)',
+                        color: 'white',
+                        padding: '3px 8px',
+                        borderRadius: '50px',
+                        fontSize: '0.65rem',
+                        fontWeight: '700'
+                      }}>VISTA PREVIA</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           <div className={styles.inputGroup}>
             <label htmlFor="aboutBioP1">Biografía - Párrafo 1</label>
             <textarea id="aboutBioP1" rows={3} placeholder="Describe la historia del gimnasio..." value={aboutBioP1} onChange={(e) => setAboutBioP1(e.target.value)} />

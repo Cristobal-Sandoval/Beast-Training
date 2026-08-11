@@ -14,7 +14,7 @@ export default function BlogDetailClient({ post, slug }) {
     image: post.image_url,
     author: { '@type': 'Person', name: post.author },
     datePublished: post.published_at,
-    dateModified: post.published_at,
+    dateModified: post.updated_at || post.published_at,
     publisher: { '@type': 'Organization', name: 'Beast Training', logo: { '@type': 'ImageObject', url: 'https://beasttraining.cl/favicon.ico' } },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `https://beasttraining.cl/blog/${post.slug}` },
   } : null;

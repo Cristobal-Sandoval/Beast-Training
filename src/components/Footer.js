@@ -8,8 +8,9 @@ export default function Footer() {
       <div className={styles.container}>
         {/* Info Column */}
         <div className={styles.brandCol}>
-          <Link href="/" className={styles.logo}>
-            <Dumbbell className={styles.logoIcon} />
+          {/* UX-11: aria-label en logo + aria-hidden en icono decorativo */}
+          <Link href="/" className={styles.logo} aria-label="Beast Training — Ir al inicio">
+            <Dumbbell className={styles.logoIcon} aria-hidden="true" />
             <span>BEAST<span className={styles.accent}>TRAINING</span></span>
           </Link>
           <p className={styles.description}>
@@ -30,8 +31,9 @@ export default function Footer() {
             </Link>
           </div>
           
-          {/* Metadata Block: Copyright and Signature (Desktop Only) */}
-          <div className={`${styles.metaBlock} ${styles.desktopOnly}`}>
+          {/* UX-14: Copyright unificado, sin duplicado HTML — control visual con CSS */}
+          {/* UX-15: aria-label en link del desarrollador */}
+          <div className={styles.metaBlock}>
             <p className={styles.copyright}>
               &copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.
               <span className={styles.separator}> • </span>
@@ -41,6 +43,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.portfolioLink}
+                aria-label="Portfolio del desarrollador (Cristóbal Sandoval)"
               >
                 🐈
               </a>
@@ -83,22 +86,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Metadata Block: Copyright and Signature (Mobile Only) */}
-      <div className={`${styles.metaBlockMobile} ${styles.mobileOnly}`}>
-        <p className={styles.copyrightMobile}>
-          &copy; {new Date().getFullYear()} Beast Training Chile. Todos los derechos reservados.
-          <span className={styles.separator}> • </span>
-          Hecho por{' '}
-          <a
-            href="https://cristobalsandoval-portafolio.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.portfolioLink}
-          >
-            🐈
-          </a>
-        </p>
-      </div>
+      {/* UX-14: Bloque mobile eliminado — copyright unificado arriba con CSS responsive */}
     </footer>
   );
 }

@@ -259,6 +259,19 @@ summary {
   }
 }
 
+/* Accessibility: Screen reader only — oculto visualmente, accesible para lectores */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Accessibility: Skip Link */
 .skipLink {
   position: absolute;
@@ -275,7 +288,8 @@ summary {
   transition: top 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.skipLink:focus {
+/* UX-13: :focus-visible en lugar de :focus para no mostrar en clicks de mouse */
+.skipLink:focus-visible {
   top: 16px;
   outline: none;
 }

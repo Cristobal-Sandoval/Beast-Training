@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS public.banners (
     description TEXT,
     h3_tagline TEXT,
     text_align TEXT DEFAULT 'center' CHECK (text_align IN ('left', 'center', 'right')) NOT NULL,
+    text_vertical_align TEXT DEFAULT 'center' CHECK (text_vertical_align IN ('top', 'center', 'bottom')) NOT NULL,
     image_url TEXT NOT NULL,
+    image_position TEXT DEFAULT '50% 50%' NOT NULL,
     link_url TEXT,
     active BOOLEAN DEFAULT true NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -199,9 +201,9 @@ INSERT INTO public.plans (name, description, price, duration_months, category, f
 ON CONFLICT DO NOTHING;
 
 -- 13. Seed Initial Banners
-INSERT INTO public.banners (title, description, image_url, link_url, active) VALUES
-('Saca la Bestia que Llevas Dentro', 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '/planes', true),
-('Promoción de Invierno', 'Suscríbete al Plan Trimestral y llévate gratis una sesión de evaluación nutricional personalizada.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '/planes', true)
+INSERT INTO public.banners (title, description, image_url, image_position, text_align, text_vertical_align, link_url, active) VALUES
+('Saca la Bestia que Llevas Dentro', 'Entrenamiento funcional de alta intensidad, musculación y fuerza en el corazón de Concepción.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '50% 50%', 'left', 'center', '/planes', true),
+('Promoción de Invierno', 'Suscríbete al Plan Trimestral y llévate gratis una sesión de evaluación nutricional personalizada.', 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop', '50% 50%', 'center', 'center', '/planes', true)
 ON CONFLICT DO NOTHING;
 
 -- 14. Seed Initial Blog Posts
@@ -264,6 +266,7 @@ CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL
 -- 17. Create About Info Table (for "Nosotros" page)
 CREATE TABLE IF NOT EXISTS public.about_info (
     id TEXT PRIMARY KEY DEFAULT 'coach-settings',
+    subtitle TEXT DEFAULT 'sobre nosotros',
     title TEXT NOT NULL DEFAULT 'Sobre Beast Training',
     subtitle TEXT DEFAULT 'conoce al coach',
     badge_text TEXT DEFAULT 'entrenador certificado',

@@ -91,10 +91,11 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 src/
 ├── app/
 │   ├── page.js                    # Landing page
+│   ├── robots.js                  # SEO: bloquea indexación de rutas privadas
 │   ├── sitemap.js                 # Sitemap dinámico (blog + estáticas)
 │   ├── layout.js                  # Layout raíz
 │   ├── globals.css                # Variables, utilidades, prefers-reduced-motion
-│   ├── blog/                      # Blog list + [slug]/ detail
+│   ├── blog/                      # Blog list + [slug]/ detail + loading skeleton
 │   ├── planes/                    # Planes con contacto de contratación
 │   ├── dashboard/                 # Dashboard alumno
 │   ├── admin/                     # Panel admin modular (Dashboard, componentes y estado)
@@ -108,10 +109,12 @@ src/
 │   ├── Footer.js                  # Footer rediseñado con acceso Staff y firma interactiva
 │   ├── WhatsAppButton.js          # Botón flotante WhatsApp dinámico
 │   ├── ScrollToTop.js            # Botón scroll to top
-│   ├── TopAnnouncementBar.js     # Cintillo de anuncio
+│   ├── TopAnnouncementBar.js     # Cintillo de anuncio (CSS Modules)
+│   ├── AnnouncementBar.module.css # Estilos del cintillo
+│   ├── ConfirmDialog.js           # Modal accesible de confirmación
 │   └── ToastProvider.js          # Sistema de notificaciones
 └── lib/
-    ├── supabaseClient.js          # Cliente Supabase
+    ├── supabaseClient.js          # Cliente Supabase (con mock offline)
     ├── mockSupabase.js            # Mock offline para desarrollo (localStorage)
     └── toast.js                   # Pub/sub de notificaciones
 ```

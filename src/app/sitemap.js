@@ -8,12 +8,14 @@ const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supa
 export default async function sitemap() {
   const baseUrl = 'https://beasttraining.cl';
 
+  const today = new Date().toISOString().split('T')[0];
+
   const staticEntries = [
-    { url: baseUrl, lastModified: '2026-07-07', changeFrequency: 'daily', priority: 1.0 },
-    { url: `${baseUrl}/planes`, lastModified: '2026-07-13', changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/nosotros`, lastModified: '2026-07-13', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/blog`, lastModified: '2026-07-13', changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/login`, lastModified: '2026-07-13', changeFrequency: 'monthly', priority: 0.4 },
+    { url: baseUrl, lastModified: today, changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/planes`, lastModified: today, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/nosotros`, lastModified: today, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: today, changeFrequency: 'daily', priority: 0.8 },
+    // SEO-07: /login eliminado del sitemap (no aporta valor SEO, consume crawl budget)
   ];
 
   const blogEntries = [];

@@ -3,7 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { Calendar, TrendingUp, Heart, Scale, ShieldAlert, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
+import { Calendar, TrendingUp, Heart, Scale, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
+import PasswordAlertBanner from './components/PasswordAlertBanner';
+import InactiveMemberCard from './components/InactiveMemberCard';
+import PasswordModal from './components/PasswordModal';
 import { showToast } from '@/lib/toast';
 import styles from './dashboard.module.css';
 
@@ -61,9 +64,18 @@ function DashboardContent() {
         setUser(session.user);
         fetchData(session.user.id);
         
-        // Load dismissed announcements
-        const dismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
-        setDismissedAnnouncements(dismissed);
+        // Load dismissed announcements with UX-10: filter expired (30 day expiry)
+        const rawDismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const validDismissed = rawDismissed.filter(item => {
+          // Support both old format (plain id string) and new format ({id, timestamp})
+          if (typeof item === 'object' && item.timestamp) {
+            return item.timestamp > thirtyDaysAgo;
+          }
+          return true; // Keep old-format items for backwards compat
+        });
+        setDismissedAnnouncements(validDismissed.map(item => typeof item === 'object' ? item.id : item));
+        localStorage.setItem('beast_dismissed_announcements', JSON.stringify(validDismissed));
       }
     });
 
@@ -140,11 +152,13 @@ function DashboardContent() {
       const adminId = adminProfiles?.[0]?.id || 'admin-uuid-123';
       setAdminUserId(adminId);
 
-      // 6. Fetch Direct Messages
+      // 6. Fetch Direct Messages — SEC-02: Filtrar en la query SQL, no en el cliente
       const { data: dmData } = await supabase
         .from('direct_messages')
-        .select('*');
+        .select('*')
+        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
       if (dmData) {
+        // Filter additional to admin conversation only
         const filtered = dmData.filter(m => 
           (m.sender_id === userId && m.receiver_id === adminId) ||
           (m.sender_id === adminId && m.receiver_id === userId)
@@ -192,8 +206,10 @@ function DashboardContent() {
   };
 
   const handleDismissAnnouncement = (annId) => {
-    const updated = [...dismissedAnnouncements, annId];
-    setDismissedAnnouncements(updated);
+    // UX-10: Guardar con timestamp de expiración (30 días)
+    const rawDismissed = JSON.parse(localStorage.getItem('beast_dismissed_announcements') || '[]');
+    const updated = [...rawDismissed, { id: annId, timestamp: Date.now() }];
+    setDismissedAnnouncements(prev => [...prev, annId]);
     localStorage.setItem('beast_dismissed_announcements', JSON.stringify(updated));
   };
 
@@ -203,8 +219,13 @@ function DashboardContent() {
       showToast('Las contraseñas nuevas no coinciden.', 'error');
       return;
     }
-    if (newPassword.length < 6) {
-      showToast('La nueva contraseña debe tener al menos 6 caracteres.', 'error');
+    // SEC-06: Mínimo 8 caracteres + requiere al menos una mayúscula y un número
+    if (newPassword.length < 8) {
+      showToast('La nueva contraseña debe tener al menos 8 caracteres.', 'error');
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      showToast('La contraseña debe incluir al menos una mayúscula y un número.', 'error');
       return;
     }
     setPasswordChangeLoading(true);
@@ -304,7 +325,9 @@ function DashboardContent() {
     return (
       <div className={styles.chartWrapper}>
         <div className={styles.chartTitle}>{label}</div>
-        <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgElement}>
+        {/* PERF-05: role=img y title para accesibilidad de lectores de pantalla */}
+        <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgElement} role="img" aria-label={label}>
+          <title>{label}</title>
           <line x1={padding} y1={padding} x2={width - padding} y2={padding} stroke="rgba(255,255,255,0.05)" />
           <line x1={padding} y1={height / 2} x2={width - padding} y2={height / 2} stroke="rgba(255,255,255,0.05)" />
           <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="rgba(255,255,255,0.1)" />
@@ -425,143 +448,12 @@ function DashboardContent() {
         )}
       </section>
 
-      {/* Contraseña Temporal Alert Banner */}
       {isDefaultPassword && (
-        <div style={{
-          background: 'rgba(255, 87, 0, 0.12)',
-          border: '1px solid rgba(255, 87, 0, 0.3)',
-          borderRadius: '8px',
-          padding: '16px 20px',
-          marginBottom: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          boxShadow: '0 4px 20px rgba(255, 87, 0, 0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <ShieldAlert size={24} style={{ color: 'var(--primary)', flexShrink: 0 }} />
-            <div>
-              <strong style={{ color: '#ffffff', display: 'block', marginBottom: '2px', fontSize: '0.95rem' }}>
-                🔑 Seguridad de tu Cuenta: Contraseña Temporal Detectada
-              </strong>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                Estás ingresando con la clave inicial. Te sugerimos cambiarla por una segura para proteger tus datos de progreso.
-              </span>
-            </div>
-          </div>
-          <button type="button"
-            onClick={() => setShowPasswordModal(true)}
-            style={{
-              background: 'var(--primary)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              fontSize: '0.85rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(255, 87, 0, 0.2)',
-              whiteSpace: 'nowrap'
-            }}
-            type="button"
-          >
-            Cambiar Contraseña
-          </button>
-        </div>
+        <PasswordAlertBanner onOpenModal={() => setShowPasswordModal(true)} />
       )}
 
       {profile?.role !== 'admin' && profile?.status !== 'active' ? (
-        <section style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '50px 20px',
-          textAlign: 'center',
-          minHeight: '400px'
-        }}>
-          <div className={`${styles.cardPanel} glass glow-orange`} style={{
-            maxWidth: '550px',
-            width: '100%',
-            padding: '40px 30px',
-            borderRadius: '12px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            marginBottom: 0
-          }}>
-            <div style={{
-              background: 'rgba(255, 87, 0, 0.1)',
-              padding: '20px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <ShieldAlert size={50} style={{ color: 'var(--primary)' }} />
-            </div>
-
-            <h2 style={{ fontSize: '1.6rem', borderBottom: 'none', paddingBottom: 0, margin: 0, color: '#ffffff', textTransform: 'uppercase', fontWeight: '800' }}>
-              Membresía Inactiva o Vencida
-            </h2>
-
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6', margin: 0 }}>
-              Hola <strong>{profile?.full_name || 'Bestia'}</strong>. Para ver tus rutinas personalizadas del mes, registrar tu evolución física y programar evaluaciones corporales, necesitas activar tu cuenta.
-            </p>
-
-            <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--border-light)',
-              padding: '16px',
-              borderRadius: '8px',
-              width: '100%',
-              textAlign: 'left',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '600' }}>¿Cómo activar mi cuenta?</span>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                1. Contrata un plan en la sección <a href="/planes" style={{ color: 'var(--primary)', fontWeight: '700', textDecoration: 'none' }}>Planes</a> o contáctate directamente.
-              </span>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                2. Realiza la transferencia o pago al Coach.
-              </span>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                3. Una vez confirmado, el Coach ingresará tu matrícula al sistema y tu cuenta se activará al instante.
-              </span>
-            </div>
-
-            <button type="button"
-              onClick={() => window.open(`https://wa.me/56948925193?text=Hola%20Coach!%20Tengo%20mi%20cuenta%20inactiva%20en%20el%20sistema%20(${profile?.email || user?.email}).%20%C2%BFMe%20podr%C3%ADas%20ayudar%20a%20activar%20mi%20membres%C3%ADa?`, '_blank')}
-              style={{
-                background: '#25D366',
-                color: '#ffffff',
-                border: 'none',
-                padding: '14px 24px',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 15px rgba(37, 211, 102, 0.3)',
-                marginTop: '10px',
-                width: '100%',
-                justifyContent: 'center'
-              }}
-              type="button"
-            >
-              <MessageSquare size={18} />
-              Contactar al Coach por WhatsApp
-            </button>
-          </div>
-        </section>
+        <InactiveMemberCard profile={profile} user={user} />
       ) : (
         <>
           {/* Comunicados Beast (Urgentes/Normales) */}
@@ -685,7 +577,7 @@ function DashboardContent() {
                 <div style={{ textAlign: 'center', padding: '20px 12px' }}>
                   <FileText size={36} style={{ opacity: 0.12, marginBottom: '12px' }} />
                   <p className={styles.emptyText}>No hay plan cargado aún para este mes</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '4px' }}>Acércate a tus entrenadores en tu próxima clase para que te diseñen una rutina personalizada.</p>
+                   <p className={styles.routineEmptyDesc}>Acércate a tus entrenadores en tu próxima clase para que te diseñen una rutina personalizada.</p>
                 </div>
               )}
             </div>
@@ -693,40 +585,13 @@ function DashboardContent() {
 
           {/* Charts Panel */}
           <div className={`${styles.cardPanel} glass`}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '8px' }}>
-              <h2 style={{ borderBottom: 'none', paddingBottom: 0, marginBottom: 0 }}>Tu Evolución Física</h2>
-              
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button type="button"
-                  onClick={() => setChartRange('3')}
-                  style={{
-                    background: chartRange === '3' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid ' + (chartRange === '3' ? 'var(--primary)' : 'var(--border-light)'),
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    minHeight: 'auto'
-                  }}
-                >
+            <div className={styles.chartHeader}>
+              <h2 className={styles.chartHeaderTitle}>Tu Evolución Física</h2>
+              <div className={styles.chartRangeButtons}>
+                <button type="button" onClick={() => setChartRange('3')} className={`${styles.chartRangeBtn} ${chartRange === '3' ? styles.chartRangeBtnActive : ''}`}>
                   Últimos 3
                 </button>
-                <button type="button"
-                  onClick={() => setChartRange('all')}
-                  style={{
-                    background: chartRange === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid ' + (chartRange === 'all' ? 'var(--primary)' : 'var(--border-light)'),
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    minHeight: 'auto'
-                  }}
-                >
+                <button type="button" onClick={() => setChartRange('all')} className={`${styles.chartRangeBtn} ${chartRange === 'all' ? styles.chartRangeBtnActive : ''}`}>
                   Historial
                 </button>
               </div>
@@ -742,15 +607,17 @@ function DashboardContent() {
           <div className={`${styles.cardPanel} glass`}>
             <h2>Historial de Evaluaciones</h2>
             <div className={styles.tableWrapper}>
+              {/* UX-02: scope="col" y caption para accesibilidad de lectores de pantalla */}
               <table className={styles.table}>
+                <caption className="sr-only">Historial de evaluaciones físicas del alumno</caption>
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Peso</th>
-                    <th>Grasa</th>
-                    <th>Masa Muscular</th>
-                    <th>Cintura</th>
-                    <th>Pecho</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Peso</th>
+                    <th scope="col">Grasa</th>
+                    <th scope="col">Masa Muscular</th>
+                    <th scope="col">Cintura</th>
+                    <th scope="col">Pecho</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -782,10 +649,10 @@ function DashboardContent() {
             
             <div className={styles.chatBox} style={{ maxHeight: '280px' }}>
               {chatMessages.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '24px 12px' }}>
-                  <MessageSquare size={36} style={{ opacity: 0.15, marginBottom: '12px' }} />
-                  <p className={styles.emptyText} style={{ marginBottom: '6px' }}>No hay mensajes aún</p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Escribe tu primera consulta al Coach. Te responderá en breve.</p>
+                <div className={styles.chatEmpty}>
+                  <MessageSquare size={36} className={styles.chatEmptyIcon} />
+                  <p className={styles.emptyText}>No hay mensajes aún</p>
+                  <p className={styles.chatEmptyDesc}>Escribe tu primera consulta al Coach. Te responderá en breve.</p>
                 </div>
               ) : (
                 <div className={styles.chatMessagesWrapper}>
@@ -809,27 +676,23 @@ function DashboardContent() {
             </div>
 
             <form onSubmit={handleSendDirectMessage} className={styles.chatForm}>
-              <textarea
-                value={newDirectMessage}
-                onChange={(e) => setNewDirectMessage(e.target.value)}
-                placeholder="Escribe un mensaje para el Coach..."
-                rows={3}
-                required
-                style={{
-                  background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-light)',
-                  color: 'var(--text-primary)',
-                  padding: '12px',
-                  borderRadius: '6px',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  width: '100%',
-                  fontFamily: 'inherit',
-                  lineHeight: '1.5',
-                  resize: 'none'
-                }}
-              />
-              <button type="submit" disabled={submittingChat} className={styles.apptBtn} style={{ marginTop: '10px' }}>
+              {/* UX-05: maxLength + contador de caracteres */}
+              <div className={styles.chatTextareaWrapper}>
+                <textarea
+                  value={newDirectMessage}
+                  onChange={(e) => setNewDirectMessage(e.target.value)}
+                  placeholder="Escribe un mensaje para el Coach..."
+                  rows={3}
+                  required
+                  maxLength={500}
+                  aria-label="Mensaje para el Coach"
+                  className={styles.chatTextarea}
+                />
+                <span className={`${styles.chatCharCount} ${newDirectMessage.length > 450 ? styles.chatCharCountWarning : ''}`}>
+                  {newDirectMessage.length}/500
+                </span>
+              </div>
+              <button type="submit" disabled={submittingChat} className={`${styles.apptBtn} ${styles.chatSendBtn}`}>
                 {submittingChat ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
             </form>
@@ -843,39 +706,26 @@ function DashboardContent() {
             </div>
 
             {profile?.next_evaluation_date ? (
-              <div className={styles.apptAlertPending} style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid var(--success)', padding: '16px', borderRadius: '6px' }}>
-                <p style={{ margin: 0, fontSize: '0.95rem', color: '#ffffff' }}>Tu próxima evaluación física está programada para el:</p>
-                <div style={{ fontSize: '1.1rem', color: 'var(--success)', fontWeight: 'bold', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className={styles.apptPendingCard}>
+                <p className={styles.apptPendingText}>Tu próxima evaluación física está programada para el:</p>
+                <div className={styles.apptPendingDate}>
                   <Check size={18} /> {profile.next_evaluation_date}
                 </div>
-                <p className={styles.apptDetails} style={{ marginTop: '12px', fontSize: '0.85rem', opacity: 0.8 }}>Si necesitas cambiar la fecha, comunícate directamente con tu entrenador.</p>
+                <p className={`${styles.apptDetails} ${styles.apptPendingNote}`}>Si necesitas cambiar la fecha, comunícate directamente con tu entrenador.</p>
               </div>
             ) : profile?.proposed_slots ? (
               <div>
                 <p className={styles.panelSubtitle}>Tu entrenador ha propuesto las siguientes fechas y horas para tu medición mensual. Selecciona la opción que más te acomode:</p>
                 
                 <form onSubmit={handleConfirmSlot} className={styles.apptForm}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '14px' }}>
+                  <div className={styles.slotList}>
                     {profile.proposed_slots.split(',').map((slot, index) => {
                       const trimmedSlot = slot.trim();
                       if (!trimmedSlot) return null;
                       return (
                         <label 
                           key={index} 
-                          style={{
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '10px', 
-                            background: selectedSlot === trimmedSlot ? 'rgba(255, 87, 0, 0.08)' : 'rgba(255,255,255,0.03)',
-                            border: '1px solid ' + (selectedSlot === trimmedSlot ? 'var(--primary)' : 'var(--border-light)'),
-                            padding: '12px 16px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: '#ffffff',
-                            transition: 'all 0.2s'
-                          }}
+                          className={`${styles.slotLabel} ${selectedSlot === trimmedSlot ? styles.slotLabelSelected : ''}`}
                         >
                           <input
                             type="radio"
@@ -883,7 +733,7 @@ function DashboardContent() {
                             value={trimmedSlot}
                             checked={selectedSlot === trimmedSlot}
                             onChange={(e) => setSelectedSlot(e.target.value)}
-                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary)' }}
+                            className={styles.slotRadio}
                           />
                           <span>{trimmedSlot}</span>
                         </label>
@@ -891,22 +741,21 @@ function DashboardContent() {
                     })}
                   </div>
                   
-                  {apptConfirmSuccess && <p className={styles.successFormText} style={{ marginTop: '8px', color: 'var(--success)' }}>¡Cita confirmada y programada con éxito!</p>}
+                  {apptConfirmSuccess && <p className={`${styles.successFormText} ${styles.apptSuccessText}`}>¡Cita confirmada y programada con éxito!</p>}
                   
                   <button 
                     type="submit" 
                     disabled={submittingConfirm || !selectedSlot} 
-                    className={styles.apptBtn} 
-                    style={{ marginTop: '16px', width: '100%' }}
+                    className={`${styles.apptBtn} ${styles.apptConfirmBtn}`}
                   >
                     {submittingConfirm ? 'Confirmando...' : 'Confirmar Fecha de Cita'}
                   </button>
                 </form>
               </div>
             ) : (
-              <div className={styles.apptAlertPending} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-light)', padding: '16px', borderRadius: '6px' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.8 }}>No tienes evaluaciones programadas ni propuestas por el staff para este mes.</p>
-                <p style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '600' }}>Tus preparadores configurarán tus opciones pronto.</p>
+              <div className={styles.apptNoSlots}>
+                <p className={styles.apptNoSlotsText}>No tienes evaluaciones programadas ni propuestas por el staff para este mes.</p>
+                <p className={styles.apptNoSlotsNote}>Tus preparadores configurarán tus opciones pronto.</p>
               </div>
             )}
           </div>
@@ -915,123 +764,16 @@ function DashboardContent() {
         </>
       )}
 
-      {/* Modal: Cambiar Contraseña */}
-      {showPasswordModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1100,
-          padding: '20px'
-        }}>
-          <div className={`${styles.cardPanel} glass`} style={{
-            maxWidth: '450px',
-            width: '100%',
-            padding: '30px',
-            borderRadius: '12px',
-            border: '1px solid var(--border-light)',
-            boxShadow: '0 15px 40px rgba(0,0,0,0.5)',
-            marginBottom: 0
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
-              <h2 style={{ fontSize: '1.3rem', textTransform: 'uppercase', color: '#ffffff', margin: 0 }}>Actualizar Contraseña</h2>
-              <button type="button" 
-                onClick={() => setShowPasswordModal(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.25rem' }}
-                type="button"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Nueva Contraseña</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-light)',
-                    background: 'rgba(255,255,255,0.03)',
-                    color: '#ffffff',
-                    fontSize: '0.9rem'
-                  }}
-                />
-              </div>
-
-              <div className={styles.inputGroup} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Confirmar Nueva Contraseña</label>
-                <input
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  placeholder="Repite la nueva contraseña"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-light)',
-                    background: 'rgba(255,255,255,0.03)',
-                    color: '#ffffff',
-                    fontSize: '0.9rem'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordModal(false)}
-                  style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid var(--border-light)',
-                    color: '#ffffff',
-                    padding: '10px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={passwordChangeLoading}
-                  style={{
-                    flex: 1.5,
-                    background: 'var(--primary)',
-                    color: '#ffffff',
-                    border: 'none',
-                    padding: '10px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontWeight: '700',
-                    fontSize: '0.9rem',
-                    boxShadow: '0 4px 15px rgba(255, 87, 0, 0.25)'
-                  }}
-                >
-                  {passwordChangeLoading ? 'Actualizando...' : 'Guardar Nueva Clave'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <PasswordModal
+        show={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onSubmit={handleChangePassword}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmNewPassword={confirmNewPassword}
+        setConfirmNewPassword={setConfirmNewPassword}
+        loading={passwordChangeLoading}
+      />
     </div>
   );
 }
