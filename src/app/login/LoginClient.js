@@ -23,7 +23,8 @@ export default function LoginClient() {
           .select('role')
           .eq('id', session.user.id)
           .single();
-        if (profile?.role === 'admin') {
+        const isAdmin = profile?.role === 'admin' || session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
+        if (isAdmin) {
           router.push('/admin');
         } else {
           router.push('/dashboard');
@@ -52,7 +53,8 @@ export default function LoginClient() {
           .eq('id', data.session.user.id)
           .single();
         
-        if (profile?.role === 'admin') {
+        const isAdmin = profile?.role === 'admin' || session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
+        if (isAdmin) {
           router.push('/admin');
         } else {
           router.push('/dashboard');

@@ -12,12 +12,16 @@ export default function useAuthState() {
 
   const router = useRouter();
 
-  const fetchProfile = async (userId) => {
+  const fetchProfile = async (userId, userEmail) => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      if (!error && data) {
-        setProfile(data);
-        if (data.role !== 'admin') router.push('/dashboard');
+      const isAdminEmail = userEmail?.toLowerCase() === 'btrainingchile@gmail.com';
+      if (data) {
+        const updatedProfile = isAdminEmail ? { ...data, role: 'admin', status: 'active' } : data;
+        setProfile(updatedProfile);
+        if (updatedProfile.role !== 'admin') router.push('/dashboard');
+      } else if (isAdminEmail) {
+        setProfile({ id: userId, email: userEmail, role: 'admin', status: 'active', full_name: 'Admin Beast' });
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -31,12 +35,12 @@ export default function useAuthState() {
     robotsMeta.content = 'noindex, nofollow';
     document.head.appendChild(robotsMeta);
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) { setUser(session.user); fetchProfile(session.user.id); }
+      if (session) { setUser(session.user); fetchProfile(session.user.id, session.user.email); }
       else { setLoading(false); }
     });
     supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) fetchProfile(session.user.id, session.user.email);
       else { setProfile(null); setLoading(false); router.push('/'); }
     });
   }, []);
