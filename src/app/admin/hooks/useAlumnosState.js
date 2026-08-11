@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { showToast } from '@/lib/toast';
 import { confirmDialog } from '@/components/ConfirmDialog';
@@ -71,8 +72,13 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
 
   const fetchAlumnos = async () => {
     try {
-      const { data, error } = await supabase.from('profiles').select('*');
-      if (!error && data) setAlumnos(data.filter(p => p.role !== 'admin'));
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        setAlumnos(data.filter(p => p.email?.toLowerCase() !== 'btrainingchile@gmail.com' && p.role !== 'admin'));
+      }
     } catch (err) { console.warn('Error fetching profiles:', err); }
   };
 
@@ -190,7 +196,14 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
     const studentName = newAlumnoName.trim();
     const studentPassword = newAlumnoPassword;
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wmivpbztuwvcwdrhurjy.supabase.co';
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_yy_0d0WRp-iLqE_xu4Zl2g_pGT8pj_4';
+
+      const tempSupabase = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false }
+      });
+
+      const { data, error } = await tempSupabase.auth.signUp({
         email: emailLower,
         password: studentPassword,
         options: {
@@ -204,6 +217,20 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
         }
       });
       if (error) throw error;
+
+      if (data?.user) {
+        const newProfile = {
+          id: data.user.id,
+          email: emailLower,
+          full_name: studentName,
+          phone: newAlumnoPhone.trim(),
+          age: newAlumnoAge ? parseInt(newAlumnoAge) : 20,
+          role: 'user',
+          status: 'inactive',
+          workout_plan: 'Rutina de adaptación: 3 series de 12 repeticiones en circuitos de acondicionamiento general.'
+        };
+        await supabase.from('profiles').upsert([newProfile]);
+      }
 
       const cleanPhone = newAlumnoPhone.trim().replace(/\D/g, '');
       const formattedPhone = cleanPhone.startsWith('56') ? cleanPhone : cleanPhone ? `56${cleanPhone}` : '';
@@ -229,7 +256,7 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
       setNewAlumnoAge('');
       setNewAlumnoPassword('beast123');
       setShowCreateModal(false);
-      fetchAlumnos();
+      await fetchAlumnos();
       showToast('¡Alumno registrado con éxito en la base de datos!', 'success');
     } catch (err) {
       showToast('Error al crear alumno: ' + err.message, 'error');
