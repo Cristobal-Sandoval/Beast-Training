@@ -200,7 +200,7 @@
   border: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.7);
   width: 44px;
   height: 44px;
   display: flex;
@@ -209,6 +209,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
+}
+
+.carouselArrow:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 @media (hover: hover) {
@@ -256,6 +261,7 @@
 }
 
 .carouselDot {
+  position: relative;
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -265,6 +271,21 @@
   padding: 0;
   transition: all 0.3s ease;
   min-height: auto;
+}
+
+.carouselDot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+}
+
+.carouselDot:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
 }
 
 .carouselDot:hover {

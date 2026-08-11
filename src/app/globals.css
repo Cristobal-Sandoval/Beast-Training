@@ -4,7 +4,7 @@
   --background-card-hover: #17171a;
   --background-nav: rgba(7, 7, 8, 0.85);
   
-  --primary: #FF5700;
+  --primary: #E64A00;
   --primary-hover: #E04E00;
   --primary-glow: rgba(255, 87, 0, 0.2);
   
@@ -60,7 +60,7 @@ body {
   background: var(--background-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #252528;
+  background: #3f3f46;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {

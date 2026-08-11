@@ -107,25 +107,25 @@ export default function Navbar() {
         </Link>
 
         <div className={styles.links}>
-          <Link href="/" className={`${styles.link} ${isActive('/') ? styles.active : ''}`}>
+          <Link href="/" className={`${styles.link} ${isActive('/') ? styles.active : ''}`} aria-current={isActive('/') ? 'page' : undefined}>
             Inicio
           </Link>
-          <Link href="/planes" className={`${styles.link} ${isActive('/planes') ? styles.active : ''}`}>
+          <Link href="/planes" className={`${styles.link} ${isActive('/planes') ? styles.active : ''}`} aria-current={isActive('/planes') ? 'page' : undefined}>
             Planes
           </Link>
-          <Link href="/blog" className={`${styles.link} ${isActive('/blog') ? styles.active : ''}`}>
+          <Link href="/blog" className={`${styles.link} ${isActive('/blog') ? styles.active : ''}`} aria-current={isActive('/blog') ? 'page' : undefined}>
             Blog
           </Link>
-          <Link href="/nosotros" className={`${styles.link} ${isActive('/nosotros') ? styles.active : ''}`}>
+          <Link href="/nosotros" className={`${styles.link} ${isActive('/nosotros') ? styles.active : ''}`} aria-current={isActive('/nosotros') ? 'page' : undefined}>
             Nosotros
           </Link>
           
           {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
-            <Link href="/admin" className={`${styles.link} ${styles.adminLink} ${isActive('/admin') ? styles.active : ''}`}>
-              <Shield size={16} /> Panel Staff
+            <Link href="/admin" className={`${styles.link} ${styles.adminLink} ${isActive('/admin') ? styles.active : ''}`} aria-current={isActive('/admin') ? 'page' : undefined}>
+              <Shield size={16} aria-hidden="true" /> Panel Staff
             </Link>
           ) : user ? (
-            <Link href="/dashboard" className={`${styles.link} ${isActive('/dashboard') ? styles.active : ''}`}>
+            <Link href="/dashboard" className={`${styles.link} ${isActive('/dashboard') ? styles.active : ''}`} aria-current={isActive('/dashboard') ? 'page' : undefined}>
               Mi Progreso
             </Link>
           ) : null}
@@ -157,30 +157,30 @@ export default function Navbar() {
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
         </button>
       </div>
 
       {isMenuOpen && (
         <div ref={menuRef} id="mobile-menu" className={styles.mobileMenu} role="dialog" aria-label="Menú de navegación móvil">
-          <Link ref={firstLinkRef} href="/" className={`${styles.mobileLink} ${isActive('/') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+          <Link ref={firstLinkRef} href="/" className={`${styles.mobileLink} ${isActive('/') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/') ? 'page' : undefined}>
             Inicio
           </Link>
-          <Link href="/planes" className={`${styles.mobileLink} ${isActive('/planes') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+          <Link href="/planes" className={`${styles.mobileLink} ${isActive('/planes') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/planes') ? 'page' : undefined}>
             Planes
           </Link>
-          <Link href="/blog" className={`${styles.mobileLink} ${isActive('/blog') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+          <Link href="/blog" className={`${styles.mobileLink} ${isActive('/blog') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/blog') ? 'page' : undefined}>
             Blog
           </Link>
-          <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+          <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/nosotros') ? 'page' : undefined}>
             Nosotros
           </Link>
           {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
-            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
-              <Shield size={16} /> Panel Staff
+            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/admin') ? 'page' : undefined}>
+              <Shield size={16} aria-hidden="true" /> Panel Staff
             </Link>
           ) : user ? (
-            <Link href="/dashboard" className={`${styles.mobileLink} ${isActive('/dashboard') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+            <Link href="/dashboard" className={`${styles.mobileLink} ${isActive('/dashboard') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/dashboard') ? 'page' : undefined}>
               Mi Progreso
             </Link>
           ) : null}

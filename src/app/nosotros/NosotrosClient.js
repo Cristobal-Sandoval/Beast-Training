@@ -112,25 +112,25 @@ export default function NosotrosClient() {
             <div className={styles.aboutSpecs}>
               {aboutInfo.spec_1 && (
                 <div className={styles.specItem}>
-                  <Award size={18} className={styles.specIcon} />
+                  <Award size={18} className={styles.specIcon} aria-hidden="true" />
                   <span>{aboutInfo.spec_1}</span>
                 </div>
               )}
               {aboutInfo.spec_2 && (
                 <div className={styles.specItem}>
-                  <Award size={18} className={styles.specIcon} />
+                  <Award size={18} className={styles.specIcon} aria-hidden="true" />
                   <span>{aboutInfo.spec_2}</span>
                 </div>
               )}
               {aboutInfo.spec_3 && (
                 <div className={styles.specItem}>
-                  <Award size={18} className={styles.specIcon} />
+                  <Award size={18} className={styles.specIcon} aria-hidden="true" />
                   <span>{aboutInfo.spec_3}</span>
                 </div>
               )}
               {aboutInfo.spec_4 && (
                 <div className={styles.specItem}>
-                  <Award size={18} className={styles.specIcon} />
+                  <Award size={18} className={styles.specIcon} aria-hidden="true" />
                   <span>{aboutInfo.spec_4}</span>
                 </div>
               )}
@@ -140,9 +140,9 @@ export default function NosotrosClient() {
             {((aboutInfo.show_coach_socials !== false && (aboutInfo.coach_instagram || aboutInfo.coach_tiktok)) || 
               (aboutInfo.show_gym_socials !== false && (aboutInfo.gym_instagram || aboutInfo.gym_facebook))) && (
               <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-light)', paddingTop: '20px' }}>
-                <h4 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px', fontWeight: '700' }}>
+                <h3 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px', fontWeight: '700' }}>
                   Síguenos en Redes Sociales
-                </h4>
+                </h3>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Coach social media */}
@@ -286,7 +286,7 @@ export default function NosotrosClient() {
 
             <div className={styles.aboutBtnWrapper} style={{ marginTop: '24px' }}>
               <Link href="/planes" className={styles.primaryBtn}>
-                Ver Planes <ArrowRight size={18} />
+                Ver Planes <ArrowRight size={18} aria-hidden="true" />
               </Link>
             </div>
           </div>

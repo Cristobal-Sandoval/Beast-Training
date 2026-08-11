@@ -117,6 +117,7 @@ export default function LoginClient() {
                 type="button"
                 className={styles.eyeBtn}
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>

@@ -15,7 +15,7 @@ export default function BlogDetailClient({ post, slug }) {
     author: { '@type': 'Person', name: post.author },
     datePublished: post.published_at,
     dateModified: post.updated_at || post.published_at,
-    publisher: { '@type': 'Organization', name: 'Beast Training', logo: { '@type': 'ImageObject', url: 'https://beasttraining.cl/favicon.ico' } },
+    publisher: { '@type': 'Organization', name: 'Beast Training', logo: { '@type': 'ImageObject', url: 'https://beasttraining.cl/og-image.jpg' } },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `https://beasttraining.cl/blog/${post.slug}` },
   } : null;
 
@@ -35,7 +35,7 @@ export default function BlogDetailClient({ post, slug }) {
         <h2>Artículo no encontrado</h2>
         <p>El artículo que buscas no existe o ha sido eliminado.</p>
         <Link href="/blog" className={styles.backBtn}>
-          <ArrowLeft size={16} /> Volver al Blog
+          <ArrowLeft size={16} aria-hidden="true" /> Volver al Blog
         </Link>
       </div>
     );
@@ -53,9 +53,9 @@ export default function BlogDetailClient({ post, slug }) {
       <div className={styles.breadcrumb}>
         <div className={styles.breadcrumbContent}>
           <Link href="/">Inicio</Link>
-          <ChevronRight size={14} />
+          <ChevronRight size={14} aria-hidden="true" />
           <Link href="/blog">Blog</Link>
-          <ChevronRight size={14} />
+          <ChevronRight size={14} aria-hidden="true" />
           <span className={styles.current}>{post.title}</span>
         </div>
       </div>
@@ -65,11 +65,11 @@ export default function BlogDetailClient({ post, slug }) {
           <h1 className={styles.title}>{post.title}</h1>
           <div className={styles.meta}>
             <div className={styles.metaItem}>
-              <User size={16} className={styles.icon} />
+              <User size={16} className={styles.icon} aria-hidden="true" />
               <span>Por {post.author}</span>
             </div>
             <div className={styles.metaItem}>
-              <Calendar size={16} className={styles.icon} />
+              <Calendar size={16} className={styles.icon} aria-hidden="true" />
               <span>{new Date(post.published_at).toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
           </div>
@@ -102,8 +102,8 @@ export default function BlogDetailClient({ post, slug }) {
 
           <aside className={styles.sidebar}>
             <div className={`${styles.ctaCard} glass glow-orange`}>
-              <Dumbbell className={styles.ctaIcon} size={36} />
-              <h3>¿Listo para Entrenar?</h3>
+              <Dumbbell className={styles.ctaIcon} size={36} aria-hidden="true" />
+              <h2>¿Listo para Entrenar?</h2>
               <p>Ven a probar una clase gratis a nuestra sede en Concepción.</p>
               <Link href="/planes" className={styles.ctaBtn}>Ver Planes & Precios</Link>
             </div>
@@ -112,7 +112,7 @@ export default function BlogDetailClient({ post, slug }) {
 
         <div className={styles.footerNav}>
           <Link href="/blog" className={styles.backBtn}>
-            <ArrowLeft size={16} /> Volver a todas las noticias
+            <ArrowLeft size={16} aria-hidden="true" /> Volver a todas las noticias
           </Link>
         </div>
       </article>

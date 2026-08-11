@@ -211,8 +211,9 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
     const studentName = newAlumnoName.trim();
     const studentPassword = newAlumnoPassword;
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wmivpbztuwvcwdrhurjy.supabase.co';
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_yy_0d0WRp-iLqE_xu4Zl2g_pGT8pj_4';
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (!supabaseUrl || !supabaseKey) { showToast('Error: Configuración de Supabase no disponible.', 'error'); setActionLoading(false); return; }
 
       const tempSupabase = createClient(supabaseUrl, supabaseKey, {
         auth: { persistSession: false }

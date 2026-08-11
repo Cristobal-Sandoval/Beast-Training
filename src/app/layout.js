@@ -38,12 +38,6 @@ export const metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  alternates: {
-    canonical: 'https://beasttraining.cl',
-    languages: {
-      'es-CL': 'https://beasttraining.cl',
-    },
-  },
   openGraph: {
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
     description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento.",
@@ -68,14 +62,12 @@ export const metadata = {
   },
 };
 
-export const viewport = {
-  themeColor: '#070708',
-};
+export const viewport = { themeColor: '#070708', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SportsActivityLocation",
+    "@type": ["SportsActivityLocation", "ExerciseGym"],
     "@id": "https://beasttraining.cl/#gym",
     "name": "Beast Training",
     "image": "https://beasttraining.cl/og-image.jpg",

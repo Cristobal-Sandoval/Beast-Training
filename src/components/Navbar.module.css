@@ -202,6 +202,15 @@
   padding: 6px;
 }
 
+.menuToggle:hover {
+  color: var(--primary);
+}
+
+.menuToggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 @media (max-width: 768px) {
   .menuToggle {
     display: block;
@@ -221,6 +230,8 @@
   padding: 40px 24px;
   gap: 24px;
   animation: slideIn 0.3s ease forwards;
+  overflow-y: auto;
+  z-index: 1000;
 }
 
 @keyframes slideIn {
@@ -240,6 +251,10 @@
   color: var(--text-secondary);
   padding: 10px 0;
   border-bottom: 1px solid var(--border-light);
+}
+
+.mobileLink:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .mobileActive {

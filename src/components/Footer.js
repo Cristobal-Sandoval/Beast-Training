@@ -26,7 +26,7 @@ export default function Footer() {
             </a>
             
             <Link href="/login" className={styles.loginBtn}>
-              <Lock size={12} className={styles.btnIcon} />
+              <Lock size={12} className={styles.btnIcon} aria-hidden="true" />
               <span>Acceso Staff & Alumnos</span>
             </Link>
           </div>
@@ -51,20 +51,39 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Navigation Column */}
+        <div className={styles.linksCol}>
+          <h3 className={styles.heading}>Navegación</h3>
+          <ul className={styles.list}>
+            <li className={styles.item}>
+              <Link href="/">Inicio</Link>
+            </li>
+            <li className={styles.item}>
+              <Link href="/planes">Planes</Link>
+            </li>
+            <li className={styles.item}>
+              <Link href="/blog">Blog</Link>
+            </li>
+            <li className={styles.item}>
+              <Link href="/nosotros">Nosotros</Link>
+            </li>
+          </ul>
+        </div>
+
         {/* Contact Column */}
         <div className={styles.linksCol}>
           <h3 className={styles.heading}>Contacto</h3>
           <ul className={styles.list}>
             <li className={styles.item}>
-              <MapPin size={18} className={styles.icon} />
+              <MapPin size={18} className={styles.icon} aria-hidden="true" />
               <span>Libertador Bernardo O'Higgins 940, Piso 4, Oficina 404, Concepción</span>
             </li>
             <li className={styles.item}>
-              <Phone size={18} className={styles.icon} />
+              <Phone size={18} className={styles.icon} aria-hidden="true" />
               <a href="tel:+56948925193" style={{ color: 'inherit', textDecoration: 'none' }}>+56 9 4892 5193</a>
             </li>
             <li className={styles.item}>
-              <Mail size={18} className={styles.icon} />
+              <Mail size={18} className={styles.icon} aria-hidden="true" />
               <a href="mailto:btrainingchile@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>btrainingchile@gmail.com</a>
             </li>
           </ul>
@@ -75,7 +94,7 @@ export default function Footer() {
           <h3 className={styles.heading}>Horarios</h3>
           <ul className={styles.list}>
             <li className={styles.item}>
-              <Clock size={18} className={styles.icon} />
+              <Clock size={18} className={styles.icon} aria-hidden="true" />
               <div>
                 <p className={styles.days}>Lunes a Viernes</p>
                 <p className={styles.hours}>10:00 - 13:00 hrs.</p>
@@ -90,7 +109,7 @@ export default function Footer() {
           <h3 className={styles.heading}>Ubicación</h3>
           <div className={styles.mapContainer}>
             <iframe
-              title="Beast Training - Libertador Bernardo O'Higgins 940, Concepción"
+              title="Ubicación de Beast Training en Concepción"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.3764834289895!2d-73.05350862343292!3d-36.82701467223945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9626e4fb2d711a91%3A0xa64b38d38096f9a0!2sLibertador%20Gral.%20Bernardo%20O'Higgins%20940%2C%204030000%20Concepci%C3%B3n%2C%20B%C3%ADo%20B%C3%ADo!5e0!3m2!1ses!2scl!4v1710000000000!5m2!1ses!2scl"
               width="100%"
               height="220"

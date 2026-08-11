@@ -94,7 +94,11 @@ export default function HomeClient({ initialBanners, initialPosts, fallbackBanne
             }}>
               <span className={styles.heroBadge}><Sparkles size={14} aria-hidden="true" /> {banner.h3_tagline || 'beast training concepción'}</span>
               {/* SEO-03: H1 siempre presente con fallback garantizado */}
-              <h1 className={styles.heroTitle}>{banner.h1_title || banner.title || 'Gimnasio de Alto Rendimiento en Concepción'}</h1>
+              {index === activeBannerIndex ? (
+                <h1 className={styles.heroTitle}>{banner.h1_title || banner.title || 'Gimnasio de Alto Rendimiento en Concepción'}</h1>
+              ) : (
+                <h2 className={styles.heroTitle}>{banner.h1_title || banner.title || 'Gimnasio de Alto Rendimiento en Concepción'}</h2>
+              )}
               <p className={styles.heroDescription}>{banner.h2_subtitle || banner.description}</p>
               <div className={styles.heroBtns} style={{ alignSelf: banner.text_align === 'center' ? 'center' : banner.text_align === 'right' ? 'flex-end' : 'flex-start' }}>
                 <Link href={banner.link_url || '/planes'} className={styles.primaryBtn}>Ver Planes <ArrowRight size={18} aria-hidden="true" /></Link>

@@ -4,7 +4,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/dashboard', '/login'],
+        disallow: ['/admin', '/dashboard', '/login', '/api/', '/registro'],
       },
     ],
     sitemap: 'https://beasttraining.cl/sitemap.xml',

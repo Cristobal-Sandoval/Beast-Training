@@ -29,7 +29,7 @@ export default function AdminDashboard() {
           <p>No tienes permisos de Administrador para ver esta página. Inicia sesión con la cuenta de administrador o usa el simulador local para pruebas.</p>
           <div className={styles.authActions}>
             <button type="button" onClick={() => s.router.push('/login')} className={styles.loginAdminBtn}>Iniciar Sesión Admin</button>
-            <button type="button" onClick={() => s.setDemoAdminMode(true)} className={styles.simulateBtn}><Sparkles size={16} /> Simular Modo Admin (Pruebas)</button>
+            {process.env.NODE_ENV !== 'production' && <button type="button" onClick={() => s.setDemoAdminMode(true)} className={styles.simulateBtn}><Sparkles size={16} /> Simular Modo Admin (Pruebas)</button>}
           </div>
         </div>
       </div>
