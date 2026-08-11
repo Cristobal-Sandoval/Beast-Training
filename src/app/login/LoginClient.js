@@ -53,7 +53,7 @@ export default function LoginClient() {
           .eq('id', data.session.user.id)
           .single();
         
-        const isAdmin = profile?.role === 'admin' || session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
+        const isAdmin = profile?.role === 'admin' || data.session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
         if (isAdmin) {
           router.push('/admin');
         } else {
