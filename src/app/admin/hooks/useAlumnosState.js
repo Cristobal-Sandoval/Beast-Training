@@ -57,6 +57,8 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
   });
 
   useEffect(() => {
+    fetchAlumnos();
+
     const handleSyncUpdate = () => {
       fetchAlumnos();
     };
