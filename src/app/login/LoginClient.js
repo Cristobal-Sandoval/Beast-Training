@@ -125,15 +125,6 @@ export default function LoginClient() {
             {loading ? 'Ingresando...' : 'Iniciar Sesión'}
           </button>
         </form>
-
-        {/* Footer info */}
-        <div className={styles.cardFooter}>
-          <div className={styles.demoAccounts}>
-            <p className={styles.demoTitle}>Cuentas de prueba:</p>
-            <p>Admin: <code>admin@beasttraining.cl</code> / <code>beast123</code></p>
-            <p>Usuario: <code>user@beasttraining.cl</code> / <code>beast123</code></p>
-          </div>
-        </div>
       </div>
     </div>
   );

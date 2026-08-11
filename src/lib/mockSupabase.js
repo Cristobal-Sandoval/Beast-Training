@@ -32,15 +32,22 @@ export default class MockSupabase {
       async signInWithPassword({ email, password }) {
         const emailLower = email.toLowerCase();
         
-        let storedPassword = 'beast123';
+        let defaultPassword = 'beast123';
+        if (emailLower === 'btrainingchile@gmail.com') {
+          defaultPassword = 'Yashark3.8/';
+        } else if (emailLower === 'pruebas@btraining.cl') {
+          defaultPassword = 'prueba123';
+        }
+
+        let storedPassword = defaultPassword;
         if (typeof window !== 'undefined') {
           const pwdKey = 'beast_passwords';
           const passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
-          storedPassword = passwords[emailLower] || 'beast123';
+          storedPassword = passwords[emailLower] || defaultPassword;
         }
 
         if (password !== storedPassword) {
-          return { data: null, error: { message: 'Contraseña incorrecta. (Si fue creada recién por el coach, usa beast123 o la clave provisoria)' } };
+          return { data: null, error: { message: 'Contraseña incorrecta.' } };
         }
 
         const isAdmin = emailLower === 'btrainingchile@gmail.com';
