@@ -453,7 +453,7 @@ function DashboardContent() {
       )}
 
       {profile?.role !== 'admin' && profile?.status !== 'active' ? (
-        <InactiveMemberCard profile={profile} user={user} />
+        <InactiveMemberCard profile={profile} user={user} onOpenPasswordModal={() => setShowPasswordModal(true)} />
       ) : (
         <>
           {/* Comunicados Beast (Urgentes/Normales) */}

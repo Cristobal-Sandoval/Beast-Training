@@ -1,7 +1,7 @@
 import { ShieldAlert, MessageSquare } from 'lucide-react';
 import styles from '../dashboard.module.css';
 
-export default function InactiveMemberCard({ profile, user }) {
+export default function InactiveMemberCard({ profile, user, onOpenPasswordModal }) {
   return (
     <section className={styles.inactiveSection}>
       <div className={`${styles.cardPanel} glass glow-orange ${styles.inactiveCard}`}>
@@ -28,13 +28,24 @@ export default function InactiveMemberCard({ profile, user }) {
           </span>
         </div>
 
-        <button type="button"
-          onClick={() => window.open(`https://wa.me/56948925193?text=${encodeURIComponent(`Hola Coach! Tengo mi cuenta inactiva en el sistema (${profile?.email || user?.email}). ¿Me podrías ayudar a activar mi membresía?`)}`, '_blank')}
-          className={styles.inactiveWhatsAppBtn}
-        >
-          <MessageSquare size={18} />
-          Contactar al Coach por WhatsApp
-        </button>
+        <div className={styles.inactiveActionsWrapper}>
+          <button type="button"
+            onClick={() => window.open(`https://wa.me/56948925193?text=${encodeURIComponent(`Hola Coach! Tengo mi cuenta inactiva en el sistema (${profile?.email || user?.email}). ¿Me podrías ayudar a activar mi membresía?`)}`, '_blank')}
+            className={styles.inactiveWhatsAppBtn}
+          >
+            <MessageSquare size={18} />
+            Contactar al Coach por WhatsApp
+          </button>
+          
+          {onOpenPasswordModal && (
+            <button type="button"
+              onClick={onOpenPasswordModal}
+              className={styles.inactivePasswordBtn}
+            >
+              Cambiar mi Contraseña
+            </button>
+          )}
+        </div>
       </div>
     </section>
   );
