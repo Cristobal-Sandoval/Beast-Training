@@ -11,7 +11,7 @@ const csp = `
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob: https://images.unsplash.com https://logospng.org https://media.istockphoto.com https://*.supabase.co;
   connect-src 'self' https://*.supabase.co https://api.mercadopago.com;
-  frame-src 'none';
+  frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com https://*.openstreetmap.org;
   base-uri 'self';
   form-action 'self';
 `.replace(/\s{2,}/g, ' ').trim();
