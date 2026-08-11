@@ -366,6 +366,77 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {/* WhatsApp Copy & Send Confirmation Modal */}
+                  {s.createdStudentModal && (
+                    <div className={styles.modalOverlay} onClick={() => s.setCreatedStudentModal(null)}>
+                      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px' }}>
+                        <div className={styles.modalHeader}>
+                          <h2 style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Check size={24} /> ¡Alumno Registrado en Producción!
+                          </h2>
+                          <button type="button" onClick={() => s.setCreatedStudentModal(null)} className={styles.modalCloseBtn}>
+                            <X size={20} />
+                          </button>
+                        </div>
+
+                        <div style={{ padding: '16px 0' }}>
+                          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '14px' }}>
+                            La cuenta de <strong>{s.createdStudentModal.name}</strong> ha sido creada en la base de datos. Copia este mensaje de bienvenida para enviárselo por WhatsApp o presiona el botón para abrir el chat directamente:
+                          </p>
+
+                          <div style={{ position: 'relative', background: '#121215', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', fontSize: '0.85rem', color: '#e0e0e0', margin: 0 }}>
+                              {s.createdStudentModal.waMessage}
+                            </pre>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(s.createdStudentModal.waMessage);
+                                showToast('¡Mensaje de WhatsApp copiado al portapapeles!', 'success');
+                              }}
+                              style={{
+                                padding: '10px 18px',
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                border: '1px solid var(--border-light)',
+                                color: '#ffffff',
+                                borderRadius: '6px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              Copiar Mensaje
+                            </button>
+
+                            <a
+                              href={s.createdStudentModal.waUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '10px 18px',
+                                background: '#25D366',
+                                color: '#000000',
+                                borderRadius: '6px',
+                                fontWeight: '700',
+                                textDecoration: 'none',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <MessageSquare size={18} />
+                              Abrir en WhatsApp
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

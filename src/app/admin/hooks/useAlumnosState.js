@@ -182,34 +182,60 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
     finally { setActionLoading(false); }
   };
 
+  const [createdStudentModal, setCreatedStudentModal] = useState(null);
+
   const handleCreateAlumno = async (e) => {
     e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
     const emailLower = newAlumnoEmail.trim().toLowerCase();
     const studentName = newAlumnoName.trim();
     const studentPassword = newAlumnoPassword;
     try {
-      const { data, error } = await supabase.auth.signUp({ email: emailLower, password: studentPassword, options: { data: { full_name: studentName, phone: newAlumnoPhone.trim(), age: newAlumnoAge ? parseInt(newAlumnoAge) : 20, role: 'user', status: 'active' } } });
+      const { data, error } = await supabase.auth.signUp({
+        email: emailLower,
+        password: studentPassword,
+        options: {
+          data: {
+            full_name: studentName,
+            phone: newAlumnoPhone.trim(),
+            age: newAlumnoAge ? parseInt(newAlumnoAge) : 20,
+            role: 'user',
+            status: 'active'
+          }
+        }
+      });
       if (error) throw error;
+
+      const cleanPhone = newAlumnoPhone.trim().replace(/\D/g, '');
+      const formattedPhone = cleanPhone.startsWith('56') ? cleanPhone : cleanPhone ? `56${cleanPhone}` : '';
       
-      const processedMsg = welcomeEmailMessage
-        .replace(/{nombre}/g, studentName || 'Bestia')
-        .replace(/{email}/g, emailLower)
-        .replace(/{clave}/g, studentPassword);
-      
-      const isGcalConnected = typeof window !== 'undefined' && localStorage.getItem('beast_gcal_connected') === 'true';
-      const gcalEmail = typeof window !== 'undefined' ? localStorage.getItem('beast_gcal_email') : '';
-      if (emailLower.endsWith('@gmail.com') && isGcalConnected) {
-        showToast(`¡Alumno registrado! Google Calendar (cuenta: ${gcalEmail}): Invitación y correo Gmail enviado con éxito:\n\n"${processedMsg}"`, 'success');
-      } else {
-        showToast(`¡Alumno registrado con éxito! Se simuló el envío del correo de bienvenida a ${emailLower}:\n\n"${processedMsg}"`, 'success');
-      }
-      
-      setNewAlumnoName(''); setNewAlumnoEmail(''); setNewAlumnoPhone(''); setNewAlumnoAge(''); setNewAlumnoPassword('beast123');
-      setWelcomeEmailMessage("¡Hola {nombre}!\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido registrada con éxito.\n\n🔑 Tus credenciales de acceso provisionales:\n• Usuario: {email}\n• Contraseña: {clave}\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña en tu primer inicio de sesión. ¡A entrenar duro!");
+      const waMessage = `¡Hola ${studentName}! 🏋️‍♂️\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido creada con éxito en el sistema.\n\n🔑 *Tus credenciales de acceso:*\n• *Usuario:* ${emailLower}\n• *Contraseña:* ${studentPassword}\n• *Acceso Portal:* https://beast-training.vercel.app/login\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña provisoria. ¡A entrenar duro! 💪`;
+
+      const waUrl = formattedPhone 
+        ? `https://wa.me/${formattedPhone}?text=${encodeURIComponent(waMessage)}`
+        : `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
+
+      setCreatedStudentModal({
+        name: studentName,
+        email: emailLower,
+        password: studentPassword,
+        phone: newAlumnoPhone.trim(),
+        waMessage,
+        waUrl
+      });
+
+      setNewAlumnoName('');
+      setNewAlumnoEmail('');
+      setNewAlumnoPhone('');
+      setNewAlumnoAge('');
+      setNewAlumnoPassword('beast123');
       setShowCreateModal(false);
       fetchAlumnos();
-    } catch (err) { showToast('Error al crear alumno: ' + err.message, 'error'); }
-    finally { setActionLoading(false); }
+      showToast('¡Alumno registrado con éxito en la base de datos!', 'success');
+    } catch (err) {
+      showToast('Error al crear alumno: ' + err.message, 'error');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDeleteProgress = async (recordId) => {
@@ -228,7 +254,7 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
     chatMessages, newDirectMessage,
     proposedSlot1, proposedSlot2, proposedSlot3,
     showCreateModal, newAlumnoName, newAlumnoEmail, newAlumnoPhone, newAlumnoAge, newAlumnoPassword,
-    welcomeEmailMessage, invitationEmailMessage,
+    welcomeEmailMessage, invitationEmailMessage, createdStudentModal,
     filteredAlumnos,
     setAlumnos, setSelectedAlumno, setAlumnoProgress, setFichaTab, setSearchTerm, setStatusFilter,
     setLogWeight, setLogBodyFat, setLogMuscle, setLogWaist, setLogChest, setLogNotes, setLogDate,
@@ -236,7 +262,7 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
     setChatMessages, setNewDirectMessage,
     setProposedSlot1, setProposedSlot2, setProposedSlot3,
     setShowCreateModal, setNewAlumnoName, setNewAlumnoEmail, setNewAlumnoPhone, setNewAlumnoAge, setNewAlumnoPassword,
-    setWelcomeEmailMessage, setInvitationEmailMessage,
+    setWelcomeEmailMessage, setInvitationEmailMessage, setCreatedStudentModal,
     fetchAlumnos, fetchDirectMessages,
     handleToggleStatus, handleSelectAlumno, handleSendDirectMessage, handleUpdatePersonalDetails,
     handleAddMeasurement, handleUpdateWorkoutPlan, handleProposeSlots, handleCreateAlumno,
