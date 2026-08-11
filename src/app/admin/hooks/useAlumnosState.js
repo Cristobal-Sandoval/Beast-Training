@@ -199,7 +199,7 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
             phone: newAlumnoPhone.trim(),
             age: newAlumnoAge ? parseInt(newAlumnoAge) : 20,
             role: 'user',
-            status: 'active'
+            status: 'inactive'
           }
         }
       });

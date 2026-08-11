@@ -120,24 +120,22 @@ export default function Navbar() {
             Nosotros
           </Link>
           
-          {user && profile?.role !== 'admin' && (
+          {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
+            <Link href="/admin" className={`${styles.link} ${styles.adminLink} ${isActive('/admin') ? styles.active : ''}`}>
+              <Shield size={16} /> Panel Staff
+            </Link>
+          ) : user ? (
             <Link href="/dashboard" className={`${styles.link} ${isActive('/dashboard') ? styles.active : ''}`}>
               Mi Progreso
             </Link>
-          )}
-
-          {profile?.role === 'admin' && (
-            <Link href="/admin" className={`${styles.link} ${styles.adminLink} ${isActive('/admin') ? styles.active : ''}`}>
-              <Shield size={16} /> Admin
-            </Link>
-          )}
+          ) : null}
         </div>
 
         <div className={styles.authContainer}>
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>
-                {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : profile?.full_name || user.email}
+                {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
               </span>
               <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Cerrar sesión">
                 <LogOut size={18} aria-hidden="true" />
@@ -177,20 +175,21 @@ export default function Navbar() {
           <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
             Nosotros
           </Link>
-          {user && profile?.role !== 'admin' && (
+          {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
+            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
+              <Shield size={16} /> Panel Staff
+            </Link>
+          ) : user ? (
             <Link href="/dashboard" className={`${styles.mobileLink} ${isActive('/dashboard') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
               Mi Progreso
             </Link>
-          )}
-          {profile?.role === 'admin' && (
-            <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu}>
-              Panel Admin
-            </Link>
-          )}
+          ) : null}
           <div className={styles.mobileAuth}>
             {user ? (
               <div className={styles.mobileUserInfo}>
-                <span className={styles.mobileUserName}>{profile?.full_name || user.email}</span>
+                <span className={styles.mobileUserName}>
+                  {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
+                </span>
                 <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn} aria-label="Cerrar sesión">
                   <LogOut size={16} aria-hidden="true" /> Cerrar Sesión
                 </button>

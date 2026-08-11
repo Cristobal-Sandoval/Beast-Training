@@ -95,11 +95,26 @@ function DashboardContent() {
     setLoading(true);
     try {
       // 1. Fetch Profile
-      const { data: profData } = await supabase
+      let { data: profData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+
+      if (!profData && user) {
+        profData = {
+          id: userId,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Nueva Bestia',
+          role: user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'admin' : 'user',
+          status: user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'active' : 'inactive',
+        };
+        try {
+          await supabase.from('profiles').upsert([profData]);
+        } catch (e) {
+          console.warn('Auto-upsert profile warning:', e);
+        }
+      }
 
       if (profData) {
         setProfile(profData);
