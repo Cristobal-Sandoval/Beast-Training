@@ -62,18 +62,24 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 - **Evaluaciones Físicas:** Registrar peso, % grasa, masa muscular, diámetros corporales y observaciones de progreso.
 - **Sistema de Citas:** Proponer slots de evaluación y ver la opción seleccionada.
 - **Chat Privado:** Responder mensajes individuales de cada alumno.
+- **Integración Google Calendar:** Conectar cuenta corporativa de Google, sincronizar citas/evaluaciones y vinculación automática de correos Gmail al registrar o escanear alumnos.
 
 ---
 
-## Mejoras Recientes (Julio 2026)
+## Mejoras Recientes (Julio - Agosto 2026)
+
+### Integración Google Calendar & Automatización
+- **Integración con Google Calendar:** Panel dedicado (`IntegrationsPanel.js`) para vincular la cuenta corporativa de Google, forzar escaneo de eventos y registrar logs de sincronización en tiempo real.
+- **Detección Automática de Gmail:** Al registrar un alumno con correo `@gmail.com`, el sistema vincula automáticamente su agenda y le envía notificaciones con enlaces de Google Meet.
 
 ### Rendimiento & Estabilidad
 - **Eliminación de MercadoPago:** Se removió por completo la pasarela de pago con tarjeta, reemplazándola por un flujo de contacto directo y contratación vía WhatsApp más ágil y personalizado.
 - **Imágenes Externas Libres:** Se migró el retrato del Coach a una etiqueta `<img>` nativa de HTML, permitiendo el ingreso de URLs de cualquier servidor externo (Imgur, Pinterest, etc.) en el panel admin sin bloqueos ni necesidad de configurar dominios en `next.config.mjs`.
-- **Estructura Modular del Panel Admin:** Se refactorizaron las vistas administrativas hacia subpaneles modulares e independientes (`Sidebar`, `PlansPanel`, `AboutPanel`, `BlogPanel`, etc.) utilizando hooks de React centralizados para un código limpio y de fácil mantenimiento.
+- **Estructura Modular del Panel Admin:** Se refactorizaron las vistas administrativas hacia subpaneles modulares e independientes (`Sidebar`, `PlansPanel`, `AboutPanel`, `BlogPanel`, `IntegrationsPanel`, etc.) utilizando hooks de React centralizados para un código limpio y de fácil mantenimiento.
 
 ### Usabilidad & Diseño Responsivo (UX/UI)
-- **Panel Admin Responsivo:** Se rediseñó por completo el Panel de Control Staff con grillas adaptativas fluidas que se ajustan perfectamente a teléfonos móviles, tabletas y computadoras de escritorio.
+- **Rediseño del Footer & Navbar:** Botón de inicio de sesión removido del Navbar para no entorpecer la vista comercial, reubicado en el footer como botón estilizado glassmórfico de "Acceso Staff & Alumnos" junto al ícono de Instagram, e integración de la firma personal con link a portafolio (`🐈`).
+- **Navegación Mobile-First Adaptativa:** En móviles, la firma y derechos reservados se reubican al fondo del todo con márgenes de seguridad para no ser tapados por los botones flotantes de WhatsApp y Scroll-to-Top.
 - **Alineación Perfecta en Formularios:** Se unificó la altura mínima y alineación flexible inferior de las etiquetas (`label`) de los campos en fila de grilla, previniendo desfases visuales provocados por títulos de varias líneas.
 - **Botón `primaryBtn` Estilizado:** Implementación del estilo institucional Beast (naranja redondeado con sombras tridimensionales y micro-interacciones) en botones principales del administrador.
 
@@ -92,14 +98,14 @@ src/
 │   ├── planes/                    # Planes con contacto de contratación
 │   ├── dashboard/                 # Dashboard alumno
 │   ├── admin/                     # Panel admin modular (Dashboard, componentes y estado)
-│   │   ├── components/            # Subpaneles del administrador (PlansPanel, AboutPanel, etc.)
+│   │   ├── components/            # Subpaneles del administrador (PlansPanel, IntegrationsPanel, etc.)
 │   │   └── useAdminState.js       # Hook centralizado de estados del panel
 │   ├── login/                     # Login
 │   ├── registro/                  # Registro
 │   └── api/                       # Endpoints backend
 ├── components/
 │   ├── Navbar.js                  # Nav responsiva con auth state
-│   ├── Footer.js                  # Footer con datos de contacto actualizados
+│   ├── Footer.js                  # Footer rediseñado con acceso Staff y firma interactiva
 │   ├── WhatsAppButton.js          # Botón flotante WhatsApp dinámico
 │   ├── ScrollToTop.js            # Botón scroll to top
 │   ├── TopAnnouncementBar.js     # Cintillo de anuncio

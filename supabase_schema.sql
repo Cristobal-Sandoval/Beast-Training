@@ -265,11 +265,22 @@ CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL
 CREATE TABLE IF NOT EXISTS public.about_info (
     id TEXT PRIMARY KEY DEFAULT 'coach-settings',
     title TEXT NOT NULL DEFAULT 'Sobre Beast Training',
-    description TEXT NOT NULL DEFAULT '',
-    coach_name TEXT DEFAULT '',
-    coach_bio TEXT DEFAULT '',
-    coach_image TEXT DEFAULT '',
-    history TEXT DEFAULT '',
+    subtitle TEXT DEFAULT 'conoce al coach',
+    badge_text TEXT DEFAULT 'entrenador certificado',
+    bio_p1 TEXT DEFAULT 'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
+    bio_p2 TEXT DEFAULT 'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
+    image_url TEXT DEFAULT 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
+    spec_1 TEXT DEFAULT 'Certificación CrossFit L-2',
+    spec_2 TEXT DEFAULT 'Preparación Física & Musculación (IPCH)',
+    spec_3 TEXT DEFAULT 'Especialista en Biomecánica aplicada al Fitness',
+    spec_4 TEXT DEFAULT 'Asesoría Nutricional Deportiva Avanzada',
+    coach_instagram TEXT DEFAULT 'https://instagram.com/btrainingchile',
+    coach_tiktok TEXT DEFAULT 'https://tiktok.com/@btrainingchile',
+    gym_instagram TEXT DEFAULT 'https://instagram.com/btrainingchile',
+    gym_facebook TEXT DEFAULT 'https://facebook.com/btrainingchile',
+    whatsapp_number TEXT DEFAULT '56948925193',
+    show_coach_socials BOOLEAN DEFAULT true NOT NULL,
+    show_gym_socials BOOLEAN DEFAULT true NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -277,8 +288,32 @@ ALTER TABLE public.about_info ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for about_info" ON public.about_info FOR SELECT USING (true);
 CREATE POLICY "Allow admins to manage about_info" ON public.about_info FOR ALL USING (public.is_admin());
 
-INSERT INTO public.about_info (id, title, description, coach_name, coach_bio, history)
-VALUES ('coach-settings', 'Sobre Beast Training', 'Beast Training es un gimnasio de alto rendimiento en Concepción, Chile.', 'Coach Javier', 'Entrenador certificado con más de 10 años de experiencia.', 'Beast Training nació en 2020 con la misión de transformar vidas a través del entrenamiento funcional de alta intensidad.')
+INSERT INTO public.about_info (
+    id, title, subtitle, badge_text, bio_p1, bio_p2, image_url,
+    spec_1, spec_2, spec_3, spec_4,
+    coach_instagram, coach_tiktok, gym_instagram, gym_facebook,
+    whatsapp_number, show_coach_socials, show_gym_socials
+)
+VALUES (
+    'coach-settings',
+    'Sobre Beast Training',
+    'conoce al coach',
+    'entrenador certificado',
+    'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
+    'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
+    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
+    'Certificación CrossFit L-2',
+    'Preparación Física & Musculación (IPCH)',
+    'Especialista en Biomecánica aplicada al Fitness',
+    'Asesoría Nutricional Deportiva Avanzada',
+    'https://instagram.com/btrainingchile',
+    'https://tiktok.com/@btrainingchile',
+    'https://instagram.com/btrainingchile',
+    'https://facebook.com/btrainingchile',
+    '56948925193',
+    true,
+    true
+)
 ON CONFLICT (id) DO NOTHING;
 
 
