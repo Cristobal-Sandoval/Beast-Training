@@ -43,7 +43,7 @@ export default class MockSupabase {
           return { data: null, error: { message: 'Contraseña incorrecta. (Si fue creada recién por el coach, usa beast123 o la clave provisoria)' } };
         }
 
-        const isAdmin = emailLower === 'admin@beasttraining.cl';
+        const isAdmin = emailLower === 'btrainingchile@gmail.com';
         const userId = isAdmin ? 'admin-uuid-123' : 'user-uuid-456';
 
         let userMetadata = { role: 'user', status: 'inactive', password_changed: false };

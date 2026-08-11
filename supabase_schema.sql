@@ -105,11 +105,11 @@ BEGIN
         new.email,
         coalesce(new.raw_user_meta_data->>'full_name', 'Nueva Bestia'),
         CASE 
-            WHEN new.email = 'admin@beasttraining.cl' THEN 'admin'::user_role
+            WHEN new.email = 'btrainingchile@gmail.com' THEN 'admin'::user_role
             ELSE 'user'::user_role
         END,
         CASE
-            WHEN new.email = 'admin@beasttraining.cl' THEN 'active' -- Admin is active by default
+            WHEN new.email = 'btrainingchile@gmail.com' THEN 'active' -- Admin is active by default
             ELSE 'inactive'
         END,
         'Rutina de adaptación: 3 series de 12 repeticiones en circuitos de acondicionamiento general.'

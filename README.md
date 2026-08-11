@@ -172,7 +172,7 @@ Ejecuta `supabase_schema.sql` en el SQL Editor de Supabase para crear todas las 
 
 | Rol | Email | Contraseña |
 |---|---|---|
-| Administrador | `admin@beasttraining.cl` | `beast123` |
+| Administrador | `btrainingchile@gmail.com` | `beast123` |
 | Alumno | `user@beasttraining.cl` | `beast123` |
 
 ---
