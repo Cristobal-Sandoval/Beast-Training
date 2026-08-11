@@ -90,12 +90,14 @@ export default function Footer() {
           <h3 className={styles.heading}>Ubicación</h3>
           <div className={styles.mapWrapper}>
             <iframe
-              title="Ubicación Beast Training Concepción"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=-73.0565%2C-36.8295%2C-73.0505%2C-36.8245&amp;layer=mapnik&amp;marker=-36.8270%2C-73.0535"
+              title="Beast Training - Libertador Bernardo O'Higgins 940, Concepción"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193.376!2d-73.0535!3d-36.8270!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9626e4fb2d711a91%3A0xa64b38d38096f9a0!2sLibertador%20Gral.%20Bernardo%20O'Higgins%20940%2C%20Concepci%C3%B3n%2C%20B%C3%ADob%C3%ADo%2C%20Chile!5e0!3m2!1ses-419!2scl!4v1"
               width="100%"
               height="130"
               style={{ border: 0, borderRadius: '10px' }}
+              allowFullScreen=""
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
               className={styles.mapIframe}
             />
             <a
