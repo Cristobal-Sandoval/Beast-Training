@@ -27,6 +27,10 @@ export default function IntegrationsPanel() {
       setConnected(isConnected);
       setGmailAccount(savedEmail);
       setAdminGmailInput(savedEmail);
+      // Default to AGENDA view on mobile (narrower rendering, no horizontal overflow)
+      if (window.innerWidth < 768) {
+        setViewMode('AGENDA');
+      }
     }
   }, []);
 
@@ -247,7 +251,7 @@ export default function IntegrationsPanel() {
           <div style={{ marginTop: '24px' }}>
             {/* View Mode Switcher */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {[
                   { id: 'WEEK', label: 'Vista Semanal' },
                   { id: 'MONTH', label: 'Vista Mensual' },
@@ -279,7 +283,7 @@ export default function IntegrationsPanel() {
               </span>
             </div>
 
-            {/* Calendar Iframe */}
+            {/* Calendar Iframe — scrollable on mobile */}
             <div style={{
               width: '100%',
               borderRadius: '12px',
@@ -288,17 +292,27 @@ export default function IntegrationsPanel() {
               background: '#0d0d0f',
               boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)'
             }}>
-              <iframe
-                key={`${calendarKey}-${viewMode}`}
-                src={calendarSrc}
-                style={{
-                  width: '100%',
-                  height: '560px',
-                  border: 0,
-                  display: 'block'
-                }}
-                title="Google Calendar Beast Training"
-              />
+              {/* Scroll wrapper: lets iframe scroll horizontally on phones without breaking the page layout */}
+              <div style={{
+                width: '100%',
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                WebkitOverflowScrolling: 'touch'
+              }}>
+                <iframe
+                  key={`${calendarKey}-${viewMode}`}
+                  src={calendarSrc}
+                  style={{
+                    /* min-width keeps Google Calendar usable; wrapper scrolls it on narrow screens */
+                    minWidth: viewMode === 'AGENDA' ? '320px' : '600px',
+                    width: '100%',
+                    height: 'clamp(380px, 60vh, 560px)',
+                    border: 0,
+                    display: 'block'
+                  }}
+                  title="Google Calendar Beast Training"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -314,7 +328,7 @@ export default function IntegrationsPanel() {
           Crea el evento con un clic. Google Calendar invitará automáticamente al alumno por correo y generará el recordatorio.
         </p>
 
-        <form onSubmit={handleCreateGoogleEvent} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+        <form onSubmit={handleCreateGoogleEvent} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
               Título del Evento

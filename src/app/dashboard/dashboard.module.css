@@ -104,6 +104,7 @@
 @media (max-width: 768px) {
   .membershipCard {
     width: 100%;
+    min-width: 0;
   }
 }
 

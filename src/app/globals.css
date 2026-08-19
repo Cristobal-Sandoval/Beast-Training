@@ -33,15 +33,20 @@
   margin: 0;
 }
 
-html, body {
-  max-width: 100vw;
-  overflow-x: hidden;
+html {
+  /* clip instead of hidden: prevents horizontal scrollbar globally without
+     clipping position:sticky/fixed children or internal scroll containers */
+  overflow-x: clip;
   background: var(--background-bg);
+  scroll-behavior: smooth;
+}
+
+html, body {
+  max-width: 100%;
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.6;
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -50,6 +55,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* Custom Scrollbar */
