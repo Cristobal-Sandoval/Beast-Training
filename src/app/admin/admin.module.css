@@ -348,8 +348,14 @@
 /* List Items Grid */
 .listGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+}
+
+@media (max-width: 540px) {
+  .listGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .listItemCard {
@@ -954,7 +960,11 @@
   .toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
+    gap: 12px;
+  }
+  /* Prevent "Nuevo Alumno" button from stretching full width on mobile */
+  .toolbar > .primaryBtn {
+    align-self: flex-start;
   }
 }
 
@@ -1066,12 +1076,18 @@
   font-weight: 700;
   margin: 0;
   color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardTopRow p {
   font-size: 0.8rem;
   color: var(--text-secondary);
   margin: 2px 0 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardActions {

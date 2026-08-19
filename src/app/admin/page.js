@@ -313,7 +313,7 @@ export default function AdminDashboard() {
                       <div key={alumno.id} className={`${styles.studentCard} glass`}>
                         <div className={styles.cardTopRow}>
                           <div className={styles.studentAvatar}>{alumno.full_name?.charAt(0) || '?'}</div>
-                          <div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
                             <h3>{alumno.full_name || 'Sin nombre'}</h3>
                             <p>{alumno.email}</p>
                           </div>

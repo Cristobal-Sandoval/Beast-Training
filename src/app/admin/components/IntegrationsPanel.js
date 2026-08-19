@@ -116,20 +116,22 @@ export default function IntegrationsPanel() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid var(--border-light)',
               color: '#ffffff',
-              padding: '8px 16px',
+              padding: '8px 14px',
               borderRadius: '8px',
-              fontSize: '0.85rem',
+              fontSize: '0.8rem',
               fontWeight: '600',
               textDecoration: 'none',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
-            <ExternalLink size={16} />
-            <span>Abrir en App Google Calendar</span>
+            <ExternalLink size={14} />
+            <span>Abrir Calendar</span>
           </a>
         </div>
 
@@ -138,27 +140,30 @@ export default function IntegrationsPanel() {
           background: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid var(--border-light)',
           borderRadius: '12px',
-          padding: '16px 20px',
+          padding: '14px 16px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '16px'
+          gap: '12px',
+          overflow: 'hidden',
+          minWidth: 0
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
             <div style={{
               width: '12px',
               height: '12px',
               borderRadius: '50%',
               background: connected ? '#10b981' : '#ef4444',
-              boxShadow: connected ? '0 0 10px #10b981' : '0 0 10px #ef4444'
+              boxShadow: connected ? '0 0 10px #10b981' : '0 0 10px #ef4444',
+              flexShrink: 0
             }} />
-            <div>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
               <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>
                 {connected ? 'Cuenta Conectada:' : 'Ingresa tu Cuenta de Google:'}
               </span>
               {connected && (
-                <span style={{ marginLeft: '8px', color: 'var(--primary)', fontWeight: '600' }}>
+                <span style={{ marginLeft: '8px', color: 'var(--primary)', fontWeight: '600', display: 'inline-block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'bottom' }}>
                   {gmailAccount}
                 </span>
               )}
@@ -180,7 +185,8 @@ export default function IntegrationsPanel() {
                   padding: '8px 14px',
                   color: '#ffffff',
                   fontSize: '0.9rem',
-                  minWidth: '260px'
+                  width: '100%',
+                  flex: 1
                 }}
               />
               <button
@@ -253,9 +259,9 @@ export default function IntegrationsPanel() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {[
-                  { id: 'WEEK', label: 'Vista Semanal' },
-                  { id: 'MONTH', label: 'Vista Mensual' },
-                  { id: 'AGENDA', label: 'Agenda (Móvil / Lista)' }
+                  { id: 'WEEK', label: 'Semana' },
+                  { id: 'MONTH', label: 'Mensual' },
+                  { id: 'AGENDA', label: 'Agenda' }
                 ].map((mode) => (
                   <button
                     key={mode.id}
