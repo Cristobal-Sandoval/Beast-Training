@@ -95,9 +95,46 @@
   }
 }
 
-/* Sidebar Tab buttons & Mobile Select */
+/* Sidebar Tab buttons & Mobile Chips */
 .mobileTabSelector {
   display: none;
+}
+
+.mobileTabChips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobileTabChips::-webkit-scrollbar {
+  display: none;
+}
+
+.mobileTabChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  padding: 10px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mobileTabChipActive {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--border-primary);
+  box-shadow: 0 4px 12px rgba(230, 74, 0, 0.4);
 }
 
 .sidebarDesktop {
@@ -110,7 +147,7 @@
   .mobileTabSelector {
     display: block;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
   .sidebarDesktop {
     display: none;

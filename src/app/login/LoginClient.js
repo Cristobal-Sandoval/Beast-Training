@@ -73,10 +73,10 @@ export default function LoginClient() {
       <div className={`${styles.card} glass glow-orange`}>
         {/* Header */}
         <div className={styles.header}>
-          <div className={styles.logo}>
-            <Dumbbell className={styles.logoIcon} />
-            <h2>BEAST<span className={styles.accent}>LOGIN</span></h2>
+          <div className={styles.logoWrapper}>
+            <img src="/logo-icon.svg" alt="Beast Training" className={styles.logoImg} />
           </div>
+          <h2>BEAST<span className={styles.accent}>LOGIN</span></h2>
           <p className={styles.subtitle}>Saca la bestia que llevas dentro</p>
         </div>
 

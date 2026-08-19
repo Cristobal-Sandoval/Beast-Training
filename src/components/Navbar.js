@@ -102,8 +102,7 @@ export default function Navbar() {
     <nav className={styles.nav}>
       <div className={styles.container}>
         <Link href="/" className={styles.logo} onClick={closeMobileMenu} aria-label="Beast Training — Ir al inicio">
-          <Dumbbell className={styles.logoIcon} aria-hidden="true" />
-          <span>BEAST<span className={styles.accent}>TRAINING</span></span>
+          <img src="/logo-full.svg" alt="Beast Training" className={styles.logoImg} />
         </Link>
 
         <div className={styles.links}>

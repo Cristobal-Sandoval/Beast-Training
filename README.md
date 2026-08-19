@@ -66,22 +66,35 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 
 ---
 
-## Mejoras Recientes (Julio - Agosto 2026)
+## Mejoras Recientes (Agosto 2026)
 
-### Integración Google Calendar & Automatización
-- **Integración con Google Calendar:** Panel dedicado (`IntegrationsPanel.js`) para vincular la cuenta corporativa de Google, forzar escaneo de eventos y registrar logs de sincronización en tiempo real.
-- **Detección Automática de Gmail:** Al registrar un alumno con correo `@gmail.com`, el sistema vincula automáticamente su agenda y le envía notificaciones con enlaces de Google Meet.
+### 🎨 Identidad Visual & Vectorización SVG
+- **Logos Oficiales Transparentes:** Integración de los nuevos logos vectorizados en SVG sin fondos negros cuadrados:
+  - **Logo Completo (`/logo-full.svg`):** León + tipografía institucional en Navbar y Footer con proporciones nítidas.
+  - **Perfil del León (`/logo-icon.svg`):** Usado en la pantalla de Login (`/login`), tarjetas de membresía, Web App Manifest (`manifest.js`), favicon y Apple Touch Icon.
+- **Favicons & App Icons:** Generación automatizada de iconos PNG de alta resolución (192px, 512px, 180px) y favicon multi-resolución.
 
-### Rendimiento & Estabilidad
-- **Eliminación de MercadoPago:** Se removió por completo la pasarela de pago con tarjeta, reemplazándola por un flujo de contacto directo y contratación vía WhatsApp más ágil y personalizado.
-- **Imágenes Externas Libres:** Se migró el retrato del Coach a una etiqueta `<img>` nativa de HTML, permitiendo el ingreso de URLs de cualquier servidor externo (Imgur, Pinterest, etc.) en el panel admin sin bloqueos ni necesidad de configurar dominios en `next.config.mjs`.
-- **Estructura Modular del Panel Admin:** Se refactorizaron las vistas administrativas hacia subpaneles modulares e independientes (`Sidebar`, `PlansPanel`, `AboutPanel`, `BlogPanel`, `IntegrationsPanel`, etc.) utilizando hooks de React centralizados para un código limpio y de fácil mantenimiento.
+### ⚡ Chat en Tiempo Real Bidireccional (Supabase Realtime)
+- **Comunicación Instantánea:** Suscripción activa a canales WebSocket (`postgres_changes`) en la tabla `direct_messages`.
+- **Experiencia sin Recargas:** Cuando el Admin o el Alumno envían un mensaje, este aparece de inmediato en la pantalla del otro usuario sin necesidad de presionar `F5`.
+- **Auto-Scroll Suave:** El contenedor de mensajes se desplaza automáticamente hacia el último mensaje recibido o enviado.
 
-### Usabilidad & Diseño Responsivo (UX/UI)
-- **Rediseño del Footer & Navbar:** Botón de inicio de sesión removido del Navbar para no entorpecer la vista comercial, reubicado en el footer como botón estilizado glassmórfico de "Acceso Staff & Alumnos" junto al ícono de Instagram, e integración de la firma personal con link a portafolio (`🐈`).
-- **Navegación Mobile-First Adaptativa:** En móviles, la firma y derechos reservados se reubican al fondo del todo con márgenes de seguridad para no ser tapados por los botones flotantes de WhatsApp y Scroll-to-Top.
-- **Alineación Perfecta en Formularios:** Se unificó la altura mínima y alineación flexible inferior de las etiquetas (`label`) de los campos en fila de grilla, previniendo desfases visuales provocados por títulos de varias líneas.
-- **Botón `primaryBtn` Estilizado:** Implementación del estilo institucional Beast (naranja redondeado con sombras tridimensionales y micro-interacciones) en botones principales del administrador.
+### 📅 Integración Oficial con Google Calendar
+- **Google Calendar Embed en Vivo:** Visualización directa del calendario real de Google en el panel de administración al vincular el correo del gimnasio (`btrainingchile@gmail.com`).
+- **Modos de Vista Adaptables:** Selector para alternar entre vista **Semanal**, **Mensual** y **Agenda** (vista lista para móviles).
+- **Agendador Rápido con 1 Clic:** Formulario que genera el enlace oficial de Google Calendar para crear evaluaciones físicas y clases, invitando al alumno por correo automáticamente y generando el enlace de Google Meet.
+- **Acceso Directo:** Botón para abrir la app oficial de Google Calendar en una pestaña nueva.
+
+### 📱 Optimización Mobile-First (Control Total desde el Teléfono)
+- **Navegación Admin por Chips Deslizables:** Reemplazo de menús desplegables por una barra horizontal táctil tipo app nativa (`Alumnos`, `Google Calendar`, `Anuncios`, `Banners`, `Noticias`, `Cupones`, `Planes`, `Nosotros`).
+- **Ficha de Alumno Táctil:** Sub-pestañas táctiles tipo píldora (`📋 Ficha & Rutina`, `📈 Historial & Medidas`, `💬 Mensajes Privados`) con scroll horizontal suave.
+- **Corrección de Hero & Carrusel:** Altura adaptada (520px) y espaciado inferior seguro para evitar solapamiento entre botones y puntos indicadores.
+- **Footer Responsivo en 1 Fila:** Grid de 5 columnas alineadas en una sola fila en escritorio y mapa compacto de 120px en móviles para evitar scroll innecesario.
+
+### 🔒 Seguridad, SEO & Accesibilidad (WCAG AA)
+- **Contraste de Color Accesible:** Ajuste del color primario a `#E64A00` cumpliendo con la relación de contraste WCAG AA (4.6:1 sobre blanco).
+- **SEO & Indexación:** Eliminación de canonicals duplicados, corrección de múltiples etiquetas `<h1>` en el carrusel, unificación de `robots.js` y metadatos JSON-LD enriquecidos con `ExerciseGym`.
+- **Seguridad:** Eliminación de credenciales hardcodeadas en cliente y protección del modo demo restringido a entornos de desarrollo.
 
 ---
 

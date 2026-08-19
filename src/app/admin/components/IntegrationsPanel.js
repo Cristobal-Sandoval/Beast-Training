@@ -1,438 +1,440 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, RefreshCw, Lock, Link2 } from 'lucide-react';
+import { Calendar, RefreshCw, Link2, ExternalLink, PlusCircle, CheckCircle2, Info, Eye, Clock, ShieldCheck, Mail } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 import styles from '../admin.module.css';
 
-export default function IntegrationsPanel({ actionLoading }) {
+export default function IntegrationsPanel() {
   const [connected, setConnected] = useState(false);
-  const [connecting, setConnecting] = useState(false);
   const [gmailAccount, setGmailAccount] = useState('');
-  const [adminGmailInput, setAdminGmailInput] = useState('staff.beasttraining@gmail.com');
-  const [autoSync, setAutoSync] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [logs, setLogs] = useState([]);
+  const [adminGmailInput, setAdminGmailInput] = useState('btrainingchile@gmail.com');
+  const [viewMode, setViewMode] = useState('WEEK'); // WEEK, MONTH, AGENDA
+  const [calendarKey, setCalendarKey] = useState(0);
+
+  // Quick Event Scheduler State
+  const [eventTitle, setEventTitle] = useState('Evaluación Física - Beast Training');
+  const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
+  const [eventTime, setEventTime] = useState('10:00');
+  const [eventDuration, setEventDuration] = useState('60'); // minutes
+  const [eventStudentEmail, setEventStudentEmail] = useState('');
+  const [eventDescription, setEventDescription] = useState('Evaluación física, medición de pliegues corporales y ajuste de rutina personalizada en Beast Training.');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isConnected = localStorage.getItem('beast_gcal_connected') === 'true';
-      const email = localStorage.getItem('beast_gcal_email') || 'staff.beasttraining@gmail.com';
-      const auto = localStorage.getItem('beast_gcal_autosync') !== 'false';
+      const savedEmail = localStorage.getItem('beast_gcal_email') || 'btrainingchile@gmail.com';
+      const isConnected = localStorage.getItem('beast_gcal_connected') === 'true' || !!savedEmail;
       setConnected(isConnected);
-      setGmailAccount(isConnected ? email : '');
-      setAdminGmailInput(email);
-      setAutoSync(auto);
+      setGmailAccount(savedEmail);
+      setAdminGmailInput(savedEmail);
     }
   }, []);
 
-  const handleConnect = () => {
-    if (connected) {
-      if (window.confirm('¿Estás seguro de que deseas desconectar Google Calendar?')) {
-        setConnected(false);
-        setGmailAccount('');
-        localStorage.setItem('beast_gcal_connected', 'false');
-        localStorage.removeItem('beast_gcal_email');
-        setLogs([]);
-      }
+  const handleConnect = (e) => {
+    e?.preventDefault();
+    const cleanEmail = adminGmailInput.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      showToast('Ingresa un correo de Google válido (ej: btrainingchile@gmail.com)', 'error');
       return;
     }
 
-    if (!adminGmailInput.trim() || !adminGmailInput.includes('@')) {
-      alert('Por favor ingresa un correo de administrador válido.');
+    setGmailAccount(cleanEmail);
+    setConnected(true);
+    localStorage.setItem('beast_gcal_connected', 'true');
+    localStorage.setItem('beast_gcal_email', cleanEmail);
+    setCalendarKey(prev => prev + 1);
+    showToast(`Google Calendar vinculado a ${cleanEmail}`, 'success');
+  };
+
+  const handleDisconnect = () => {
+    if (window.confirm('¿Deseas desconectar o cambiar la cuenta de Google Calendar?')) {
+      setConnected(false);
+      setGmailAccount('');
+      localStorage.setItem('beast_gcal_connected', 'false');
+      localStorage.removeItem('beast_gcal_email');
+      showToast('Google Calendar desconectado', 'info');
+    }
+  };
+
+  // Generate official Google Calendar event creation URL
+  const handleCreateGoogleEvent = (e) => {
+    e.preventDefault();
+    if (!eventTitle.trim()) {
+      showToast('Por favor ingresa un título para el evento', 'error');
       return;
     }
 
-    setConnecting(true);
-    setLogs([]);
-    setTimeout(() => {
-      setConnecting(false);
-      setConnected(true);
-      const emailToUse = adminGmailInput.trim().toLowerCase();
-      setGmailAccount(emailToUse);
-      localStorage.setItem('beast_gcal_connected', 'true');
-      localStorage.setItem('beast_gcal_email', emailToUse);
-      
-      setLogs([
-        '🔌 Estableciendo túnel con Google OAuth 2.0...',
-        `✅ Autorización exitosa para ${emailToUse}`,
-        '📅 Importando calendario principal: "Evaluaciones Beast & Clases"',
-        '✨ Webhook de sincronización en tiempo real registrado.'
-      ]);
-    }, 1500);
+    // Format dates to ISO / Google Calendar format (YYYYMMDDTHHmmSS)
+    const [startHour, startMin] = (eventTime || '10:00').split(':').map(Number);
+    const startDate = new Date(`${eventDate}T${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}:00`);
+    const endDate = new Date(startDate.getTime() + parseInt(eventDuration || '60') * 60 * 1000);
+
+    const formatGCalDate = (d) => {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    };
+
+    const datesParam = `${formatGCalDate(startDate)}/${formatGCalDate(endDate)}`;
+    const locationParam = encodeURIComponent("Libertador Bernardo O'Higgins 940, Piso 4, Oficina 404, Concepción");
+    const detailsParam = encodeURIComponent(eventDescription);
+    const titleParam = encodeURIComponent(eventTitle);
+    const addParam = eventStudentEmail ? `&add=${encodeURIComponent(eventStudentEmail.trim())}` : '';
+
+    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titleParam}&dates=${datesParam}&details=${detailsParam}&location=${locationParam}${addParam}&sf=true&output=xml`;
+
+    window.open(gcalUrl, '_blank', 'noopener,noreferrer');
+    showToast('Abriendo creador de evento en Google Calendar...', 'success');
   };
 
-  const handleToggleAutoSync = () => {
-    const newVal = !autoSync;
-    setAutoSync(newVal);
-    localStorage.setItem('beast_gcal_autosync', String(newVal));
-  };
-
-  const handleSyncNow = () => {
-    if (!connected) return;
-    setSyncing(true);
-    setLogs([`🔄 Iniciando sincronización de clases desde Google Calendar...`]);
-
-    setTimeout(() => {
-      setLogs(prev => [...prev, '🔍 Escaneando eventos de Google Calendar del mes de Julio 2026...']);
-    }, 800);
-
-    setTimeout(() => {
-      setLogs(prev => [
-        ...prev,
-        '📅 Encontrado evento: "Evaluación Física - Carlos M." (carlos.m@gmail.com) para el 16/07 10:00.',
-        '📅 Encontrado evento: "Clase de Prueba - Sofia Torres" (sofia.torres94@gmail.com) para el 17/07 15:30.'
-      ]);
-    }, 1800);
-
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const profilesKey = 'beast_profiles_list';
-        let profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]');
-        
-        // Carlos Mendoza
-        const carlosIdx = profiles.findIndex(p => p.email?.toLowerCase() === 'carlos.m@gmail.com');
-        if (carlosIdx !== -1) {
-          profiles[carlosIdx] = {
-            ...profiles[carlosIdx],
-            proposed_slots: '16/07 10:00',
-            status: 'active'
-          };
-        } else {
-          profiles.push({
-            id: 'carlos-uuid-sync-123',
-            email: 'carlos.m@gmail.com',
-            full_name: 'Carlos Mendoza',
-            age: 29,
-            phone: '+56977889900',
-            role: 'user',
-            status: 'active',
-            password_changed: false,
-            workout_plan: 'Plan HIIT inicial - Evaluado en Google Calendar',
-            proposed_slots: '16/07 10:00'
-          });
-        }
-
-        // Sofia Torres
-        const sofiaIdx = profiles.findIndex(p => p.email?.toLowerCase() === 'sofia.torres94@gmail.com');
-        if (sofiaIdx !== -1) {
-          profiles[sofiaIdx] = {
-            ...profiles[sofiaIdx],
-            proposed_slots: '17/07 15:30',
-            status: 'active'
-          };
-        } else {
-          profiles.push({
-            id: 'sofia-uuid-sync-456',
-            email: 'sofia.torres94@gmail.com',
-            full_name: 'Sofia Torres',
-            age: 26,
-            phone: '+56966554433',
-            role: 'user',
-            status: 'active',
-            password_changed: false,
-            workout_plan: 'Clase de Prueba Agendada en Google Calendar',
-            proposed_slots: '17/07 15:30'
-          });
-        }
-
-        localStorage.setItem(profilesKey, JSON.stringify(profiles));
-        window.dispatchEvent(new Event('beast_alumnos_updated'));
-      }
-
-      setLogs(prev => [
-        ...prev,
-        '✅ Actualizado correo de alumno carlos.m@gmail.com en el panel con su nueva cita.',
-        '✅ Creado registro provisional para alumna sofia.torres94@gmail.com y vinculada a la clase.',
-        '🎉 ¡Sincronización completada! 2 citas vinculadas, correos validados con éxito.'
-      ]);
-      setSyncing(false);
-    }, 3200);
-  };
+  const calendarSrc = gmailAccount
+    ? `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(gmailAccount)}&ctz=America%2FSantiago&bgcolor=%230d0d0f&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=1&mode=${viewMode}`
+    : '';
 
   return (
     <div className={styles.tabContent}>
+      {/* Header Panel */}
       <div className={`${styles.cardPanel} glass glow-orange`}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <Calendar size={28} style={{ color: 'var(--primary)' }} />
-          <h2 style={{ margin: 0 }}>Sincronización con Google Calendar</h2>
-        </div>
-        <p className={styles.panelInstructions}>
-          Conecta la cuenta de Google del gimnasio para programar evaluaciones físicas y clases de forma bidireccional. 
-          Al ingresar un correo Gmail de un alumno, el sistema lo asociará automáticamente con sus eventos agendados.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Calendar size={28} style={{ color: 'var(--primary)' }} />
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Google Calendar Oficial</h2>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Visualiza y gestiona tu calendario real de Google directamente en tu panel de control.
+              </p>
+            </div>
+          </div>
 
+          <a
+            href="https://calendar.google.com/calendar/r"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-light)',
+              color: '#ffffff',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              textDecoration: 'none',
+              transition: 'all 0.2s'
+            }}
+          >
+            <ExternalLink size={16} />
+            <span>Abrir en App Google Calendar</span>
+          </a>
+        </div>
+
+        {/* Connection Setup Bar */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid var(--border-light)',
           borderRadius: '12px',
-          padding: '24px',
-          margin: '20px 0',
+          padding: '16px 20px',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '20px'
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px'
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              background: connected ? '#10b981' : '#ef4444',
+              boxShadow: connected ? '0 0 10px #10b981' : '0 0 10px #ef4444'
+            }} />
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <div style={{
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  background: connected ? '#10b981' : '#ef4444',
-                  boxShadow: connected ? '0 0 10px #10b981' : '0 0 10px #ef4444'
-                }} />
-                <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>
-                  {connected ? 'Conectado a Google Calendar' : 'Google Calendar Desconectado'}
+              <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>
+                {connected ? 'Cuenta Conectada:' : 'Ingresa tu Cuenta de Google:'}
+              </span>
+              {connected && (
+                <span style={{ marginLeft: '8px', color: 'var(--primary)', fontWeight: '600' }}>
+                  {gmailAccount}
                 </span>
-              </div>
-              {connected ? (
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  Cuenta vinculada: <strong>{gmailAccount}</strong>
-                </p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
-                  <label htmlFor="adminGmailInput" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                    Correo Gmail del Administrador (Gimnasio)
-                  </label>
-                  <input
-                    id="adminGmailInput"
-                    type="email"
-                    value={adminGmailInput}
-                    onChange={(e) => setAdminGmailInput(e.target.value)}
-                    placeholder="ejemplo@gmail.com"
-                    style={{
-                      background: 'rgba(0, 0, 0, 0.2)',
-                      border: '1px solid var(--border-light)',
-                      borderRadius: '6px',
-                      padding: '8px 12px',
-                      color: '#fff',
-                      fontSize: '0.85rem',
-                      width: '280px'
-                    }}
-                  />
-                </div>
               )}
             </div>
-
-            <button
-              type="button"
-              onClick={handleConnect}
-              disabled={connecting}
-              style={{
-                background: connected ? 'rgba(239, 68, 68, 0.1)' : 'var(--primary)',
-                border: connected ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid var(--border-primary)',
-                color: connected ? '#ef4444' : '#ffffff',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {connecting ? (
-                <>
-                  <RefreshCw size={16} className={styles.spinner} />
-                  <span>Conectando...</span>
-                </>
-              ) : connected ? (
-                <span>Desconectar Google</span>
-              ) : (
-                <>
-                  <Link2 size={16} />
-                  <span>Conectar Google Calendar</span>
-                </>
-              )}
-            </button>
           </div>
 
-          {connected && (
-            <div style={{
-              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-              paddingTop: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '2px' }}>
-                    Sincronización Automática Bidireccional
-                  </span>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    Al ingresar el Gmail del alumno en su ficha, busca y asocia eventos de calendario automáticamente.
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleToggleAutoSync}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: autoSync ? 'var(--primary)' : 'var(--text-muted)',
-                    transition: 'color 0.2s'
-                  }}
-                >
-                  <div style={{
-                    width: '50px',
-                    height: '26px',
-                    borderRadius: '13px',
-                    background: autoSync ? 'var(--primary)' : 'rgba(255, 255, 255, 0.1)',
-                    position: 'relative',
-                    transition: 'background-color 0.2s'
-                  }}>
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      background: '#ffffff',
-                      position: 'absolute',
-                      top: '3px',
-                      left: autoSync ? '27px' : '3px',
-                      transition: 'left 0.2s'
-                    }} />
-                  </div>
-                </button>
-              </div>
+          {!connected ? (
+            <form onSubmit={handleConnect} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="email"
+                value={adminGmailInput}
+                onChange={(e) => setAdminGmailInput(e.target.value)}
+                placeholder="ej: btrainingchile@gmail.com"
+                required
+                style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  color: '#ffffff',
+                  fontSize: '0.9rem',
+                  minWidth: '260px'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  background: 'var(--primary)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Link2 size={16} />
+                <span>Vincular Calendario</span>
+              </button>
+            </form>
+          ) : (
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setCalendarKey(prev => prev + 1)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--border-light)',
+                  color: '#ffffff',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <RefreshCw size={14} />
+                <span>Refrescar</span>
+              </button>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'rgba(255, 255, 255, 0.01)',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '1px dashed rgba(255, 255, 255, 0.05)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <RefreshCw size={16} style={{ color: 'var(--text-secondary)' }} />
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    ¿Quieres forzar el escaneo de eventos y correos de Google Calendar ahora mismo?
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSyncNow}
-                  disabled={syncing}
-                  style={{
-                    background: 'rgba(255, 87, 0, 0.1)',
-                    border: '1px solid rgba(255, 87, 0, 0.3)',
-                    color: 'var(--primary)',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  {syncing ? <RefreshCw size={14} className={styles.spinner} /> : null}
-                  <span>{syncing ? 'Sincronizando...' : 'Sincronizar Citas'}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#ef4444',
+                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Cambiar Cuenta
+              </button>
             </div>
           )}
         </div>
 
-        {logs.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', fontWeight: '700' }}>Registro de Actividad</h4>
+        {/* Live Google Calendar Embed */}
+        {connected && (
+          <div style={{ marginTop: '24px' }}>
+            {/* View Mode Switcher */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[
+                  { id: 'WEEK', label: 'Vista Semanal' },
+                  { id: 'MONTH', label: 'Vista Mensual' },
+                  { id: 'AGENDA', label: 'Agenda (Móvil / Lista)' }
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => { setViewMode(mode.id); setCalendarKey(prev => prev + 1); }}
+                    style={{
+                      background: viewMode === mode.id ? 'var(--primary)' : 'rgba(255, 255, 255, 0.04)',
+                      border: viewMode === mode.id ? '1px solid var(--border-primary)' : '1px solid var(--border-light)',
+                      color: viewMode === mode.id ? '#ffffff' : 'var(--text-secondary)',
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      fontSize: '0.85rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Zona Horaria: America/Santiago (Chile)
+              </span>
+            </div>
+
+            {/* Calendar Iframe */}
             <div style={{
-              background: '#070708',
+              width: '100%',
+              borderRadius: '12px',
+              overflow: 'hidden',
               border: '1px solid var(--border-light)',
-              borderRadius: '8px',
-              padding: '16px',
-              fontFamily: 'monospace',
-              fontSize: '0.8rem',
-              color: '#d1d5db',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              maxHeight: '200px',
-              overflowY: 'auto'
+              background: '#0d0d0f',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)'
             }}>
-              {logs.map((log, index) => (
-                <div key={index} style={{ lineHeight: '1.4' }}>
-                  {log}
-                </div>
-              ))}
+              <iframe
+                key={`${calendarKey}-${viewMode}`}
+                src={calendarSrc}
+                style={{
+                  width: '100%',
+                  height: '560px',
+                  border: 0,
+                  display: 'block'
+                }}
+                title="Google Calendar Beast Training"
+              />
             </div>
           </div>
         )}
       </div>
-      
-      <div className={`${styles.cardPanel} glass`} style={{ marginTop: '20px' }}>
-        <h3>💡 ¿Cómo funciona la sincronización automática de correos?</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{
-              background: 'rgba(255, 87, 0, 0.1)',
-              color: 'var(--primary)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              flexShrink: 0
-            }}>1</div>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-              <strong>Detección de Gmail:</strong> Cuando ingresas un nuevo alumno o editas su ficha en la pestaña **Gestión de Alumnos**, si la casilla de correo es Gmail (ej: `@gmail.com`), el sistema asocia de inmediato su calendario de Google.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{
-              background: 'rgba(255, 87, 0, 0.1)',
-              color: 'var(--primary)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              flexShrink: 0
-            }}>2</div>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-              <strong>Asociación automática de clases:</strong> Al agendar clases o evaluaciones físicas en Google Calendar ingresando el correo del alumno en los invitados, el evento se sincronizará automáticamente aquí, cargándose en el progreso y citas del alumno en tiempo real.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{
-              background: 'rgba(255, 87, 0, 0.1)',
-              color: 'var(--primary)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              flexShrink: 0
-            }}>3</div>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-              <strong>Notificaciones automáticas:</strong> Cada vez que realices un cambio de cita, el alumno recibirá un correo electrónico de invitación con su enlace de Google Meet y los detalles de su clase en Beast Training.
-            </p>
-          </div>
+
+      {/* Quick Scheduler Section */}
+      <div className={`${styles.cardPanel} glass glow-orange`} style={{ marginTop: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <PlusCircle size={22} style={{ color: 'var(--primary)' }} />
+          <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Agendar Nueva Clase o Evaluación</h3>
         </div>
+        <p style={{ margin: '0 0 20px 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          Crea el evento con un clic. Google Calendar invitará automáticamente al alumno por correo y generará el recordatorio.
+        </p>
+
+        <form onSubmit={handleCreateGoogleEvent} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Título del Evento
+            </label>
+            <input
+              type="text"
+              value={eventTitle}
+              onChange={(e) => setEventTitle(e.target.value)}
+              placeholder="ej: Evaluación Física - Juan Pérez"
+              required
+              className={styles.textInput}
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Correo del Alumno (Invitado Google)
+            </label>
+            <input
+              type="email"
+              value={eventStudentEmail}
+              onChange={(e) => setEventStudentEmail(e.target.value)}
+              placeholder="alumno@gmail.com (opcional)"
+              className={styles.textInput}
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Fecha
+            </label>
+            <input
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Hora de Inicio
+            </label>
+            <input
+              type="time"
+              value={eventTime}
+              onChange={(e) => setEventTime(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Duración
+            </label>
+            <select
+              value={eventDuration}
+              onChange={(e) => setEventDuration(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff' }}
+            >
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">1 hora (Recomendado)</option>
+              <option value="90">1 hora y media</option>
+              <option value="120">2 horas</option>
+            </select>
+          </div>
+
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+              Notas / Descripción
+            </label>
+            <textarea
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
+              rows={2}
+              style={{ width: '100%', padding: '10px 14px', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-light)', borderRadius: '8px', color: '#fff', resize: 'vertical' }}
+            />
+          </div>
+
+          <div style={{ gridColumn: '1 / -1', marginTop: '8px' }}>
+            <button
+              type="submit"
+              style={{
+                background: 'var(--primary)',
+                color: '#ffffff',
+                border: 'none',
+                padding: '12px 28px',
+                borderRadius: '8px',
+                fontWeight: '700',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 15px rgba(230, 74, 0, 0.4)'
+              }}
+            >
+              <Calendar size={18} />
+              <span>Crear Evento en Google Calendar 🚀</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Permissions / Tips Guide */}
+      <div className={`${styles.cardPanel} glass`} style={{ marginTop: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+          <Info size={18} style={{ color: 'var(--primary)' }} />
+          <h4 style={{ margin: 0, fontSize: '0.95rem' }}>¿Cómo asegurar que el calendario se vea correctamente?</h4>
+        </div>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
+          Google Calendar requiere que el calendario de tu cuenta (ej: <strong>btrainingchile@gmail.com</strong>) tenga habilitada la visibilidad para poder incrustarse. Si ves un mensaje de autorización de Google en el recuadro, asegúrate en <a href="https://calendar.google.com/calendar/r/settings" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Configuración de Google Calendar</a> de tener marcado <em>&quot;Permisos de acceso para eventos: Compartir públicamente / Ver todos los detalles&quot;</em>.
+        </p>
       </div>
     </div>
   );
 }
+

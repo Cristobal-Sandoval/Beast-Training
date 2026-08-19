@@ -87,17 +87,23 @@ export default function AdminDashboard() {
             </div>
 
             {/* Sub-tabs */}
-            <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-light)', paddingBottom: '1px', marginBottom: '24px', flexWrap: 'wrap' }}>
-              {['routine', 'evaluations', 'chat'].map((tab) => (
-                <button key={tab} type="button" onClick={() => s.setFichaTab(tab)}
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+              {[
+                { id: 'routine', label: '📋 Ficha & Rutina' },
+                { id: 'evaluations', label: '📈 Historial & Medidas' },
+                { id: 'chat', label: '💬 Mensajes Privados' }
+              ].map((tab) => (
+                <button key={tab.id} type="button" onClick={() => s.setFichaTab(tab.id)}
                   style={{
-                    background: s.fichaTab === tab ? 'rgba(255, 87, 0, 0.1)' : 'none',
-                    border: s.fichaTab === tab ? '1px solid var(--primary)' : '1px solid transparent',
-                    color: s.fichaTab === tab ? 'var(--primary)' : 'var(--text-secondary)',
-                    padding: '8px 16px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    background: s.fichaTab === tab.id ? 'var(--primary)' : 'rgba(255, 255, 255, 0.04)',
+                    border: s.fichaTab === tab.id ? '1px solid var(--border-primary)' : '1px solid var(--border-light)',
+                    color: s.fichaTab === tab.id ? '#ffffff' : 'var(--text-secondary)',
+                    padding: '10px 18px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                    whiteSpace: 'nowrap', flexShrink: 0,
+                    transition: 'all 0.2s',
+                    boxShadow: s.fichaTab === tab.id ? '0 4px 12px rgba(230, 74, 0, 0.4)' : 'none'
                   }}>
-                  {tab === 'routine' ? 'Ficha & Rutina' : tab === 'evaluations' ? 'Historial & Evaluaciones' : 'Mensajes Privados'}
+                  {tab.label}
                 </button>
               ))}
             </div>

@@ -36,7 +36,11 @@ export const metadata = {
     "fitness concepción", "gym concepción chile"
   ],
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/logo-icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
   openGraph: {
     title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",

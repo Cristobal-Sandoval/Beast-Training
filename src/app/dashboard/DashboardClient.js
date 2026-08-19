@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Calendar, TrendingUp, Heart, Scale, Award, FileText, Bell, Sparkles, MessageSquare, Check } from 'lucide-react';
@@ -45,6 +45,7 @@ function DashboardContent() {
   const [newDirectMessage, setNewDirectMessage] = useState('');
   const [submittingChat, setSubmittingChat] = useState(false);
   const [adminUserId, setAdminUserId] = useState('admin-uuid-123');
+  const chatBottomRef = useRef(null);
 
   // Change Password states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -54,6 +55,42 @@ function DashboardContent() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // REALTIME: Auto-scroll to bottom of chat
+  useEffect(() => {
+    if (chatBottomRef.current) {
+      chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages]);
+
+  // REALTIME: Suscripción en tiempo real a direct_messages
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`user_chat_realtime_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+        },
+        (payload) => {
+          const newMsg = payload.new;
+          if (newMsg && (newMsg.receiver_id === user.id || newMsg.sender_id === user.id)) {
+            setChatMessages((prev) => {
+              if (prev.some((m) => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     // Check auth
@@ -686,6 +723,7 @@ function DashboardContent() {
                       </div>
                     );
                   })}
+                  <div ref={chatBottomRef} />
                 </div>
               )}
             </div>

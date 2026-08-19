@@ -245,6 +245,9 @@ CREATE POLICY "Users can read their own received or sent messages" ON public.dir
 CREATE POLICY "Users can insert their own sent messages" ON public.direct_messages
     FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
+-- Enable Supabase Realtime for instant chat updates
+ALTER PUBLICATION supabase_realtime ADD TABLE public.direct_messages;
+
 
 -- 12. Create Announcement Bar Table
 CREATE TABLE IF NOT EXISTS public.announcement_bar (

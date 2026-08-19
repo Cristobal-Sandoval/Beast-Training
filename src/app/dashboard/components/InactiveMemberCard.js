@@ -6,7 +6,7 @@ export default function InactiveMemberCard({ profile, user, onOpenPasswordModal 
     <section className={styles.inactiveSection}>
       <div className={`${styles.cardPanel} glass glow-orange ${styles.inactiveCard}`}>
         <div className={styles.inactiveIconWrapper}>
-          <ShieldAlert size={50} className={styles.inactiveIcon} />
+          <img src="/logo-icon.svg" alt="Beast Training" style={{ height: '65px', width: 'auto', filter: 'drop-shadow(0 4px 16px rgba(230, 74, 0, 0.45))' }} />
         </div>
 
         <h2 className={styles.inactiveTitle}>Membresía Inactiva o Vencida</h2>

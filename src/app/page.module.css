@@ -12,13 +12,13 @@
 
 @media (max-width: 768px) {
   .heroSection {
-    height: 480px;
+    height: 540px;
   }
 }
 
 @media (max-width: 480px) {
   .heroSection {
-    height: 420px;
+    height: 520px;
   }
 }
 
@@ -70,7 +70,7 @@
 
 @media (max-width: 576px) {
   .heroContent {
-    padding: 0 48px;
+    padding: 0 24px 36px 24px;
     gap: 12px;
   }
 }
@@ -249,15 +249,20 @@
   }
 }
 
-/* Carousel Dots */
 .carouselDots {
   position: absolute;
-  bottom: 24px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
   z-index: 10;
+}
+
+@media (max-width: 576px) {
+  .carouselDots {
+    bottom: 12px;
+  }
 }
 
 .carouselDot {

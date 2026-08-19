@@ -10,8 +10,7 @@ export default function Footer() {
         <div className={styles.brandCol}>
           {/* UX-11: aria-label en logo + aria-hidden en icono decorativo */}
           <Link href="/" className={styles.logo} aria-label="Beast Training — Ir al inicio">
-            <Dumbbell className={styles.logoIcon} aria-hidden="true" />
-            <span>BEAST<span className={styles.accent}>TRAINING</span></span>
+            <img src="/logo-full.svg" alt="Beast Training" className={styles.logoImg} />
           </Link>
           <p className={styles.description}>
             Entrenamiento de fuerza, funcional, HIIT y CrossFit de alto impacto. Saca la bestia que llevas dentro.

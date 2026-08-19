@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import { showToast } from '@/lib/toast';
@@ -9,10 +9,15 @@ import { confirmDialog } from '@/components/ConfirmDialog';
 export default function useAlumnosState({ user, setSuccessMsg, actionLoading, setActionLoading }) {
   const [alumnos, setAlumnos] = useState([]);
   const [selectedAlumno, setSelectedAlumno] = useState(null);
+  const selectedAlumnoRef = useRef(selectedAlumno);
   const [alumnoProgress, setAlumnoProgress] = useState([]);
   const [fichaTab, setFichaTab] = useState('routine');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  useEffect(() => {
+    selectedAlumnoRef.current = selectedAlumno;
+  }, [selectedAlumno]);
 
   const [logWeight, setLogWeight] = useState('');
   const [logBodyFat, setLogBodyFat] = useState('');
@@ -71,6 +76,42 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
       }
     };
   }, []);
+
+  // REALTIME: Suscripción en tiempo real a direct_messages en panel admin
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`admin_chat_realtime_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+        },
+        (payload) => {
+          const newMsg = payload.new;
+          if (!newMsg) return;
+          const currentSelected = selectedAlumnoRef.current;
+          if (currentSelected?.id) {
+            if (
+              (newMsg.sender_id === currentSelected.id && newMsg.receiver_id === user.id) ||
+              (newMsg.sender_id === user.id && newMsg.receiver_id === currentSelected.id)
+            ) {
+              setChatMessages((prev) => {
+                if (prev.some((m) => m.id === newMsg.id)) return prev;
+                return [...prev, newMsg];
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const fetchAlumnos = async () => {
     try {

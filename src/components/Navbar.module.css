@@ -26,22 +26,20 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.03em;
+  text-decoration: none;
 }
 
-.logoIcon {
-  color: var(--primary);
-  transform: rotate(-15deg);
-  transition: transform 0.3s ease;
+.logoImg {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
 
-.logo:hover .logoIcon {
-  transform: rotate(0deg) scale(1.1);
+.logo:hover .logoImg {
+  transform: scale(1.04);
+  opacity: 0.92;
 }
 
 .accent {
@@ -212,6 +210,9 @@
 }
 
 @media (max-width: 768px) {
+  .logoImg {
+    height: 40px;
+  }
   .menuToggle {
     display: block;
   }
