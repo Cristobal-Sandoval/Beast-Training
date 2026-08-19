@@ -166,6 +166,11 @@ summary {
   min-height: 44px;
 }
 
+/* Card-level buttons can use a tighter 40px touch target (still accessible) */
+[class*="cardBtn"] {
+  min-height: 40px !important;
+}
+
 /* Button active feedback on touch devices */
 @media (hover: none) and (pointer: coarse) {
   button:active,

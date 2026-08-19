@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { Users, MessageSquare, Image, FileText, Sparkles, Dumbbell, UserCheck, Calendar } from 'lucide-react';
 import styles from '../admin.module.css';
 
@@ -15,6 +16,18 @@ const tabs = [
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, setSuccessMsg }) {
+  const activeChipRef = useRef(null);
+
+  useEffect(() => {
+    if (activeChipRef.current) {
+      activeChipRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [activeTab]);
+
   return (
     <>
       {/* Mobile Tab Scrollable Chips (Visible on mobile/tablet <= 768px) */}
@@ -26,6 +39,7 @@ export default function Sidebar({ activeTab, setActiveTab, setSuccessMsg }) {
             return (
               <button
                 key={tab.id}
+                ref={isActive ? activeChipRef : null}
                 type="button"
                 onClick={() => { setActiveTab(tab.id); setSuccessMsg(null); }}
                 className={`${styles.mobileTabChip} ${isActive ? styles.mobileTabChipActive : ''}`}

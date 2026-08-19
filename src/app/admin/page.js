@@ -87,7 +87,21 @@ export default function AdminDashboard() {
             </div>
 
             {/* Sub-tabs */}
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '20px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            <div style={{
+              display: 'flex',
+              gap: '8px',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              padding: '4px 2px 10px 2px',
+              marginBottom: '16px',
+              WebkitOverflowScrolling: 'touch',
+              width: '100%',
+              maxWidth: '100%',
+              minWidth: 0,
+              touchAction: 'pan-x',
+              overscrollBehaviorX: 'contain',
+              scrollSnapType: 'x proximity'
+            }}>
               {[
                 { id: 'routine', label: '📋 Ficha & Rutina' },
                 { id: 'evaluations', label: '📈 Historial & Medidas' },
@@ -98,8 +112,8 @@ export default function AdminDashboard() {
                     background: s.fichaTab === tab.id ? 'var(--primary)' : 'rgba(255, 255, 255, 0.04)',
                     border: s.fichaTab === tab.id ? '1px solid var(--border-primary)' : '1px solid var(--border-light)',
                     color: s.fichaTab === tab.id ? '#ffffff' : 'var(--text-secondary)',
-                    padding: '10px 18px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
-                    whiteSpace: 'nowrap', flexShrink: 0,
+                    padding: '8px 16px', borderRadius: '50px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                    whiteSpace: 'nowrap', flexShrink: 0, scrollSnapAlign: 'start',
                     transition: 'all 0.2s',
                     boxShadow: s.fichaTab === tab.id ? '0 4px 12px rgba(230, 74, 0, 0.4)' : 'none'
                   }}>
@@ -311,23 +325,27 @@ export default function AdminDashboard() {
                     )}
                     {s.filteredAlumnos.map(alumno => (
                       <div key={alumno.id} className={`${styles.studentCard} glass`}>
+                        {/* Top: Avatar + Info + Status badge inline */}
                         <div className={styles.cardTopRow}>
                           <div className={styles.studentAvatar}>{alumno.full_name?.charAt(0) || '?'}</div>
                           <div style={{ minWidth: 0, flex: 1 }}>
-                            <h3>{alumno.full_name || 'Sin nombre'}</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <h3>{alumno.full_name || 'Sin nombre'}</h3>
+                              <span className={alumno.status === 'active' ? styles.statusBadgeActive : styles.statusBadgeInactive}>
+                                {alumno.status === 'active' ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </div>
                             <p>{alumno.email}</p>
                           </div>
-                          <span className={alumno.status === 'active' ? styles.statusBadgeActive : styles.statusBadgeInactive}>
-                            {alumno.status === 'active' ? 'Activo' : 'Inactivo'}
-                          </span>
                         </div>
+                        {/* Bottom: Action buttons */}
                         <div className={styles.cardActions}>
-                          <button type="button" onClick={() => s.handleToggleStatus(alumno)}
-                            className={alumno.status === 'active' ? styles.deactivateBtn : styles.activateBtn}>
-                            {alumno.status === 'active' ? 'Desactivar' : 'Activar'}
-                          </button>
-                          <button type="button" onClick={() => s.handleSelectAlumno(alumno)} className={styles.viewEditBtn}>
+                          <button type="button" onClick={() => s.handleSelectAlumno(alumno)} className={styles.cardBtnPrimary}>
                             <ArrowRight size={16} /> Ver Ficha
+                          </button>
+                          <button type="button" onClick={() => s.handleToggleStatus(alumno)}
+                            className={alumno.status === 'active' ? styles.cardBtnDeactivate : styles.cardBtnActivate}>
+                            {alumno.status === 'active' ? 'Desactivar' : 'Activar'}
                           </button>
                         </div>
                       </div>
