@@ -10,8 +10,8 @@ const csp = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com;
   img-src 'self' data: blob: https://images.unsplash.com https://logospng.org https://media.istockphoto.com https://*.supabase.co;
-  connect-src 'self' https://*.supabase.co https://api.mercadopago.com;
-  frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com https://*.openstreetmap.org;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mercadopago.com;
+  frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com https://calendar.google.com https://*.openstreetmap.org;
   base-uri 'self';
   form-action 'self';
 `.replace(/\s{2,}/g, ' ').trim();

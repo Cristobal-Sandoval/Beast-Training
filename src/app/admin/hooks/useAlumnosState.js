@@ -127,10 +127,8 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
       
       if (data) {
         const filtered = data.filter(p => p.email?.toLowerCase() !== 'btrainingchile@gmail.com' && p.role !== 'admin');
-        console.log(`fetchAlumnos: ${data.length} total profiles, ${filtered.length} non-admin alumnos`, filtered);
         setAlumnos(filtered);
       } else {
-        console.warn('fetchAlumnos: data is null/undefined');
         setAlumnos([]);
       }
     } catch (err) {
