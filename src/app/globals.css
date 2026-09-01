@@ -336,51 +336,15 @@ summary {
 /* ── Overrides para el Widget de Instagram Elfsight ── */
 div[class*="elfsight-app"] {
   background: transparent !important;
+  width: 100% !important;
 }
 
-/* Ocultar la barra blanca interna de Elfsight */
+/* Ocultar cualquier barra blanca interna o badges no deseados */
 div[class*="elfsight-app"] [class*="Header__Container"],
 div[class*="elfsight-app"] [class*="Header__Component"],
 div[class*="elfsight-app"] header,
 div[class*="elfsight-app"] .eapps-instagram-feed-header {
   display: none !important;
   background: transparent !important;
-}
-
-/* Forzar 1 sola fila con scroll horizontal / carrusel fluido */
-div[class*="elfsight-app"] [class*="PostsGrid__Container"],
-div[class*="elfsight-app"] [class*="Grid__Container"],
-div[class*="elfsight-app"] [class*="Posts__Container"],
-div[class*="elfsight-app"] .eapps-instagram-feed-posts-grid {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  gap: 14px !important;
-  padding: 4px 4px 14px 4px !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: var(--primary) transparent !important;
-}
-
-div[class*="elfsight-app"] [class*="Post__Container"],
-div[class*="elfsight-app"] [class*="PostItem"],
-div[class*="elfsight-app"] [class*="Item__Container"],
-div[class*="elfsight-app"] .eapps-instagram-feed-posts-item {
-  flex: 0 0 240px !important;
-  min-width: 220px !important;
-  max-width: 260px !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
-}
-
-@media (max-width: 640px) {
-  div[class*="elfsight-app"] [class*="Post__Container"],
-  div[class*="elfsight-app"] [class*="PostItem"],
-  div[class*="elfsight-app"] [class*="Item__Container"],
-  div[class*="elfsight-app"] .eapps-instagram-feed-posts-item {
-    flex: 0 0 175px !important;
-    min-width: 160px !important;
-    max-width: 180px !important;
-  }
 }
 

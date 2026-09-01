@@ -102,26 +102,10 @@
 
 /* ── Elfsight Live Container ── */
 .elfsightWrapper {
-  min-height: 380px;
   width: 100%;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid var(--border-light);
-  padding: 16px;
   position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-}
-
-.elfsightWrapper:hover {
-  border-color: rgba(255, 87, 0, 0.3);
-}
-
-@media (max-width: 640px) {
-  .elfsightWrapper {
-    padding: 8px;
-    border-radius: 12px;
-  }
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 /* ── Footer bar ── */
