@@ -6,10 +6,10 @@
 
 .glowBg {
   position: absolute;
-  top: 10%;
+  top: 8%;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
+  width: min(600px, 90vw);
   height: 600px;
   background: radial-gradient(circle, rgba(255, 87, 0, 0.08) 0%, rgba(7, 7, 8, 0) 70%);
   z-index: -1;
@@ -18,7 +18,7 @@
 
 .header {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,20 +27,21 @@
 
 .subtitle {
   color: var(--primary);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: 2.4rem;
   text-transform: uppercase;
+  letter-spacing: -0.01em;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .header h1 {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -49,23 +50,24 @@
   font-size: 1.05rem;
   max-width: 560px;
   margin: 0 auto;
+  line-height: 1.5;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .description {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
   }
 }
 
 .headerBar {
-  width: 60px;
-  height: 4px;
+  width: 50px;
+  height: 3px;
   background: var(--primary);
-  margin-top: 8px;
+  margin-top: 6px;
   border-radius: 2px;
 }
 
-/* Category Switch Tabs — 3 tabs, scrollable on narrow screens */
+/* ── Category Switch Tabs ── */
 .tabsContainer {
   display: flex;
   justify-content: center;
@@ -73,25 +75,19 @@
   border: 1px solid var(--border-light);
   padding: 4px;
   border-radius: 50px;
-  max-width: 480px;
+  max-width: 440px;
   width: 100%;
-  margin: 0 auto 48px auto;
+  margin: 0 auto 44px auto;
   position: relative;
   isolation: isolate;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.tabsContainer::-webkit-scrollbar {
-  display: none;
+  gap: 4px;
 }
 
 @media (max-width: 480px) {
   .tabsContainer {
     max-width: 100%;
-    border-radius: 16px;
-    gap: 2px;
+    border-radius: 14px;
+    padding: 3px;
   }
 }
 
@@ -100,34 +96,33 @@
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 10px 18px;
   border-radius: 50px;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
   position: relative;
   z-index: 1;
-  min-width: 0;
-  flex-shrink: 0;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .tabToggleBtn {
     padding: 9px 10px;
     font-size: 0.82rem;
-    gap: 4px;
+    gap: 6px;
+    border-radius: 10px;
   }
 }
 
 .activeTabToggle {
-  color: var(--text-primary);
-  font-weight: 700;
+  color: #ffffff;
+  font-weight: 800;
 }
 
 .activeTabToggle::before {
@@ -137,89 +132,101 @@
   background: var(--primary);
   border-radius: 50px;
   z-index: -1;
-  box-shadow: 0 4px 15px rgba(255, 87, 0, 0.3);
-  animation: tabSlideIn 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(255, 87, 0, 0.35);
 }
 
-@keyframes tabSlideIn {
-  from { opacity: 0; transform: scaleX(0.85); }
-  to   { opacity: 1; transform: scaleX(1); }
+@media (max-width: 480px) {
+  .activeTabToggle::before {
+    border-radius: 10px;
+  }
 }
 
 .discountBadge {
-  background: rgba(37, 211, 102, 0.18);
+  background: rgba(37, 211, 102, 0.2);
   color: #25d366;
   font-size: 0.65rem;
   font-weight: 800;
   padding: 2px 7px;
   border-radius: 20px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid rgba(37, 211, 102, 0.2);
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(37, 211, 102, 0.3);
 }
 
 .onlineBadge {
-  background: rgba(59, 130, 246, 0.18);
+  background: rgba(59, 130, 246, 0.2);
   color: #60a5fa;
   font-size: 0.65rem;
   font-weight: 800;
   padding: 2px 7px;
   border-radius: 20px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* Plans Grid — up to 3 columns, 2 rows = 6 cards max */
+/* ── Plans Grid ── */
 .plansGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
   align-items: stretch;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .plansGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .plansGrid {
     grid-template-columns: 1fr;
-    max-width: 440px;
+    max-width: 420px;
     margin: 0 auto;
-    gap: 16px;
+    gap: 18px;
+  }
+
+  /* ⭐ EN MOBILE: El plan Más Popular siempre sale PRIMERO */
+  .popularCard {
+    order: -1 !important;
   }
 }
 
-/* Plan Card */
+/* ── Plan Card ── */
 .planCard {
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 30px 22px;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-@media (max-width: 576px) {
-  .planCard {
-    padding: 24px 18px;
-  }
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-light);
+  order: 0;
 }
 
 .planCard:hover {
   transform: translateY(-4px);
-  border-color: var(--border-primary);
-  background: var(--background-card-hover);
+  border-color: rgba(255, 87, 0, 0.4);
+  background: rgba(255, 255, 255, 0.04);
 }
 
+/* ⭐ Highlight para el Plan Más Popular en Desktop y Mobile */
 .popularCard {
-  border-color: var(--primary);
-  box-shadow: 0 4px 24px rgba(255, 87, 0, 0.18);
+  border: 2px solid var(--primary);
+  background: linear-gradient(180deg, rgba(255, 87, 0, 0.09) 0%, rgba(20, 20, 24, 0.85) 100%);
+  box-shadow: 0 8px 32px rgba(255, 87, 0, 0.22);
+}
+
+@media (min-width: 1201px) {
+  .popularCard {
+    transform: translateY(-6px) scale(1.02);
+  }
+  .popularCard:hover {
+    transform: translateY(-10px) scale(1.03);
+  }
 }
 
 .popularBadge {
@@ -227,105 +234,110 @@
   top: 14px;
   right: 14px;
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  padding: 4px 12px;
+  padding: 4px 11px;
   border-radius: 20px;
   letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 10px rgba(255, 87, 0, 0.4);
 }
 
 .cardHeader {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   border-bottom: 1px solid var(--border-light);
-  padding-bottom: 20px;
+  padding-bottom: 18px;
 }
 
 .planName {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   text-transform: uppercase;
   margin-bottom: 10px;
-  padding-right: 60px; /* space for popular badge */
-}
-
-@media (max-width: 576px) {
-  .planName {
-    font-size: 1.2rem;
-  }
+  font-weight: 800;
+  padding-right: 40px;
+  letter-spacing: 0.02em;
 }
 
 .priceContainer {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 8px;
 }
 
 .price {
   font-family: var(--font-display);
-  font-size: 2.4rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #ffffff;
   line-height: 1;
 }
 
-@media (max-width: 576px) {
-  .price {
-    font-size: 2rem;
-  }
-}
-
 .duration {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .planDesc {
   color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  margin-top: 4px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin-top: 6px;
 }
 
-/* Feature list */
+/* ── Features List ── */
 .features {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 12px;
   flex-grow: 1;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .featureItem {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
+  line-height: 1.4;
 }
 
-.featureIcon {
-  color: var(--primary);
+.featureIconWrap {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 87, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   margin-top: 1px;
 }
 
-/* WhatsApp CTA */
+.featureIcon {
+  color: var(--primary);
+}
+
+/* ── WhatsApp Button ── */
 .whatsappBtn {
   width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   background: #25d366;
   color: #ffffff;
   border: none;
-  padding: 14px 12px;
+  padding: 13px 14px;
   border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 800;
+  font-size: 0.92rem;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: auto;
@@ -334,26 +346,29 @@
 .whatsappBtn:hover {
   background: #20ba5a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.35);
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.35);
 }
 
 .popularWhatsappBtn {
-  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.22);
+  background: #25d366;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.3);
 }
 
-.popularWhatsappBtn:hover {
-  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.4);
+/* ── Empty & Trust Section ── */
+.emptyContainer {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
 }
 
-/* Trust badge */
 .secureBadgeSection {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 48px;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   text-align: center;
   flex-wrap: wrap;
 }
