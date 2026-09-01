@@ -100,217 +100,28 @@
   }
 }
 
-/* ── Mode Switcher Tabs ── */
-.modeTabs {
-  display: flex;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-light);
-  border-radius: 50px;
-  padding: 3px;
-  gap: 3px;
-  margin-bottom: 24px;
-  max-width: max-content;
-}
-
-@media (max-width: 640px) {
-  .modeTabs {
-    width: 100%;
-    max-width: 100%;
-    justify-content: center;
-  }
-}
-
-.modeTabBtn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-@media (max-width: 640px) {
-  .modeTabBtn {
-    flex: 1;
-    justify-content: center;
-    padding: 8px 10px;
-    font-size: 0.78rem;
-  }
-}
-
-.modeTabActive {
-  background: linear-gradient(135deg, rgba(225, 48, 108, 0.3) 0%, rgba(255, 87, 0, 0.3) 100%);
-  border: 1px solid rgba(225, 48, 108, 0.5);
-  color: #ffffff;
-  font-weight: 800;
-}
-
-/* ── Real Instagram Embeds Grid ── */
-.embedsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-
-@media (max-width: 992px) {
-  .embedsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .embedsGrid {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-}
-
-.embedCard {
-  background: rgba(20, 20, 24, 0.85);
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.embedCard:hover {
-  border-color: rgba(225, 48, 108, 0.4);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(225, 48, 108, 0.15);
-}
-
-.instagramIframe {
+/* ── Elfsight Live Container ── */
+.elfsightWrapper {
+  min-height: 380px;
   width: 100%;
-  min-height: 480px;
-  border: none;
-  background: #000000;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-light);
+  padding: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
-/* ── Direct Photo Gallery Grid ── */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 14px;
-}
-
-@media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
+.elfsightWrapper:hover {
+  border-color: rgba(255, 87, 0, 0.3);
 }
 
 @media (max-width: 640px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  .elfsightWrapper {
+    padding: 8px;
+    border-radius: 12px;
   }
-}
-
-.postCard {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-light);
-  display: block;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.postCard:hover {
-  transform: translateY(-4px);
-  border-color: rgba(225, 48, 108, 0.5);
-  box-shadow: 0 8px 24px rgba(225, 48, 108, 0.2);
-}
-
-.postImage {
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.postCard:hover .postImage {
-  transform: scale(1.08);
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 12px;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.postCard:hover .overlay {
-  opacity: 1;
-}
-
-@media (max-width: 768px) {
-  .overlay {
-    opacity: 0;
-  }
-  .postCard:active .overlay {
-    opacity: 1;
-  }
-}
-
-.overlayTop {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.instagramIcon {
-  color: #fff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-}
-
-.overlayBottom {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.statItem {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.caption {
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.3;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 /* ── Footer bar ── */

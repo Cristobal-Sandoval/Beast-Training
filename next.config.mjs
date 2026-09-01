@@ -6,12 +6,12 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://*.supabase.co https://www.instagram.com https://*.instagram.com https://*.cdninstagram.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' https://fonts.gstatic.com;
-  img-src 'self' data: blob: https://images.unsplash.com https://logospng.org https://media.istockphoto.com https://*.supabase.co https://*.cdninstagram.com https://*.instagram.com;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mercadopago.com https://*.instagram.com;
-  frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com https://calendar.google.com https://*.openstreetmap.org https://www.instagram.com https://instagram.com https://*.instagram.com;
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://*.supabase.co https://www.instagram.com https://*.instagram.com https://*.cdninstagram.com https://elfsightcdn.com https://*.elfsightcdn.com https://*.elfsight.com https://static.elfsight.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.elfsightcdn.com https://*.elfsight.com;
+  font-src 'self' https://fonts.gstatic.com https://*.elfsightcdn.com;
+  img-src 'self' data: blob: https://images.unsplash.com https://logospng.org https://media.istockphoto.com https://*.supabase.co https://*.cdninstagram.com https://*.instagram.com https://*.fbcdn.net https://*.elfsightcdn.com https://*.elfsight.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mercadopago.com https://*.instagram.com https://*.elfsight.com https://*.elfsightcdn.com https://core.service.elfsight.com;
+  frame-src 'self' https://www.google.com https://maps.google.com https://*.google.com https://calendar.google.com https://*.openstreetmap.org https://www.instagram.com https://instagram.com https://*.instagram.com https://*.elfsight.com https://*.elfsightcdn.com;
   base-uri 'self';
   form-action 'self';
 `.replace(/\s{2,}/g, ' ').trim();
