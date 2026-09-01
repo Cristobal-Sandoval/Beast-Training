@@ -1,12 +1,18 @@
-// Default 18 plans (6 Solo, 6 Duo, 6 Online)
-// 4 active (visible: true), 2 offline (visible: false), exactly 1 popular per category
+// Mapping between UI categories ('solo', 'duo', 'online') and DB categories ('individual', 'couple', 'family')
+export const toDbCategory = (uiCat) => {
+  const map = { solo: 'individual', duo: 'couple', online: 'family' };
+  return map[uiCat] || uiCat || 'individual';
+};
+
+export const fromDbCategory = (dbCat) => {
+  const map = { individual: 'solo', couple: 'duo', family: 'online', solo: 'solo', duo: 'duo', online: 'online' };
+  return map[dbCat] || dbCat || 'solo';
+};
 
 export const MAX_PLANS_PER_CATEGORY = 6;
 
 export const DEFAULT_PLANS = [
-  // ══════════════════════════════════════════
-  // CATEGORÍA: SOLO (6 planes: 4 activos, 2 offline, 1 popular)
-  // ══════════════════════════════════════════
+  // ── SOLO (4 activos, 2 offline, 1 popular) ──
   {
     id: 'solo-1',
     name: 'Plan Mensual Solo',
@@ -32,7 +38,7 @@ export const DEFAULT_PLANS = [
   {
     id: 'solo-3',
     name: 'Plan Semestral Solo',
-    description: 'Seis meses de entrenamiento constante con congelamiento de membresía incluido.',
+    description: 'Seis meses de progreso continuo con congelamiento de membresía por 15 días.',
     price: 170000,
     duration_months: 6,
     category: 'solo',
@@ -43,7 +49,7 @@ export const DEFAULT_PLANS = [
   {
     id: 'solo-4',
     name: 'Plan Anual Solo',
-    description: 'Compromiso total con tu salud y rendimiento físico con el máximo ahorro.',
+    description: 'Compromiso total con tu salud y rendimiento físico al mejor precio mensual.',
     price: 320000,
     duration_months: 12,
     category: 'solo',
@@ -65,7 +71,7 @@ export const DEFAULT_PLANS = [
   {
     id: 'solo-6',
     name: 'Plan Estudiante Solo',
-    description: 'Tarifa especial presentando tu pase escolar o credencial universitaria en horario valle.',
+    description: 'Tarifa especial presentando pase escolar o credencial universitaria en horario valle.',
     price: 28000,
     duration_months: 1,
     category: 'solo',
@@ -74,9 +80,7 @@ export const DEFAULT_PLANS = [
     visible: false, // 🔕 OFFLINE
   },
 
-  // ══════════════════════════════════════════
-  // CATEGORÍA: DÚO (6 planes: 4 activos, 2 offline, 1 popular)
-  // ══════════════════════════════════════════
+  // ── DÚO (4 activos, 2 offline, 1 popular) ──
   {
     id: 'duo-1',
     name: 'Plan Mensual Dúo',
@@ -144,9 +148,7 @@ export const DEFAULT_PLANS = [
     visible: false, // 🔕 OFFLINE
   },
 
-  // ══════════════════════════════════════════
-  // CATEGORÍA: ONLINE (6 planes: 4 activos, 2 offline, 1 popular)
-  // ══════════════════════════════════════════
+  // ── ONLINE (4 activos, 2 offline, 1 popular) ──
   {
     id: 'online-1',
     name: 'Plan Online Mensual',

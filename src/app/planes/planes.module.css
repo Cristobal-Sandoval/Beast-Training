@@ -165,22 +165,24 @@
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-/* ── Plans Grid ── */
+/* ── Plans Grid (3 columnas en Desktop, 1 columna en Mobile) ── */
 .plansGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
   align-items: stretch;
+  max-width: 1140px;
+  margin: 0 auto;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 992px) {
   .plansGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .plansGrid {
     grid-template-columns: 1fr;
     max-width: 420px;
@@ -188,7 +190,7 @@
     gap: 18px;
   }
 
-  /* ⭐ EN MOBILE: El plan Más Popular siempre sale PRIMERO */
+  /* ⭐ EN MOBILE: El plan Más Popular siempre sale PRIMERO arriba de todo */
   .popularCard {
     order: -1 !important;
   }
@@ -197,7 +199,7 @@
 /* ── Plan Card ── */
 .planCard {
   border-radius: 16px;
-  padding: 30px 22px;
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -213,19 +215,20 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* ⭐ Highlight para el Plan Más Popular en Desktop y Mobile */
+/* ⭐ Highlight para el Plan Más Popular (Centro en Desktop, 1ero en Mobile) */
 .popularCard {
   border: 2px solid var(--primary);
-  background: linear-gradient(180deg, rgba(255, 87, 0, 0.09) 0%, rgba(20, 20, 24, 0.85) 100%);
-  box-shadow: 0 8px 32px rgba(255, 87, 0, 0.22);
+  background: linear-gradient(180deg, rgba(255, 87, 0, 0.1) 0%, rgba(20, 20, 24, 0.85) 100%);
+  box-shadow: 0 8px 32px rgba(255, 87, 0, 0.25);
 }
 
-@media (min-width: 1201px) {
+@media (min-width: 993px) {
   .popularCard {
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-8px) scale(1.03);
+    z-index: 2;
   }
   .popularCard:hover {
-    transform: translateY(-10px) scale(1.03);
+    transform: translateY(-12px) scale(1.04);
   }
 }
 

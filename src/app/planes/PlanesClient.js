@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Check, MessageCircle, ShieldCheck, User, Users, Wifi, Star, Sparkles } from 'lucide-react';
+import { Check, MessageCircle, ShieldCheck, User, Users, Wifi, Star } from 'lucide-react';
 import styles from './planes.module.css';
-import { DEFAULT_PLANS, MAX_PLANS_PER_CATEGORY } from '@/lib/defaultPlans';
+import { DEFAULT_PLANS, MAX_PLANS_PER_CATEGORY, fromDbCategory } from '@/lib/defaultPlans';
 
 const categories = [
   { id: 'solo',   label: 'Solo',   icon: User,  subtitle: 'Individual' },
@@ -24,12 +24,11 @@ export default function PlanesClient() {
 
   const fetchPlans = async () => {
     try {
-      const { data, error } = await supabase.from('plans').select('*');
+      const { data, error } = await supabase.from('plans').select('*').order('price', { ascending: true });
       if (!error && data && data.length > 0) {
-        const catMap = { individual: 'solo', couple: 'duo', family: 'solo' };
         const normalized = data.map(p => ({
           ...p,
-          category: catMap[p.category] || p.category,
+          category: fromDbCategory(p.category),
           visible: p.visible !== false,
           features: (p.features || []).filter(
             f => !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha')
@@ -61,22 +60,34 @@ export default function PlanesClient() {
     }
   };
 
-  // Filter only active/visible plans for the active category (max 6)
+  // Filter ONLY active/visible plans for the selected category (max 6)
   const activePlansForCategory = plans
     .filter(p => p.category === activeCategory && p.visible)
     .slice(0, MAX_PLANS_PER_CATEGORY);
 
-  // Separate popular vs non-popular to place popular in the center on desktop
+  // Separate popular vs non-popular plans
   const popularPlan = activePlansForCategory.find(p => p.popular);
   const nonPopularPlans = activePlansForCategory
     .filter(p => !p.popular)
     .sort((a, b) => a.price - b.price);
 
-  // Desktop ordering: place popular plan in the center
-  let orderedPlans = [...nonPopularPlans];
+  // Desktop ordering: place the popular plan in the middle of the first 3 (index 1)
+  let orderedPlans = [];
   if (popularPlan) {
-    const midIndex = Math.floor(nonPopularPlans.length / 2);
-    orderedPlans.splice(midIndex, 0, popularPlan);
+    if (nonPopularPlans.length === 0) {
+      orderedPlans = [popularPlan];
+    } else if (nonPopularPlans.length === 1) {
+      orderedPlans = [nonPopularPlans[0], popularPlan];
+    } else {
+      // Index 1 is the middle card in a 3-column row
+      orderedPlans = [
+        nonPopularPlans[0],
+        popularPlan,
+        ...nonPopularPlans.slice(1)
+      ];
+    }
+  } else {
+    orderedPlans = [...nonPopularPlans];
   }
 
   const handleWhatsAppContact = (plan) => {
@@ -128,7 +139,7 @@ export default function PlanesClient() {
           })}
         </div>
 
-        {/* Plans Grid */}
+        {/* Plans Grid (3 columns on Desktop, 1 column on Mobile) */}
         {orderedPlans.length === 0 ? (
           <div className={styles.emptyContainer}>
             <p style={{ fontSize: '2rem', marginBottom: '8px' }}>🏋️</p>
@@ -136,7 +147,7 @@ export default function PlanesClient() {
           </div>
         ) : (
           <div className={styles.plansGrid}>
-            {orderedPlans.map((plan) => {
+            {orderedPlans.map((plan, idx) => {
               const isPop = plan.popular;
               return (
                 <div

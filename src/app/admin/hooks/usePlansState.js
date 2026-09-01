@@ -4,15 +4,13 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { showToast } from '@/lib/toast';
 import { confirmDialog } from '@/components/ConfirmDialog';
-import { DEFAULT_PLANS, MAX_PLANS_PER_CATEGORY } from '@/lib/defaultPlans';
+import { DEFAULT_PLANS, MAX_PLANS_PER_CATEGORY, toDbCategory, fromDbCategory } from '@/lib/defaultPlans';
 
 export { MAX_PLANS_PER_CATEGORY };
 
-const CAT_MAP = { individual: 'solo', couple: 'duo', family: 'solo' };
-
 const normalizePlan = (plan) => ({
   ...plan,
-  category: CAT_MAP[plan.category] || plan.category || 'solo',
+  category: fromDbCategory(plan.category),
   visible: plan.visible !== false,
   features: (plan.features || []).filter(
     f => !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha')
@@ -36,7 +34,7 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
 
   const fetchPlansList = async () => {
     try {
-      const { data, error } = await supabase.from('plans').select('*');
+      const { data, error } = await supabase.from('plans').select('*').order('price', { ascending: true });
       if (!error && data && data.length > 0) {
         const normalized = data.map(normalizePlan);
         const categoriesInDb = new Set(normalized.map(p => p.category));
@@ -73,9 +71,11 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
     setActionLoading(true);
     setSuccessMsg(null);
     const featuresArray = planFeatures.split('\n').map(f => f.trim()).filter(f => f !== '');
+    const dbCategory = toDbCategory(planCategory);
+    
     const planData = {
       name: planName.trim(),
-      category: planCategory,
+      category: dbCategory,
       price: parseInt(planPrice),
       duration_months: parseInt(planDuration),
       description: planDesc.trim(),
@@ -88,14 +88,14 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
       if (editingPlan) {
         // If marked as popular, unset other plans in same category
         if (planPopular) {
-          await supabase.from('plans').update({ popular: false }).eq('category', planCategory);
+          await supabase.from('plans').update({ popular: false }).eq('category', dbCategory);
         }
         const { error } = await supabase.from('plans').update(planData).eq('id', editingPlan.id);
         if (error) throw error;
         showToast('¡Plan actualizado con éxito!', 'success');
       } else {
         if (planPopular) {
-          await supabase.from('plans').update({ popular: false }).eq('category', planCategory);
+          await supabase.from('plans').update({ popular: false }).eq('category', dbCategory);
         }
         const { error } = await supabase.from('plans').insert([planData]);
         if (error) throw error;
@@ -104,16 +104,16 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
       setShowPlanModal(false);
       fetchPlansList();
     } catch (err) {
-      // If DB failed (e.g. offline ID or mock), update local state
+      // Local fallback
       setPlansList(prev => {
         if (editingPlan) {
           return prev.map(p => {
-            if (p.id === editingPlan.id) return { ...p, ...planData };
+            if (p.id === editingPlan.id) return { ...p, ...planData, category: planCategory };
             if (planPopular && p.category === planCategory) return { ...p, popular: false };
             return p;
           });
         } else {
-          const newP = { id: 'p-' + Date.now(), ...planData };
+          const newP = { id: 'p-' + Date.now(), ...planData, category: planCategory };
           const updated = prev.map(p => (planPopular && p.category === planCategory ? { ...p, popular: false } : p));
           return [...updated, newP];
         }
@@ -134,7 +134,6 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
       showToast('Plan eliminado correctamente', 'success');
       fetchPlansList();
     } catch (err) {
-      // Local fallback
       setPlansList(prev => prev.filter(p => p.id !== planId));
       showToast('Plan eliminado', 'success');
     } finally {
@@ -145,10 +144,11 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
   // Toggle ⭐ popular — exactly 1 popular per category
   const handleTogglePopular = async (plan) => {
     const newVal = !plan.popular;
+    const dbCategory = toDbCategory(plan.category);
     try {
       if (newVal) {
-        // Unset popular on other plans in the same category
-        await supabase.from('plans').update({ popular: false }).eq('category', plan.category);
+        // Unset popular on other plans in the same category in DB
+        await supabase.from('plans').update({ popular: false }).eq('category', dbCategory);
         await supabase.from('plans').update({ popular: true }).eq('id', plan.id);
         setPlansList(prev =>
           prev.map(p => {
@@ -157,14 +157,13 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
             return p;
           })
         );
-        showToast(`⭐ "${plan.name}" es ahora el plan MÁS POPULAR de ${plan.category.toUpperCase()}`, 'success');
+        showToast(`⭐ "${plan.name}" es ahora el MÁS POPULAR de ${plan.category.toUpperCase()}`, 'success');
       } else {
         await supabase.from('plans').update({ popular: false }).eq('id', plan.id);
         setPlansList(prev => prev.map(p => (p.id === plan.id ? { ...p, popular: false } : p)));
         showToast('Destacado removido', 'success');
       }
     } catch (err) {
-      // Local fallback
       setPlansList(prev =>
         prev.map(p => {
           if (p.id === plan.id) return { ...p, popular: newVal };
@@ -183,10 +182,10 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
       const { error } = await supabase.from('plans').update({ visible: newVal }).eq('id', plan.id);
       if (error) throw error;
       setPlansList(prev => prev.map(p => (p.id === plan.id ? { ...p, visible: newVal } : p)));
-      showToast(newVal ? '✅ Plan activado (visible en la web)' : '🔕 Plan desactivado (offline)', 'success');
+      showToast(newVal ? '✅ Plan activado (Online en la web)' : '🔕 Plan desactivado (Offline)', 'success');
     } catch (err) {
       setPlansList(prev => prev.map(p => (p.id === plan.id ? { ...p, visible: newVal } : p)));
-      showToast(newVal ? '✅ Plan activado (visible en web)' : '🔕 Plan desactivado (offline)', 'success');
+      showToast(newVal ? '✅ Plan activado (Online en la web)' : '🔕 Plan desactivado (Offline)', 'success');
     }
   };
 
