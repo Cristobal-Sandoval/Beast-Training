@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { Heart, MessageCircle, ExternalLink } from 'lucide-react';
+import { Heart, MessageCircle, ExternalLink, Play, Grid, Film } from 'lucide-react';
 import styles from './InstagramFeed.module.css';
 
 function InstagramIcon({ size = 18, className = '' }) {
@@ -25,6 +26,7 @@ function InstagramIcon({ size = 18, className = '' }) {
   );
 }
 
+// Curated Instagram community posts from @btrainingchile
 const COMMUNITY_POSTS = [
   {
     id: 'ig-1',
@@ -78,8 +80,10 @@ const COMMUNITY_POSTS = [
 
 export default function InstagramFeed({
   title = 'Comunidad en Instagram',
-  subtitle = 'Conoce el día a día de nuestros atletas y entrenamientos en Concepción.'
+  subtitle = 'Conoce el día a día de nuestros atletas, eventos y entrenamientos en Concepción.'
 }) {
+  const [viewMode, setViewMode] = useState('gallery'); // 'gallery' | 'profile'
+
   return (
     <section className={styles.section}>
       <div className={styles.container}>
@@ -94,63 +98,168 @@ export default function InstagramFeed({
             <p className={styles.description}>{subtitle}</p>
           </div>
 
-          {/* Follow Button */}
-          <a
-            href="https://www.instagram.com/btrainingchile/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.followBtn}
-          >
-            <InstagramIcon size={18} />
-            <span>Seguir a @btrainingchile</span>
-            <ExternalLink size={14} />
-          </a>
-        </div>
-
-        {/* 6-Photo Instagram Grid */}
-        <div className={styles.grid}>
-          {COMMUNITY_POSTS.map((post) => (
+          <div className={styles.headerActions}>
             <a
-              key={post.id}
-              href={post.url}
+              href="https://www.instagram.com/btrainingchile/"
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.postCard}
-              title={post.caption}
+              className={styles.followBtn}
             >
-              <Image
-                src={post.image}
-                alt={post.caption}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                className={styles.postImage}
-              />
-              
-              {/* Hover / Active Touch Overlay */}
-              <div className={styles.overlay}>
-                <div className={styles.overlayTop}>
-                  <InstagramIcon size={18} className={styles.instagramIcon} />
-                </div>
+              <InstagramIcon size={18} />
+              <span>Ver Perfil @btrainingchile</span>
+              <ExternalLink size={14} />
+            </a>
+          </div>
+        </div>
+
+        {/* Mode Tabs */}
+        <div className={styles.modeTabs}>
+          <button
+            type="button"
+            onClick={() => setViewMode('gallery')}
+            className={`${styles.modeTabBtn} ${viewMode === 'gallery' ? styles.modeTabActive : ''}`}
+          >
+            <Grid size={15} />
+            <span>Galería de Fotos</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('profile')}
+            className={`${styles.modeTabBtn} ${viewMode === 'profile' ? styles.modeTabActive : ''}`}
+          >
+            <Film size={15} />
+            <span>Feed &amp; Reels en Vivo</span>
+          </button>
+        </div>
+
+        {/* ── View 1: Fast Community Gallery ── */}
+        {viewMode === 'gallery' && (
+          <div className={styles.grid}>
+            {COMMUNITY_POSTS.map((post) => (
+              <a
+                key={post.id}
+                href={post.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.postCard}
+                title={post.caption}
+              >
+                <Image
+                  src={post.image}
+                  alt={post.caption}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                  className={styles.postImage}
+                />
                 
-                <div className={styles.overlayBottom}>
-                  <div className={styles.stats}>
-                    <span className={styles.statItem}>
-                      <Heart size={13} fill="#fff" /> {post.likes}
-                    </span>
-                    <span className={styles.statItem}>
-                      <MessageCircle size={13} fill="#fff" /> {post.comments}
-                    </span>
+                {/* Hover / Active Touch Overlay */}
+                <div className={styles.overlay}>
+                  <div className={styles.overlayTop}>
+                    <InstagramIcon size={18} className={styles.instagramIcon} />
                   </div>
-                  <p className={styles.caption}>{post.caption}</p>
+                  
+                  <div className={styles.overlayBottom}>
+                    <div className={styles.stats}>
+                      <span className={styles.statItem}>
+                        <Heart size={13} fill="#fff" /> {post.likes}
+                      </span>
+                      <span className={styles.statItem}>
+                        <MessageCircle size={13} fill="#fff" /> {post.comments}
+                      </span>
+                    </div>
+                    <p className={styles.caption}>{post.caption}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* ── View 2: Real Instagram Profile & Embed Showcase ── */}
+        {viewMode === 'profile' && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '16px',
+            padding: '32px 24px',
+            textAlign: 'center',
+          }}>
+            {/* Instagram Profile Card Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '14px',
+              marginBottom: '24px',
+            }}>
+              <div style={{
+                width: '72px',
+                height: '72px',
+                borderRadius: '50%',
+                padding: '3px',
+                background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: '#070708',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '1.8rem',
+                }}>
+                  🐺
                 </div>
               </div>
-            </a>
-          ))}
-        </div>
+
+              <div>
+                <h3 style={{ margin: '0 0 4px', fontSize: '1.2rem', fontWeight: 800 }}>
+                  @btrainingchile
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  Beast Training · Gimnasio &amp; Entrenamiento Funcional en Concepción
+                </p>
+              </div>
+
+              <a
+                href="https://www.instagram.com/btrainingchile/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '50px',
+                  padding: '10px 24px',
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 18px rgba(225, 48, 108, 0.3)',
+                }}
+              >
+                <InstagramIcon size={16} />
+                <span>Abrir Instagram Oficial</span>
+                <ExternalLink size={14} />
+              </a>
+            </div>
+
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto' }}>
+              Publicamos rutinas semanales, historias en vivo desde el box, técnicas de levantamiento y testimonios de nuestros alumnos.
+            </p>
+          </div>
+        )}
 
         {/* Footer info bar */}
         <div className={styles.footerBar}>
-          <span>Etiquétanos en tus historias de entrenamiento con</span>
+          <span>Etiquétanos en tus historias con</span>
           <a
             href="https://www.instagram.com/explore/tags/beasttrainingchile/"
             target="_blank"
@@ -158,7 +267,7 @@ export default function InstagramFeed({
           >
             #BeastTrainingChile
           </a>
-          <span>para aparecer en nuestra comunidad.</span>
+          <span>para aparecer en el feed de la comunidad.</span>
         </div>
 
       </div>
