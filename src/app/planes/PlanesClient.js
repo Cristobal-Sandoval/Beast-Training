@@ -78,26 +78,27 @@ export default function PlanesClient() {
 
   const fetchPlans = async () => {
     try {
-      const { data, error } = await supabase.from('plans').select('*').order('price', { ascending: true });
+      const { data, error } = await supabase.from('plans').select('*');
       if (!error && data && data.length > 0) {
-        // Normalize legacy category names
         const catMap = { individual: 'solo', couple: 'duo', family: 'solo' };
         const normalized = data.map(p => ({
           ...p,
           category: catMap[p.category] || p.category,
-          // Filter out 'Casilleros y duchas' from features
+          visible: p.visible !== false,
           features: (p.features || []).filter(f =>
             !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha')
           ),
         }));
-        const visible = normalized.filter(p => p.visible !== false);
-        if (visible.some(p => p.category)) {
-          const dbCategories = new Set(visible.map(p => p.category));
-          // Use DB data where category exists, supplement with defaults for missing categories
-          const supplements = defaultPlans.filter(dp => !dbCategories.has(dp.category));
-          setPlans([...visible, ...supplements]);
+        // Only show visible plans on public page, popular first
+        const activeFromDb = normalized
+          .filter(p => p.visible)
+          .sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0) || a.price - b.price);
+        if (activeFromDb.length > 0) {
+          setPlans(activeFromDb);
+          return;
         }
       }
+      // Fallback to defaults (all visible)
     } catch (err) { /* use defaults */ }
   };
 
@@ -110,10 +111,8 @@ export default function PlanesClient() {
     } catch (err) { /* use default */ }
   };
 
-  // Limit to max 6 per category and filter
-  const filteredPlans = plans
-    .filter(p => p.category === activeCategory)
-    .slice(0, 6);
+  // Only show visible plans for active category (popular/featured first)
+  const filteredPlans = plans.filter(p => p.category === activeCategory);
 
   const handleWhatsAppContact = (plan) => {
     const msg = encodeURIComponent(
@@ -161,7 +160,13 @@ export default function PlanesClient() {
           })}
         </div>
 
-        {/* Plans grid */}
+        {/* Plans grid — or empty state */}
+        {filteredPlans.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🏋️</p>
+            <p>Próximamente más planes en esta categoría. ¡Consultanos por WhatsApp!</p>
+          </div>
+        ) : (
         <div className={styles.plansGrid}>
           {filteredPlans.map((plan) => (
             <div key={plan.id} className={`${styles.planCard} glass ${plan.popular ? styles.popularCard : ''}`}>
@@ -198,6 +203,7 @@ export default function PlanesClient() {
             </div>
           ))}
         </div>
+        )}
 
         <div className={styles.secureBadgeSection}>
           <ShieldCheck size={20} className={styles.secureIcon} />

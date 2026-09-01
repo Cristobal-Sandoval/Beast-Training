@@ -5,15 +5,24 @@ import { supabase } from '@/lib/supabaseClient';
 import { showToast } from '@/lib/toast';
 import { confirmDialog } from '@/components/ConfirmDialog';
 
+export const MAX_TOTAL_PLANS = 6; // Global limit across all categories
+
 const CAT_MAP = { individual: 'solo', couple: 'duo', family: 'solo' };
 
 const normalizePlan = (plan) => ({
   ...plan,
   category: CAT_MAP[plan.category] || plan.category || 'solo',
+  visible: plan.visible !== false, // default to true if null
   features: (plan.features || []).filter(
     f => !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha')
   ),
 });
+
+// Sort: popular first, then by price
+const sortPlans = (list) =>
+  [...list].sort((a, b) =>
+    (b.popular ? 1 : 0) - (a.popular ? 1 : 0) || a.price - b.price
+  );
 
 export default function usePlansState({ setSuccessMsg, actionLoading, setActionLoading }) {
   const [plansList, setPlansList] = useState([]);
@@ -29,19 +38,21 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
 
   const fetchPlansList = async () => {
     try {
-      const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .order('popular', { ascending: false }) // popular first
-        .order('price', { ascending: true });
+      const { data, error } = await supabase.from('plans').select('*');
       if (!error && data) {
-        setPlansList(data.map(normalizePlan));
+        setPlansList(sortPlans(data.map(normalizePlan)));
       }
     } catch (err) { /* silent */ }
   };
 
   const handleSavePlan = async (e) => {
-    e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
+    e.preventDefault();
+    // Enforce global 6-plan limit for new plans
+    if (!editingPlan && plansList.length >= MAX_TOTAL_PLANS) {
+      showToast(`Límite de ${MAX_TOTAL_PLANS} planes alcanzado. Elimina uno antes de crear otro.`, 'error');
+      return;
+    }
+    setActionLoading(true); setSuccessMsg(null);
     const featuresArray = planFeatures.split('\n').map(f => f.trim()).filter(f => f !== '');
     const planData = {
       name: planName.trim(),
@@ -51,6 +62,7 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
       description: planDesc.trim(),
       features: featuresArray,
       popular: planPopular,
+      visible: true, // new plans start visible
     };
     try {
       if (editingPlan) {
@@ -80,20 +92,25 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
     finally { setActionLoading(false); }
   };
 
-  // Toggle popular flag directly from the list (one tap)
+  // Toggle ⭐ popular — one tap
   const handleTogglePopular = async (plan) => {
-    const newPopular = !plan.popular;
+    const newVal = !plan.popular;
     try {
-      const { error } = await supabase
-        .from('plans')
-        .update({ popular: newPopular })
-        .eq('id', plan.id);
+      const { error } = await supabase.from('plans').update({ popular: newVal }).eq('id', plan.id);
       if (error) throw error;
-      setPlansList(prev =>
-        prev.map(p => p.id === plan.id ? { ...p, popular: newPopular } : p)
-          .sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0) || a.price - b.price)
-      );
-      showToast(newPopular ? '⭐ Plan marcado como destacado' : 'Destacado removido', 'success');
+      setPlansList(prev => sortPlans(prev.map(p => p.id === plan.id ? { ...p, popular: newVal } : p)));
+      showToast(newVal ? '⭐ Destacado activado' : 'Destacado removido', 'success');
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  };
+
+  // Toggle 👁 visible (online/offline on public page) — one tap
+  const handleToggleVisible = async (plan) => {
+    const newVal = !plan.visible;
+    try {
+      const { error } = await supabase.from('plans').update({ visible: newVal }).eq('id', plan.id);
+      if (error) throw error;
+      setPlansList(prev => sortPlans(prev.map(p => p.id === plan.id ? { ...p, visible: newVal } : p)));
+      showToast(newVal ? '✅ Plan visible en la web' : '🔕 Plan oculto de la web', 'success');
     } catch (err) { showToast('Error: ' + err.message, 'error'); }
   };
 
@@ -126,6 +143,8 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
     planName, planCategory, planPrice, planDuration, planDesc, planFeatures, planPopular,
     setPlansList, setShowPlanModal, setEditingPlan,
     setPlanName, setPlanCategory, setPlanPrice, setPlanDuration, setPlanDesc, setPlanFeatures, setPlanPopular,
-    fetchPlansList, handleSavePlan, handleDeletePlan, handleEditPlanClick, handleAddPlanClick, handleTogglePopular,
+    fetchPlansList, handleSavePlan, handleDeletePlan,
+    handleEditPlanClick, handleAddPlanClick,
+    handleTogglePopular, handleToggleVisible,
   };
 }

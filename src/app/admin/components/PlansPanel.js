@@ -1,21 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, X, Star, List, LayoutGrid } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Star, Eye, EyeOff, List, LayoutGrid } from 'lucide-react';
 import styles from '../admin.module.css';
+import { MAX_TOTAL_PLANS } from '../hooks/usePlansState';
 
-const formatCLP = (price) => {
-  if (!price && price !== 0) return '';
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(price);
-};
+const formatCLP = (price) =>
+  new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(price);
 
 const CATEGORIES = [
   { id: 'solo',   label: 'Solo',   emoji: '🧍' },
   { id: 'duo',    label: 'Dúo',    emoji: '👥' },
   { id: 'online', label: 'Online', emoji: '💻' },
 ];
-
-const MAX_PLANS = 6;
 
 export default function PlansPanel({
   plansList, showPlanModal, editingPlan,
@@ -24,201 +21,124 @@ export default function PlansPanel({
   planDesc, setPlanDesc, planFeatures, setPlanFeatures,
   planPopular, setPlanPopular, actionLoading,
   handleAddPlanClick, handleEditPlanClick, handleDeletePlan,
-  handleSavePlan, handleTogglePopular, setShowPlanModal,
+  handleSavePlan, handleTogglePopular, handleToggleVisible, setShowPlanModal,
 }) {
-  const [view, setView] = useState('create'); // 'create' | 'active'
+  const [view, setView] = useState('active'); // 'active' | 'create'
 
-  const countByCategory = (cat) => plansList.filter(p => p.category === cat).length;
+  const totalPlans = plansList.length;
+  const visiblePlans = plansList.filter(p => p.visible);
+  const limitReached = totalPlans >= MAX_TOTAL_PLANS;
 
   const plansByCategory = CATEGORIES.map(cat => ({
     ...cat,
-    plans: plansList
-      .filter(p => p.category === cat.id)
-      .sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0) || a.price - b.price),
+    all: plansList.filter(p => p.category === cat.id),
+    visible: plansList.filter(p => p.category === cat.id && p.visible),
   }));
 
   return (
     <div className={styles.tabContent}>
 
-      {/* ── Top action bar ── */}
+      {/* ── Top bar ── */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: '10px', marginBottom: '20px', flexWrap: 'wrap'
+        gap: '10px', marginBottom: '20px', flexWrap: 'wrap',
       }}>
-        {/* View toggle */}
+        {/* View toggle pill */}
         <div style={{
           display: 'flex', background: 'rgba(255,255,255,0.04)',
           border: '1px solid var(--border-light)', borderRadius: '10px',
-          padding: '3px', gap: '3px'
+          padding: '3px', gap: '3px', flexShrink: 0,
         }}>
-          <button
-            type="button"
-            onClick={() => setView('create')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              background: view === 'create' ? 'var(--primary)' : 'transparent',
-              border: 'none', color: view === 'create' ? '#fff' : 'var(--text-secondary)',
-              borderRadius: '8px', padding: '8px 14px', fontSize: '0.82rem',
-              fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
-            }}
-          >
-            <LayoutGrid size={14} /> Agregar
-          </button>
-          <button
-            type="button"
-            onClick={() => setView('active')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              background: view === 'active' ? 'var(--primary)' : 'transparent',
-              border: 'none', color: view === 'active' ? '#fff' : 'var(--text-secondary)',
-              borderRadius: '8px', padding: '8px 14px', fontSize: '0.82rem',
-              fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
-            }}
-          >
-            <List size={14} />
-            Planes Activos
-            {plansList.length > 0 && (
-              <span style={{
-                background: view === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--primary)',
-                color: '#fff', borderRadius: '50px', padding: '0px 7px',
-                fontSize: '0.72rem', fontWeight: 800, minWidth: '20px', textAlign: 'center'
-              }}>
-                {plansList.length}
-              </span>
-            )}
-          </button>
+          <ViewBtn active={view === 'active'} onClick={() => setView('active')} icon={<List size={13} />}>
+            Planes{totalPlans > 0 && <CountBadge n={totalPlans} active={view === 'active'} />}
+          </ViewBtn>
+          <ViewBtn active={view === 'create'} onClick={() => setView('create')} icon={<LayoutGrid size={13} />}>
+            Gestionar
+          </ViewBtn>
         </div>
 
-        {/* Quick add */}
+        {/* New plan button — disabled if at limit */}
         <button
           type="button"
           onClick={() => handleAddPlanClick()}
+          disabled={limitReached}
           className={styles.primaryBtn}
-          style={{ padding: '9px 16px' }}
+          style={{ padding: '9px 16px', opacity: limitReached ? 0.45 : 1, cursor: limitReached ? 'not-allowed' : 'pointer' }}
+          title={limitReached ? `Límite de ${MAX_TOTAL_PLANS} planes alcanzado` : 'Crear nuevo plan'}
         >
           <Plus size={15} /> Nuevo Plan
         </button>
       </div>
 
-      {/* ════════════════════════════════
-          VIEW: CREATE — grouped by category
-      ════════════════════════════════ */}
-      {view === 'create' && (
-        <div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '20px' }}>
-            Máximo <strong>6 planes</strong> por categoría. El ⭐ destacado aparece primero en la web.
-          </p>
-          {CATEGORIES.map(cat => (
-            <div key={cat.id} style={{ marginBottom: '28px' }}>
-              {/* Category header */}
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '12px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.1rem' }}>{cat.emoji}</span>
-                  <span style={{ fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {cat.label}
-                  </span>
-                  <span style={{
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-light)',
-                    borderRadius: '20px', padding: '1px 8px', fontSize: '0.72rem',
-                    color: 'var(--text-muted)', fontWeight: 600
-                  }}>
-                    {countByCategory(cat.id)}/{MAX_PLANS}
-                  </span>
-                </div>
-                {countByCategory(cat.id) < MAX_PLANS ? (
-                  <button
-                    type="button"
-                    onClick={() => handleAddPlanClick(cat.id)}
-                    style={{
-                      background: 'rgba(255,87,0,0.1)', border: '1px solid var(--border-primary)',
-                      color: 'var(--primary)', borderRadius: '8px', padding: '6px 12px',
-                      fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '5px'
-                    }}
-                  >
-                    <Plus size={13} /> Agregar
-                  </button>
-                ) : (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                    Límite alcanzado
-                  </span>
-                )}
-              </div>
-
-              {countByCategory(cat.id) === 0 ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', paddingLeft: '4px' }}>
-                  Sin planes aún.
-                </p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {plansByCategory.find(c => c.id === cat.id)?.plans.map(plan => (
-                    <PlanRow
-                      key={plan.id}
-                      plan={plan}
-                      onEdit={handleEditPlanClick}
-                      onDelete={handleDeletePlan}
-                      onToggleStar={handleTogglePopular}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+      {/* Global usage bar */}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: '6px', fontSize: '0.78rem', color: 'var(--text-muted)',
+        }}>
+          <span>
+            <span style={{ color: '#fff', fontWeight: 700 }}>{visiblePlans.length}</span> activos en web
+            <span style={{ margin: '0 6px', opacity: 0.3 }}>·</span>
+            <span style={{ color: '#fff', fontWeight: 700 }}>{totalPlans}</span>/{MAX_TOTAL_PLANS} planes creados
+          </span>
+          {limitReached && (
+            <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.72rem' }}>✕ Límite alcanzado</span>
+          )}
         </div>
-      )}
+        {/* Progress bar */}
+        <div style={{
+          height: '4px', background: 'rgba(255,255,255,0.08)',
+          borderRadius: '4px', overflow: 'hidden',
+        }}>
+          <div style={{
+            height: '100%', borderRadius: '4px', transition: 'width 0.4s ease',
+            background: limitReached ? '#ef4444' : 'var(--primary)',
+            width: `${(totalPlans / MAX_TOTAL_PLANS) * 100}%`,
+          }} />
+        </div>
+      </div>
 
       {/* ════════════════════════════════
-          VIEW: ACTIVE PLANS — full list
+          VIEW: ACTIVE PLANS (default)
       ════════════════════════════════ */}
       {view === 'active' && (
         <div>
-          {plansList.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '2rem', marginBottom: '8px' }}>📋</p>
-              <p>No hay planes creados aún.</p>
-              <button
-                type="button"
-                onClick={() => { setView('create'); handleAddPlanClick(); }}
-                className={styles.primaryBtn}
-                style={{ marginTop: '16px' }}
-              >
-                <Plus size={15} /> Crear primer plan
-              </button>
-            </div>
+          {totalPlans === 0 ? (
+            <EmptyState onAdd={() => { setView('create'); handleAddPlanClick(); }} />
           ) : (
-            CATEGORIES.map(cat => {
-              const catPlans = plansByCategory.find(c => c.id === cat.id)?.plans || [];
-              if (catPlans.length === 0) return null;
+            plansByCategory.map(cat => {
+              if (cat.all.length === 0) return null;
               return (
-                <div key={cat.id} style={{ marginBottom: '28px' }}>
+                <div key={cat.id} style={{ marginBottom: '24px' }}>
+                  {/* Category header */}
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     borderBottom: '1px solid var(--border-light)',
-                    paddingBottom: '8px', marginBottom: '10px'
+                    paddingBottom: '8px', marginBottom: '10px',
                   }}>
-                    <span>{cat.emoji}</span>
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span style={{ fontSize: '1rem' }}>{cat.emoji}</span>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                       {cat.label}
                     </span>
+                    {/* Active count for this category */}
                     <span style={{
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-light)',
-                      borderRadius: '20px', padding: '1px 7px', fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600
+                      marginLeft: 'auto', fontSize: '0.72rem', fontWeight: 700,
+                      color: cat.visible.length > 0 ? '#4ade80' : 'var(--text-muted)',
                     }}>
-                      {catPlans.length}
+                      {cat.visible.length > 0
+                        ? `${cat.visible.length} online`
+                        : 'sin activos'}
                     </span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {catPlans.map(plan => (
+                    {cat.all.map(plan => (
                       <PlanRow
                         key={plan.id}
                         plan={plan}
                         onEdit={handleEditPlanClick}
                         onDelete={handleDeletePlan}
                         onToggleStar={handleTogglePopular}
-                        showPrice
+                        onToggleVisible={handleToggleVisible}
                       />
                     ))}
                   </div>
@@ -229,12 +149,76 @@ export default function PlansPanel({
         </div>
       )}
 
-      {/* ── Edit/Create Modal ── */}
+      {/* ════════════════════════════════
+          VIEW: CREATE / MANAGE
+      ════════════════════════════════ */}
+      {view === 'create' && (
+        <div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '20px', lineHeight: 1.5 }}>
+            Podés crear hasta <strong>{MAX_TOTAL_PLANS} planes en total</strong> entre todas las categorías.
+            Usá el <Eye size={12} style={{ display: 'inline', verticalAlign: 'middle' }} /> ojo para activar o desactivar su visibilidad en la web.
+          </p>
+          {CATEGORIES.map(cat => (
+            <div key={cat.id} style={{ marginBottom: '28px' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '12px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1rem' }}>{cat.emoji}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {cat.label}
+                  </span>
+                  <span style={{
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-light)',
+                    borderRadius: '20px', padding: '1px 8px', fontSize: '0.7rem',
+                    color: 'var(--text-muted)', fontWeight: 600,
+                  }}>
+                    {cat.all.length}
+                  </span>
+                </div>
+                {!limitReached && (
+                  <button
+                    type="button"
+                    onClick={() => handleAddPlanClick(cat.id)}
+                    style={{
+                      background: 'rgba(255,87,0,0.1)', border: '1px solid var(--border-primary)',
+                      color: 'var(--primary)', borderRadius: '8px', padding: '6px 12px',
+                      fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '5px',
+                    }}
+                  >
+                    <Plus size={13} /> Agregar
+                  </button>
+                )}
+              </div>
+              {cat.all.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', paddingLeft: '2px' }}>Sin planes en esta categoría.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {cat.all.map(plan => (
+                    <PlanRow
+                      key={plan.id}
+                      plan={plan}
+                      onEdit={handleEditPlanClick}
+                      onDelete={handleDeletePlan}
+                      onToggleStar={handleTogglePopular}
+                      onToggleVisible={handleToggleVisible}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Modal ── */}
       {showPlanModal && (
         <div className={styles.modalOverlay} onClick={() => setShowPlanModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>{editingPlan ? 'Editar Plan' : 'Crear Plan'}</h2>
+              <h2>{editingPlan ? 'Editar Plan' : 'Nuevo Plan'}</h2>
               <button type="button" onClick={() => setShowPlanModal(false)} className={styles.modalCloseBtn}>
                 <X size={20} />
               </button>
@@ -252,12 +236,8 @@ export default function PlansPanel({
                   <select id="planCategory" value={planCategory}
                     onChange={(e) => setPlanCategory(e.target.value)} className={styles.selectInput}>
                     {CATEGORIES.map(c => (
-                      <option
-                        key={c.id} value={c.id}
-                        disabled={!editingPlan && countByCategory(c.id) >= MAX_PLANS}
-                      >
+                      <option key={c.id} value={c.id}>
                         {c.emoji} {c.label}
-                        {!editingPlan && countByCategory(c.id) >= MAX_PLANS ? ' (lleno)' : ` (${countByCategory(c.id)}/${MAX_PLANS})`}
                       </option>
                     ))}
                   </select>
@@ -287,26 +267,27 @@ export default function PlansPanel({
                   onChange={(e) => setPlanFeatures(e.target.value)}
                   placeholder={'Clases ilimitadas\nEvaluación física mensual\nAsesoría nutricional'} />
               </div>
-              {/* Popular toggle — prominent */}
+
+              {/* Popular toggle */}
               <button
                 type="button"
                 onClick={() => setPlanPopular(!planPopular)}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   gap: '8px', padding: '12px',
-                  background: planPopular ? 'rgba(255,200,0,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: planPopular ? '1px solid rgba(255,200,0,0.4)' : '1px solid var(--border-light)',
+                  background: planPopular ? 'rgba(255,200,0,0.1)' : 'rgba(255,255,255,0.03)',
+                  border: planPopular ? '1px solid rgba(255,200,0,0.35)' : '1px solid var(--border-light)',
                   borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
                   color: planPopular ? '#fbbf24' : 'var(--text-secondary)',
-                  fontWeight: 700, fontSize: '0.9rem'
+                  fontWeight: 700, fontSize: '0.88rem',
                 }}
               >
-                <Star size={18} fill={planPopular ? '#fbbf24' : 'none'} />
-                {planPopular ? '⭐ Destacado (aparece primero en la web)' : 'Marcar como plan destacado'}
+                <Star size={16} fill={planPopular ? '#fbbf24' : 'none'} />
+                {planPopular ? 'Plan destacado — aparece primero en la web' : 'Marcar como plan destacado'}
               </button>
 
               <button type="submit" className={styles.submitBtn} disabled={actionLoading}
-                style={{ marginTop: '16px' }}>
+                style={{ marginTop: '14px' }}>
                 {actionLoading ? 'Guardando...' : editingPlan ? 'Guardar Cambios' : 'Crear Plan'}
               </button>
             </form>
@@ -317,73 +298,134 @@ export default function PlansPanel({
   );
 }
 
-/* ── Reusable compact plan row ── */
-function PlanRow({ plan, onEdit, onDelete, onToggleStar, showPrice = true }) {
+/* ── Sub-components ── */
+
+function ViewBtn({ active, onClick, icon, children }) {
+  return (
+    <button type="button" onClick={onClick} style={{
+      display: 'flex', alignItems: 'center', gap: '6px',
+      background: active ? 'var(--primary)' : 'transparent',
+      border: 'none', color: active ? '#fff' : 'var(--text-secondary)',
+      borderRadius: '8px', padding: '8px 13px', fontSize: '0.8rem',
+      fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+    }}>
+      {icon}{children}
+    </button>
+  );
+}
+
+function CountBadge({ n, active }) {
+  return (
+    <span style={{
+      background: active ? 'rgba(255,255,255,0.22)' : 'var(--primary)',
+      color: '#fff', borderRadius: '50px', padding: '0 7px',
+      fontSize: '0.7rem', fontWeight: 800, minWidth: '18px', textAlign: 'center',
+    }}>{n}</span>
+  );
+}
+
+function EmptyState({ onAdd }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+      <p style={{ fontSize: '1.8rem', marginBottom: '6px' }}>📋</p>
+      <p style={{ marginBottom: '16px', fontSize: '0.9rem' }}>No hay planes creados aún.</p>
+      <button type="button" onClick={onAdd} style={{
+        background: 'var(--primary)', border: 'none', color: '#fff',
+        borderRadius: '10px', padding: '10px 20px', fontWeight: 700,
+        cursor: 'pointer', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '6px',
+      }}>
+        <Plus size={15} /> Crear primer plan
+      </button>
+    </div>
+  );
+}
+
+function PlanRow({ plan, onEdit, onDelete, onToggleStar, onToggleVisible }) {
+  const isOnline = plan.visible;
+
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: '10px',
-      background: plan.popular ? 'rgba(255,200,0,0.04)' : 'rgba(255,255,255,0.02)',
-      border: plan.popular ? '1px solid rgba(255,200,0,0.25)' : '1px solid var(--border-light)',
-      borderRadius: '10px', padding: '12px 14px',
+      display: 'flex', alignItems: 'center', gap: '8px',
+      background: isOnline ? 'rgba(74,222,128,0.03)' : 'rgba(255,255,255,0.015)',
+      border: isOnline ? '1px solid rgba(74,222,128,0.18)' : '1px solid var(--border-light)',
+      borderRadius: '10px', padding: '11px 12px',
+      opacity: isOnline ? 1 : 0.65,
       transition: 'all 0.2s',
     }}>
-      {/* Star toggle */}
-      <button
-        type="button"
-        onClick={() => onToggleStar(plan)}
-        title={plan.popular ? 'Quitar destacado' : 'Marcar como destacado'}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-          color: plan.popular ? '#fbbf24' : 'var(--text-muted)',
-          flexShrink: 0, display: 'flex', alignItems: 'center',
-          transition: 'color 0.2s',
-        }}
-      >
-        <Star size={18} fill={plan.popular ? '#fbbf24' : 'none'} />
-      </button>
+      {/* Online status dot */}
+      <span title={isOnline ? 'Visible en la web' : 'Oculto de la web'} style={{
+        width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0,
+        background: isOnline ? '#4ade80' : 'rgba(255,255,255,0.2)',
+        boxShadow: isOnline ? '0 0 6px rgba(74,222,128,0.6)' : 'none',
+      }} />
 
-      {/* Info */}
+      {/* Plan info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{
-          margin: 0, fontWeight: 700, fontSize: '0.88rem', color: '#fff',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+          margin: 0, fontWeight: 700, fontSize: '0.86rem',
+          color: isOnline ? '#fff' : 'var(--text-secondary)',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {plan.name}
+          {plan.popular && (
+            <span style={{ marginLeft: '6px', color: '#fbbf24', fontSize: '0.7rem' }}>★</span>
+          )}
         </p>
-        <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(plan.price)}
-          {' · '}{plan.duration_months} mes{plan.duration_months > 1 ? 'es' : ''}
-          {plan.popular && <span style={{ marginLeft: '6px', color: '#fbbf24', fontWeight: 700 }}>★ Destacado</span>}
+        <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+          {formatCLP(plan.price)} · {plan.duration_months} mes{plan.duration_months > 1 ? 'es' : ''}
+          <span style={{
+            marginLeft: '8px', fontWeight: 700, fontSize: '0.68rem',
+            color: isOnline ? '#4ade80' : 'rgba(255,255,255,0.3)',
+            textTransform: 'uppercase', letterSpacing: '0.04em',
+          }}>
+            {isOnline ? '● Online' : '○ Oculto'}
+          </span>
         </p>
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-        <button
-          type="button"
-          onClick={() => onEdit(plan)}
-          title="Editar"
-          style={{
-            background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-light)',
-            color: 'var(--text-secondary)', borderRadius: '8px', padding: '7px 10px',
-            cursor: 'pointer', display: 'flex', alignItems: 'center',
-          }}
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: '5px', flexShrink: 0, alignItems: 'center' }}>
+        {/* Star */}
+        <IconBtn
+          onClick={() => onToggleStar(plan)}
+          title={plan.popular ? 'Quitar destacado' : 'Marcar destacado'}
+          color={plan.popular ? '#fbbf24' : 'var(--text-muted)'}
+          bg={plan.popular ? 'rgba(251,191,36,0.08)' : 'transparent'}
         >
+          <Star size={15} fill={plan.popular ? '#fbbf24' : 'none'} />
+        </IconBtn>
+        {/* Eye toggle */}
+        <IconBtn
+          onClick={() => onToggleVisible(plan)}
+          title={isOnline ? 'Ocultar de la web' : 'Mostrar en la web'}
+          color={isOnline ? '#4ade80' : 'var(--text-muted)'}
+          bg={isOnline ? 'rgba(74,222,128,0.08)' : 'transparent'}
+        >
+          {isOnline ? <Eye size={15} /> : <EyeOff size={15} />}
+        </IconBtn>
+        {/* Edit */}
+        <IconBtn onClick={() => onEdit(plan)} title="Editar" color="var(--text-secondary)">
           <Edit size={15} />
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(plan.id)}
-          title="Eliminar"
-          style={{
-            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-            color: '#ef4444', borderRadius: '8px', padding: '7px 10px',
-            cursor: 'pointer', display: 'flex', alignItems: 'center',
-          }}
-        >
+        </IconBtn>
+        {/* Delete */}
+        <IconBtn onClick={() => onDelete(plan.id)} title="Eliminar"
+          color="#ef4444" bg="rgba(239,68,68,0.06)" borderColor="rgba(239,68,68,0.18)">
           <Trash2 size={15} />
-        </button>
+        </IconBtn>
       </div>
     </div>
+  );
+}
+
+function IconBtn({ onClick, title, color, bg = 'rgba(255,255,255,0.04)', borderColor = 'var(--border-light)', children }) {
+  return (
+    <button type="button" onClick={onClick} title={title} style={{
+      background: bg, border: `1px solid ${borderColor}`,
+      color, borderRadius: '7px', padding: '6px 8px',
+      cursor: 'pointer', display: 'flex', alignItems: 'center',
+      transition: 'all 0.15s', minWidth: '32px', justifyContent: 'center',
+    }}>
+      {children}
+    </button>
   );
 }

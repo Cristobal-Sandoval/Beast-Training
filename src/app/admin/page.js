@@ -551,6 +551,7 @@ export default function AdminDashboard() {
                   handleDeletePlan={s.handleDeletePlan}
                   handleSavePlan={s.handleSavePlan}
                   handleTogglePopular={s.handleTogglePopular}
+                  handleToggleVisible={s.handleToggleVisible}
                   setShowPlanModal={s.setShowPlanModal}
                 />
               )}
