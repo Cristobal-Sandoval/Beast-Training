@@ -7,38 +7,7 @@ import { ArrowRight, Calendar, User, Flame } from 'lucide-react';
 import Image from 'next/image';
 import styles from './blog.module.css';
 
-const defaultPosts = [
-  {
-    id: 'p1',
-    title: '5 Ejercicios Clave para Aumentar tu Fuerza',
-    excerpt: 'Descubre los movimientos fundamentales que te ayudarán a construir una base de fuerza sólida y mejorar tu rendimiento.',
-    slug: 'ejercicios-clave-aumentar-fuerza',
-    image_url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop',
-    published_at: '2026-07-01T12:00:00Z',
-    author: 'Coach Javier',
-    category: 'Fuerza',
-  },
-  {
-    id: 'p2',
-    title: 'La Importancia de la Nutrición en el Entrenamiento Funcional',
-    excerpt: 'Entrenar duro es solo la mitad del trabajo. Descubre cómo alimentar tu cuerpo para potenciar la recuperación.',
-    slug: 'importancia-nutricion-entrenamiento-funcional',
-    image_url: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop',
-    published_at: '2026-06-28T12:00:00Z',
-    author: 'Nutri Camila',
-    category: 'Nutrición',
-  },
-  {
-    id: 'p3',
-    title: 'HIIT vs Cardio Tradicional: ¿Cuál es mejor para ti?',
-    excerpt: 'Comparamos las dos metodologías de resistencia cardiovascular más populares para ayudarte a elegir según tu tiempo y metas.',
-    slug: 'hiit-vs-cardio-tradicional',
-    image_url: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=800&auto=format&fit=crop',
-    published_at: '2026-06-15T12:00:00Z',
-    author: 'Coach Javier',
-    category: 'Cardio',
-  },
-];
+import { DEFAULT_BLOG_POSTS } from '@/lib/defaultBlogPosts';
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('es-CL', {
@@ -49,7 +18,7 @@ function formatDate(dateStr) {
 }
 
 export default function BlogClient() {
-  const [posts, setPosts] = useState(defaultPosts);
+  const [posts, setPosts] = useState(DEFAULT_BLOG_POSTS);
 
   useEffect(() => {
     fetchPosts();

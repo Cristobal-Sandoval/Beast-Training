@@ -25,7 +25,7 @@ export default function useBlogState({ setSuccessMsg, actionLoading, setActionLo
   const handleCreatePost = async (e) => {
     e.preventDefault(); setActionLoading(true); setSuccessMsg(null);
     const slug = postTitle.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-    const newPost = { title: postTitle, slug, excerpt: postExcerpt, content: postContent, image_url: postImg || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=600&auto=format&fit=crop', author: postAuthor || 'Staff Beast', published_at: new Date().toISOString() };
+    const newPost = { title: postTitle, slug, excerpt: postExcerpt, content: postContent, image_url: postImg || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=600&auto=format&fit=crop', author: postAuthor || 'Pelu', published_at: new Date().toISOString() };
     try {
       const { data, error } = await supabase.from('blog_posts').insert([newPost]).select();
       if (error) throw error;
