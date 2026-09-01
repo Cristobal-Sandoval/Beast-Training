@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { Dumbbell, ArrowRight, Activity, Zap, Shield, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import InstagramFeed from '@/components/InstagramFeed';
 import styles from './page.module.css';
 
 export default function HomeClient({ initialBanners, initialPosts, fallbackBanners, fallbackPosts }) {
@@ -157,6 +158,9 @@ export default function HomeClient({ initialBanners, initialPosts, fallbackBanne
           <Link href="/planes" className={styles.ctaBtn}>Únete a Nosotros <Dumbbell size={18} /></Link>
         </div>
       </section>
+
+      {/* Instagram Community Feed */}
+      <InstagramFeed />
 
       <section className="section reveal">
         <div className={styles.sectionHeader}>

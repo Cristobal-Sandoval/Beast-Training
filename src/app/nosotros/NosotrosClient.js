@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { ArrowRight, Sparkles, Award } from 'lucide-react';
 import Image from 'next/image';
+import InstagramFeed from '@/components/InstagramFeed';
 import styles from './nosotros.module.css';
 
 export default function NosotrosClient() {
@@ -292,6 +293,12 @@ export default function NosotrosClient() {
           </div>
         </div>
       </section>
+
+      {/* Instagram Feed & Community */}
+      <InstagramFeed
+        title="Nuestra Comunidad en Instagram"
+        subtitle="Entrenamientos reales, eventos del box y progreso diario de nuestros atletas."
+      />
     </div>
   );
 }
