@@ -10,7 +10,7 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   const [planName, setPlanName] = useState('');
-  const [planCategory, setPlanCategory] = useState('individual');
+  const [planCategory, setPlanCategory] = useState('solo');
   const [planPrice, setPlanPrice] = useState('');
   const [planDuration, setPlanDuration] = useState(1);
   const [planDesc, setPlanDesc] = useState('');
@@ -57,15 +57,21 @@ export default function usePlansState({ setSuccessMsg, actionLoading, setActionL
   };
 
   const handleEditPlanClick = (plan) => {
-    setEditingPlan(plan); setPlanName(plan.name); setPlanCategory(plan.category || 'individual');
+    // Normalize legacy category names from DB
+    const catMap = { individual: 'solo', couple: 'duo', family: 'solo' };
+    const cat = catMap[plan.category] || plan.category || 'solo';
+    setEditingPlan(plan); setPlanName(plan.name); setPlanCategory(cat);
     setPlanPrice(plan.price); setPlanDuration(plan.duration_months);
-    setPlanDesc(plan.description || ''); setPlanFeatures(plan.features ? plan.features.join('\n') : '');
+    setPlanDesc(plan.description || '');
+    // Remove 'Casilleros y duchas' from existing features when editing
+    const features = (plan.features || []).filter(f => !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha'));
+    setPlanFeatures(features.join('\n'));
     setPlanPopular(plan.popular || false); setShowPlanModal(true);
   };
 
   const handleAddPlanClick = () => {
-    setEditingPlan(null); setPlanName(''); setPlanCategory('individual'); setPlanPrice(''); setPlanDuration(1);
-    setPlanDesc(''); setPlanFeatures('Clases ilimitadas\nAcceso a musculación y cardio\nEvaluación física mensual\nCasilleros y duchas');
+    setEditingPlan(null); setPlanName(''); setPlanCategory('solo'); setPlanPrice(''); setPlanDuration(1);
+    setPlanDesc(''); setPlanFeatures('Clases ilimitadas\nAcceso a musculación y cardio\nEvaluación física mensual');
     setPlanPopular(false); setShowPlanModal(true);
   };
 

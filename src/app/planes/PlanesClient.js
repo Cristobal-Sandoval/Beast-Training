@@ -2,73 +2,103 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Check, MessageCircle, ShieldCheck, User, Users } from 'lucide-react';
+import { Check, MessageCircle, ShieldCheck, User, Users, Wifi } from 'lucide-react';
 import styles from './planes.module.css';
 
+// Default fallback plans — no duchas/casilleros, 3 categories
 const defaultPlans = [
+  // --- SOLO ---
   {
-    id: 'p1', name: 'Plan Mensual', description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
-    price: 35000, duration_months: 1, category: 'individual',
-    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial', 'Casilleros y duchas'],
+    id: 'p1', name: 'Plan Mensual Solo', description: 'Acceso ilimitado a todas nuestras clases y sala de musculación.',
+    price: 35000, duration_months: 1, category: 'solo',
+    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física inicial'],
     popular: false, visible: true,
   },
   {
-    id: 'p2', name: 'Plan Trimestral', description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
-    price: 90000, duration_months: 3, category: 'individual',
-    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica', 'Casilleros y duchas'],
+    id: 'p2', name: 'Plan Trimestral Solo', description: 'Nuestra opción recomendada para ver los primeros cambios reales.',
+    price: 90000, duration_months: 3, category: 'solo',
+    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional básica'],
     popular: true, visible: true,
   },
   {
-    id: 'p3', name: 'Plan Anual', description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
-    price: 320000, duration_months: 12, category: 'individual',
-    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '1 polera oficial Beast Training'],
+    id: 'p3', name: 'Plan Anual Solo', description: 'Compromiso total con tu salud y rendimiento físico al mejor precio.',
+    price: 320000, duration_months: 12, category: 'solo',
+    features: ['Clases ilimitadas', 'Acceso a musculación y cardio', 'Evaluación física mensual', 'Asesoría nutricional avanzada', '1 polera oficial Beast Training'],
+    popular: false, visible: true,
+  },
+  // --- DÚO ---
+  {
+    id: 'p4', name: 'Plan Mensual Dúo', description: 'Acceso completo para dos personas. Entrenád juntos.',
+    price: 50000, duration_months: 1, category: 'duo',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial c/u'],
     popular: false, visible: true,
   },
   {
-    id: 'p4', name: 'Plan Dúo Mensual', description: 'Acceso completo para dos personas. Entrená con quien más quieras.',
-    price: 50000, duration_months: 1, category: 'couple',
-    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Acceso a musculación y cardio', 'Evaluación física inicial c/u', 'Casilleros y duchas'],
-    popular: false, visible: true,
-  },
-  {
-    id: 'p5', name: 'Plan Dúo Trimestral', description: 'La opción recomendada en pareja para ver resultados juntos.',
-    price: 135000, duration_months: 3, category: 'couple',
-    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional básica', 'Casilleros y duchas'],
+    id: 'p5', name: 'Plan Trimestral Dúo', description: 'La opción recomendada en pareja para ver resultados juntos.',
+    price: 135000, duration_months: 3, category: 'duo',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional básica'],
     popular: true, visible: true,
   },
   {
-    id: 'p6', name: 'Plan Dúo Anual', description: 'Máximo ahorro para dos. Un año de entrenamiento juntos.',
-    price: 480000, duration_months: 12, category: 'couple',
-    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional avanzada', 'Casilleros y duchas', '2 poleras oficiales Beast Training'],
+    id: 'p6', name: 'Plan Anual Dúo', description: 'Máximo ahorro para dos. Un año de entrenamiento juntos.',
+    price: 480000, duration_months: 12, category: 'duo',
+    features: ['2 membresías incluidas', 'Clases ilimitadas para ambos', 'Evaluación física mensual c/u', 'Asesoría nutricional avanzada', '2 poleras oficiales Beast Training'],
     popular: false, visible: true,
+  },
+  // --- ONLINE ---
+  {
+    id: 'p7', name: 'Plan Online Mensual', description: 'Entrenamiento personalizado desde donde estés, guiado por tu coach.',
+    price: 25000, duration_months: 1, category: 'online',
+    features: ['Rutina personalizada mensual', 'Seguimiento vía WhatsApp', 'Evaluación física inicial online', 'Asesoría nutricional básica'],
+    popular: false, visible: true,
+  },
+  {
+    id: 'p8', name: 'Plan Online Trimestral', description: 'Seguimiento continuo y ajuste de rutinas cada mes durante 3 meses.',
+    price: 65000, duration_months: 3, category: 'online',
+    features: ['Rutinas personalizadas mensuales', 'Seguimiento vía WhatsApp', 'Evaluación física mensual online', 'Asesoría nutricional avanzada'],
+    popular: true, visible: true,
   },
 ];
 
 const categories = [
-  { id: 'individual', label: 'Individual', icon: User },
-  { id: 'couple', label: 'Dúo / Pareja', icon: Users },
+  { id: 'solo',   label: 'Solo',   icon: User },
+  { id: 'duo',    label: 'Dúo',    icon: Users },
+  { id: 'online', label: 'Online', icon: Wifi },
 ];
 
 export default function PlanesClient() {
   const [plans, setPlans] = useState(defaultPlans);
-  const [activeCategory, setActiveCategory] = useState('individual');
+  const [activeCategory, setActiveCategory] = useState('solo');
   const [whatsappNumber, setWhatsappNumber] = useState('56948925193');
 
-  useEffect(() => { 
-    fetchPlans(); 
+  useEffect(() => {
+    fetchPlans();
     fetchWhatsappNumber();
   }, []);
 
   const fetchPlans = async () => {
     try {
       const { data, error } = await supabase.from('plans').select('*').order('price', { ascending: true });
-      if (!error && data && data.length > 0 && data.some(p => p.category)) {
-        const visible = data.filter(p => p.visible !== false);
-        const categoriesInDb = new Set(visible.map(p => p.category));
-        const supplements = defaultPlans.filter(dp => !categoriesInDb.has(dp.category));
-        setPlans([...visible, ...supplements]);
+      if (!error && data && data.length > 0) {
+        // Normalize legacy category names
+        const catMap = { individual: 'solo', couple: 'duo', family: 'solo' };
+        const normalized = data.map(p => ({
+          ...p,
+          category: catMap[p.category] || p.category,
+          // Filter out 'Casilleros y duchas' from features
+          features: (p.features || []).filter(f =>
+            !f.toLowerCase().includes('casillero') && !f.toLowerCase().includes('ducha')
+          ),
+        }));
+        const visible = normalized.filter(p => p.visible !== false);
+        if (visible.some(p => p.category)) {
+          const dbCategories = new Set(visible.map(p => p.category));
+          // Use DB data where category exists, supplement with defaults for missing categories
+          const supplements = defaultPlans.filter(dp => !dbCategories.has(dp.category));
+          setPlans([...visible, ...supplements]);
+        }
       }
-    } catch (err) { console.warn('Usando planes predeterminados:', err); }
+    } catch (err) { /* use defaults */ }
   };
 
   const fetchWhatsappNumber = async () => {
@@ -77,21 +107,23 @@ export default function PlanesClient() {
       if (!error && data?.whatsapp_number) {
         setWhatsappNumber(data.whatsapp_number.replace(/\+/g, '').trim());
       }
-    } catch (err) {
-      console.warn('Error fetching whatsapp number:', err);
-    }
+    } catch (err) { /* use default */ }
   };
 
-  const filteredPlans = plans.filter(p => p.category === activeCategory);
+  // Limit to max 6 per category and filter
+  const filteredPlans = plans
+    .filter(p => p.category === activeCategory)
+    .slice(0, 6);
 
   const handleWhatsAppContact = (plan) => {
-    const message = encodeURIComponent(`Hola! Me gustaría contratar el ${plan.name} de Beast Training ($${plan.price.toLocaleString('es-CL')}). ¿Cómo puedo inscribirme?`);
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    const msg = encodeURIComponent(
+      `Hola! Me gustaría contratar el ${plan.name} de Beast Training (${new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(plan.price)}). ¿Cómo puedo inscribirme?`
+    );
+    window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, '_blank');
   };
 
-  const formatCLP = (value) => {
-    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(value);
-  };
+  const formatCLP = (value) =>
+    new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(value);
 
   return (
     <div className={styles.wrapper}>
@@ -104,10 +136,10 @@ export default function PlanesClient() {
           <p className={styles.description}>
             Elige el plan que mejor se adapte a tus objetivos. Sin matrícula ni cargos ocultos.
           </p>
-          <div className={styles.headerBar}></div>
+          <div className={styles.headerBar} />
         </div>
 
-        {/* Category Tabs */}
+        {/* Category Tabs — scrollable on mobile */}
         <div className={styles.tabsContainer} role="tablist">
           {categories.map((cat) => {
             const Icon = cat.icon;
@@ -120,14 +152,16 @@ export default function PlanesClient() {
                 className={`${styles.tabToggleBtn} ${activeCategory === cat.id ? styles.activeTabToggle : ''}`}
                 onClick={() => setActiveCategory(cat.id)}
               >
-                <Icon size={18} />
+                <Icon size={17} />
                 {cat.label}
-                {cat.id === 'couple' && <span className={styles.discountBadge}>Ahorra</span>}
+                {cat.id === 'duo' && <span className={styles.discountBadge}>Ahorra</span>}
+                {cat.id === 'online' && <span className={styles.onlineBadge}>Nuevo</span>}
               </button>
             );
           })}
         </div>
 
+        {/* Plans grid */}
         <div className={styles.plansGrid}>
           {filteredPlans.map((plan) => (
             <div key={plan.id} className={`${styles.planCard} glass ${plan.popular ? styles.popularCard : ''}`}>
@@ -145,9 +179,9 @@ export default function PlanesClient() {
               </div>
 
               <div className={styles.features}>
-                {plan.features.map((feature, index) => (
+                {(plan.features || []).map((feature, index) => (
                   <div key={index} className={styles.featureItem}>
-                    <Check size={18} className={styles.featureIcon} />
+                    <Check size={17} className={styles.featureIcon} />
                     <span>{feature}</span>
                   </div>
                 ))}
