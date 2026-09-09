@@ -1,0 +1,35 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Runs every 3 days at 12:00 UTC to prevent Supabase 7-day free tier pause
+    - cron: '0 12 */3 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  ping-supabase:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send keep-alive query
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://wmivpbztuwvcwdrhurjy.supabase.co' }}
+          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_yy_0d0WRp-iLqE_xu4Zl2g_pGT8pj_4' }}
+        run: |
+          echo "Sending lightweight keep-alive ping to Supabase..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X GET "${SUPABASE_URL}/rest/v1/plans?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          
+          BODY=$(echo "$RESPONSE" | sed -e '$d')
+          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
+          
+          echo "Response Body: $BODY"
+          echo "HTTP Status Code: $STATUS"
+          
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Supabase project is active and responding successfully!"
+          else
+            echo "⚠️ Unexpected status code: $STATUS"
+            exit 1
+          fi
