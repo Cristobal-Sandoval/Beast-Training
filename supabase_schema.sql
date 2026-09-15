@@ -99,6 +99,64 @@ CREATE TABLE IF NOT EXISTS public.appointment_requests (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- 8b. Migración de columnas faltantes (BD creadas con versiones anteriores del schema).
+-- Seguro de re-ejecutar. DEBE correr ANTES de los seeds (usan estas columnas).
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS workout_plan TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS next_evaluation_date TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS proposed_slots TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password_changed BOOLEAN DEFAULT false NOT NULL;
+
+ALTER TABLE public.physical_progress ADD COLUMN IF NOT EXISTS body_fat NUMERIC(4, 2);
+ALTER TABLE public.physical_progress ADD COLUMN IF NOT EXISTS muscle_mass NUMERIC(5, 2);
+ALTER TABLE public.physical_progress ADD COLUMN IF NOT EXISTS waist NUMERIC(5, 2);
+ALTER TABLE public.physical_progress ADD COLUMN IF NOT EXISTS chest NUMERIC(5, 2);
+ALTER TABLE public.physical_progress ADD COLUMN IF NOT EXISTS notes TEXT;
+
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS h3_tagline TEXT;
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS text_vertical_align TEXT DEFAULT 'center';
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS image_position TEXT DEFAULT '50% 50%';
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS link_url TEXT;
+
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS excerpt TEXT;
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS content TEXT;
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS author TEXT DEFAULT 'Beast Staff';
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS published_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now());
+
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS duration_months INTEGER DEFAULT 1;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'individual';
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS features TEXT[] DEFAULT '{}'::TEXT[];
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS popular BOOLEAN DEFAULT false;
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS visible BOOLEAN DEFAULT true;
+
+ALTER TABLE public.announcements ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'normal';
+
+ALTER TABLE public.appointment_requests ADD COLUMN IF NOT EXISTS requested_date DATE DEFAULT CURRENT_DATE;
+ALTER TABLE public.appointment_requests ADD COLUMN IF NOT EXISTS requested_time TEXT;
+ALTER TABLE public.appointment_requests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS subtitle TEXT DEFAULT 'sobre nosotros';
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS title TEXT DEFAULT 'Sobre Beast Training';
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS badge_text TEXT DEFAULT 'entrenador certificado';
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS bio_p1 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS bio_p2 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS image_position TEXT DEFAULT '50% 50%';
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS spec_1 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS spec_2 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS spec_3 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS spec_4 TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS coach_instagram TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS coach_tiktok TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS gym_instagram TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS gym_facebook TEXT;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS whatsapp_number TEXT DEFAULT '56948925193';
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS show_coach_socials BOOLEAN DEFAULT true;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS show_gym_socials BOOLEAN DEFAULT true;
+ALTER TABLE public.about_info ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now());
+
 -- 9. Trigger to automatically create a profile when a user registers
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
@@ -338,6 +396,7 @@ CREATE TABLE IF NOT EXISTS public.about_info (
     bio_p1 TEXT DEFAULT 'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
     bio_p2 TEXT DEFAULT 'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
     image_url TEXT DEFAULT 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop',
+    image_position TEXT DEFAULT '50% 50%',
     spec_1 TEXT DEFAULT 'Certificación CrossFit L-2',
     spec_2 TEXT DEFAULT 'Preparación Física & Musculación (IPCH)',
     spec_3 TEXT DEFAULT 'Especialista en Biomecánica aplicada al Fitness',
@@ -385,9 +444,5 @@ VALUES (
     true
 )
 ON CONFLICT (id) DO NOTHING;
-
--- 18. Migración idempotente para bases de datos ya creadas con una versión anterior del schema.
--- Todo el script es seguro de re-ejecutar (IF NOT EXISTS / OR REPLACE / DROP IF EXISTS).
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password_changed BOOLEAN DEFAULT false NOT NULL;
 
 
