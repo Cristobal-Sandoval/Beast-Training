@@ -57,7 +57,7 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 ### ⚙️ Panel Administrador (`/admin`)
 - **Gestión de Alumnos**: Registro con clave provisional, activación/desactivación de cuentas y visualización de fichas técnicas.
 - **Gestor de Planes**: Crear, editar, activar/desactivar y marcar planes como "Más Popular" respetando el límite de 6 por categoría.
-- **Integración Google Calendar**: Sincronización con la cuenta `btrainingchile@gmail.com` para agendar evaluaciones y clases con 1 clic.
+- **Integración Google Calendar**: Sincronización con la cuenta de Google del gimnasio para agendar evaluaciones y clases con 1 clic.
 - **Banners & Anuncios**: Editor de imágenes, textos y alineaciones para el carrusel principal y cintillo promocional.
 - **Editor de Blog**: Creación y eliminación de artículos en tiempo real.
 - **Chat en Vivo**: Respuestas instantáneas por WebSocket a los alumnos sin recargar la página.
@@ -65,6 +65,18 @@ Plataforma web completa para **Beast Training**, un gimnasio de alto rendimiento
 ---
 
 ## Mejoras Recientes (Septiembre 2026)
+
+### 🔒 Auditoría de Seguridad, SEO y Performance
+- **RLS endurecido en `profiles`**: lectura restringida al propio usuario + admin (antes pública); `promo_codes` solo gestionable por admin.
+- **Admin por rol, no por email**: `profiles.role = 'admin'` es la única fuente de verdad (con bootstrap seguro para la cuenta del dueño).
+- **Sin credenciales en código**: el mock local ya no trae claves hardcodeadas y en producción sin env vars la app falla fuerte en vez de levantar auth simulada.
+- **Chat alumno→coach vía RPC mínima** (`get_admin_id()`): los alumnos ya no necesitan listar perfiles para encontrar al admin.
+- **Columna `password_changed`** en `profiles` + fix del `subtitle` duplicado en `about_info` + trigger con `RAISE WARNING` (ya no traga errores en silencio).
+- **SEO**: metadata propia + canonical en la home, `robots.txt` 100% dinámico (`robots.js`), sitemap sin columnas inexistentes y con `revalidate`, un solo H1 visible en el hero (`aria-hidden` en slides inactivos).
+- **Performance**: home con ISR (`revalidate = 60`), mensajes directos filtrados en servidor, CSP sin orígenes en desuso.
+- **UX**: URL canónica en mensajes de WhatsApp y cintillo de anuncios con dismiss persistente por aviso.
+
+> ⚠️ **Tras actualizar**: re-ejecutar `supabase_schema.sql` en Supabase (la sección 18 es una migración idempotente para BD ya existentes: agrega `password_changed`, las nuevas políticas RLS y la función `get_admin_id()`).
 
 ### 🚀 Planes de Entrenamiento Rediseñados
 - Implementación de las 3 categorías definitivas: **Solo**, **Dúo** y **Online**.
@@ -156,13 +168,15 @@ npm run start
 
 | Tabla | Descripción |
 |---|---|
-| `profiles` | Perfiles de usuarios (rol admin/alumno, plan, rutina, estado) |
+| `profiles` | Perfiles de usuarios (rol admin/alumno, plan, rutina, estado, `password_changed`; lectura propia/admin) |
 | `plans` | Catálogo de planes de membresía (solo, duo, online, popular, visible) |
 | `banners` | Banners promocionales del Hero |
 | `blog_posts` | Artículos y noticias de fitness y nutrición |
 | `direct_messages` | Mensajes del chat en tiempo real entre alumno y coach |
 | `physical_progress` | Evaluaciones antropométricas (peso, grasa, músculo, perímetros) |
 | `announcements` | Comunicados generales del gimnasio |
+| `announcement_bar` | Cintillo promocional superior (texto, enlace, activo) |
+| `appointment_requests` | Solicitudes de citas de evaluación de los alumnos |
 | `about_info` | Configuración de la sección Nosotros, redes sociales y WhatsApp |
 | `promo_codes` | Códigos de descuento promocionales |
 

@@ -7,12 +7,21 @@ export const isPlaceholderMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || supaba
 
 const realSupabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// PERF-10: MockSupabase se importa estáticamente pero solo se instancia en modo placeholder.
-// En producción con Supabase real configurado, isPlaceholderMode = false y el mock no se usa.
-// Para excluir mockSupabase del bundle de producción, se requiere un refactoring más profundo
-// (separar en entry points o usar next/dynamic). Actualmente es aceptable para el tamaño del proyecto.
+// SEC: el mock es solo para desarrollo local (sin secretos reales).
+// En producción sin env vars, fallar fuerte en vez de levantar auth simulada.
 import MockSupabaseClass from './mockSupabase';
 
-const supabase = isPlaceholderMode ? new MockSupabaseClass() : realSupabase;
+let supabase;
+if (isPlaceholderMode) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY en producción. ' +
+      'El modo mock está prohibido fuera de desarrollo.'
+    );
+  }
+  supabase = new MockSupabaseClass();
+} else {
+  supabase = realSupabase;
+}
 
 export { supabase };

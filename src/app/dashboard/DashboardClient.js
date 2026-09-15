@@ -195,13 +195,20 @@ function DashboardContent() {
         setAppointments(apptData);
       }
 
-      // 5. Find admin user ID
-      const { data: adminProfiles } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'admin')
-        .limit(1);
-      const adminId = adminProfiles?.[0]?.id || 'admin-uuid-123';
+      // 5. Find admin user ID — SEC: vía RPC mínima (los alumnos no pueden listar profiles).
+      let adminId = null;
+      try {
+        const { data: rpcAdminId } = await supabase.rpc('get_admin_id');
+        if (rpcAdminId) adminId = rpcAdminId;
+      } catch (e) { /* fallback legacy abajo */ }
+      if (!adminId) {
+        const { data: adminProfiles } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin')
+          .limit(1);
+        adminId = adminProfiles?.[0]?.id || 'admin-uuid-123';
+      }
       setAdminUserId(adminId);
 
       // 6. Fetch Direct Messages — SEC-02: Filtrar en la query SQL, no en el cliente

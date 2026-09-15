@@ -137,12 +137,17 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
   };
 
   const fetchDirectMessages = async (alumnoId) => {
+    // PERF/SEC: filtrar la conversación en la query, no traer toda la tabla al cliente.
+    const adminId = user?.id;
+    if (!adminId || !alumnoId) { setChatMessages([]); return; }
     try {
-      const { data, error } = await supabase.from('direct_messages').select('*');
+      const { data, error } = await supabase
+        .from('direct_messages')
+        .select('*')
+        .or(`and(sender_id.eq.${adminId},receiver_id.eq.${alumnoId}),and(sender_id.eq.${alumnoId},receiver_id.eq.${adminId})`)
+        .order('created_at', { ascending: true });
       if (!error && data) {
-        const adminId = user?.id;
-        const filtered = data.filter(m => (m.sender_id === adminId && m.receiver_id === alumnoId) || (m.sender_id === alumnoId && m.receiver_id === adminId));
-        setChatMessages(filtered);
+        setChatMessages(data);
       }
     } catch (err) { console.warn('Error fetching messages:', err); }
   };
@@ -290,7 +295,7 @@ export default function useAlumnosState({ user, setSuccessMsg, actionLoading, se
       const cleanPhone = newAlumnoPhone.trim().replace(/\D/g, '');
       const formattedPhone = cleanPhone.startsWith('56') ? cleanPhone : cleanPhone ? `56${cleanPhone}` : '';
       
-      const waMessage = `¡Hola ${studentName}! 🏋️‍♂️\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido creada con éxito en el sistema.\n\n🔑 *Tus credenciales de acceso:*\n• *Usuario:* ${emailLower}\n• *Contraseña:* ${studentPassword}\n• *Acceso Portal:* https://beast-training.vercel.app/login\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña provisoria. ¡A entrenar duro! 💪`;
+      const waMessage = `¡Hola ${studentName}! 🏋️‍♂️\n\nBienvenido a Beast Training Concepción. Tu cuenta de alumno ha sido creada con éxito en el sistema.\n\n🔑 *Tus credenciales de acceso:*\n• *Usuario:* ${emailLower}\n• *Contraseña:* ${studentPassword}\n• *Acceso Portal:* https://beasttraining.cl/login\n\nPor favor, ingresa al portal de alumnos y cambia tu contraseña provisoria. ¡A entrenar duro! 💪`;
 
       const waUrl = formattedPhone 
         ? `https://wa.me/${formattedPhone}?text=${encodeURIComponent(waMessage)}`

@@ -77,7 +77,8 @@ export default function HomeClient({ initialBanners, initialPosts, fallbackBanne
         onBlur={() => setIsCarouselPaused(false)}
       >
         {banners.map((banner, index) => (
-          <div key={banner.id} className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`} style={{
+          // SEO/UX: slides inactivos ocultos a lectores de pantalla (un solo H1 visible).
+          <div key={banner.id} aria-hidden={index !== activeBannerIndex} className={`${styles.heroSlide} ${index === activeBannerIndex ? styles.activeSlide : ''}`} style={{
             alignItems: banner.text_vertical_align === 'top' ? 'flex-start' : banner.text_vertical_align === 'bottom' ? 'flex-end' : 'center',
             paddingTop: banner.text_vertical_align === 'top' ? '120px' : '0',
             paddingBottom: banner.text_vertical_align === 'bottom' ? '80px' : '0'

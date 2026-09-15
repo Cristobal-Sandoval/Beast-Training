@@ -119,7 +119,7 @@ export default function Navbar() {
             Nosotros
           </Link>
           
-          {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
+          {user && profile?.role === 'admin' ? (
             <Link href="/admin" className={`${styles.link} ${styles.adminLink} ${isActive('/admin') ? styles.active : ''}`} aria-current={isActive('/admin') ? 'page' : undefined}>
               <Shield size={16} aria-hidden="true" /> Panel Staff
             </Link>
@@ -134,7 +134,7 @@ export default function Navbar() {
           {user ? (
             <div className={styles.userInfo}>
               <span className={styles.userName}>
-                {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
+                {profile?.role === 'admin' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
               </span>
               <button type="button" onClick={handleLogout} className={styles.logoutBtn} aria-label="Cerrar sesión">
                 <LogOut size={18} aria-hidden="true" />
@@ -174,7 +174,7 @@ export default function Navbar() {
           <Link href="/nosotros" className={`${styles.mobileLink} ${isActive('/nosotros') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/nosotros') ? 'page' : undefined}>
             Nosotros
           </Link>
-          {user && (user.email?.toLowerCase() === 'btrainingchile@gmail.com' || profile?.role === 'admin') ? (
+          {user && profile?.role === 'admin' ? (
             <Link href="/admin" className={`${styles.mobileLink} ${styles.mobileAdminLink} ${isActive('/admin') ? styles.mobileActive : ''}`} onClick={closeMobileMenu} aria-current={isActive('/admin') ? 'page' : undefined}>
               <Shield size={16} aria-hidden="true" /> Panel Staff
             </Link>
@@ -187,7 +187,7 @@ export default function Navbar() {
             {user ? (
               <div className={styles.mobileUserInfo}>
                 <span className={styles.mobileUserName}>
-                  {user.email?.toLowerCase() === 'btrainingchile@gmail.com' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
+                  {profile?.role === 'admin' ? 'Pelu' : (profile?.full_name || user.user_metadata?.full_name || user.email)}
                 </span>
                 <button type="button" onClick={handleLogout} className={styles.mobileLogoutBtn} aria-label="Cerrar sesión">
                   <LogOut size={16} aria-hidden="true" /> Cerrar Sesión

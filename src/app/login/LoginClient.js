@@ -23,7 +23,8 @@ export default function LoginClient() {
           .select('role')
           .eq('id', session.user.id)
           .single();
-        const isAdmin = profile?.role === 'admin' || session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
+        // SEC: el rol en DB manda. El email solo cubre el bootstrap (perfil aún no creado).
+        const isAdmin = profile?.role === 'admin' || (!profile && session.user.email?.toLowerCase() === 'btrainingchile@gmail.com');
         if (isAdmin) {
           router.push('/admin');
         } else {
@@ -53,7 +54,8 @@ export default function LoginClient() {
           .eq('id', data.session.user.id)
           .single();
         
-        const isAdmin = profile?.role === 'admin' || data.session.user.email?.toLowerCase() === 'btrainingchile@gmail.com';
+        // SEC: el rol en DB manda. El email solo cubre el bootstrap (perfil aún no creado).
+        const isAdmin = profile?.role === 'admin' || (!profile && data.session.user.email?.toLowerCase() === 'btrainingchile@gmail.com');
         if (isAdmin) {
           router.push('/admin');
         } else {

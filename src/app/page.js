@@ -1,6 +1,43 @@
 import HomeClient from './HomeClient';
 import { supabase } from '@/lib/supabaseClient';
 
+// SEO: la home usaba solo el metadata default del layout. Canonical + OG propios + ISR.
+export const metadata = {
+  title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
+  description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento. Saca la bestia que llevas dentro.",
+  openGraph: {
+    title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
+    description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados, nutrición deportiva y el mejor ambiente de entrenamiento.",
+    url: "https://beasttraining.cl",
+    siteName: "Beast Training",
+    locale: "es_CL",
+    type: "website",
+    images: [
+      {
+        url: "https://beasttraining.cl/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Beast Training — Gimnasio de Alto Rendimiento en Concepción",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Beast Training | Gimnasio de Alto Rendimiento en Concepción",
+    description: "Entrenamiento funcional, HIIT, fuerza y CrossFit en Concepción. Planes personalizados y seguimiento digital.",
+    images: ["https://beasttraining.cl/og-image.jpg"],
+  },
+  alternates: {
+    canonical: "https://beasttraining.cl",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export const revalidate = 60;
+
 const fallbackBanners = [
   {
     id: 'b1',

@@ -12,16 +12,37 @@ export default function useAuthState() {
 
   const router = useRouter();
 
+  // Email del dueño: solo se usa como bootstrap (reparar rol una vez), nunca como bypass.
+  // La única fuente de verdad para admin es profiles.role = 'admin' (forzado por RLS).
+  const ADMIN_BOOTSTRAP_EMAIL = 'btrainingchile@gmail.com';
+
   const fetchProfile = async (userId, userEmail) => {
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-      const isAdminEmail = userEmail?.toLowerCase() === 'btrainingchile@gmail.com';
+      const isBootstrapEmail = userEmail?.toLowerCase() === ADMIN_BOOTSTRAP_EMAIL;
       if (data) {
-        const updatedProfile = isAdminEmail ? { ...data, role: 'admin', status: 'active' } : data;
-        setProfile(updatedProfile);
-        if (updatedProfile.role !== 'admin') router.push('/dashboard');
-      } else if (isAdminEmail) {
+        if (isBootstrapEmail && data.role !== 'admin') {
+          const { error: repairError } = await supabase
+            .from('profiles')
+            .update({ role: 'admin', status: 'active' })
+            .eq('id', userId);
+          if (!repairError) {
+            setProfile({ ...data, role: 'admin', status: 'active' });
+            return;
+          }
+          // Si RLS bloquea la reparación, se deniega igual: sin bypass por email.
+          setProfile(data);
+          router.push('/dashboard');
+          return;
+        }
+        setProfile(data);
+        if (data.role !== 'admin') router.push('/dashboard');
+      } else if (isBootstrapEmail) {
+        // Sin fila (trigger aún no corrió): acceso provisional de bootstrap.
+        // Las escrituras siguen bloqueadas por RLS hasta que exista el rol en DB.
         setProfile({ id: userId, email: userEmail, role: 'admin', status: 'active', full_name: 'Admin Beast' });
+      } else {
+        setProfile(null);
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }

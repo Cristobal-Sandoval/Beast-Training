@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     workout_plan TEXT,
     next_evaluation_date TEXT,
     proposed_slots TEXT,
+    password_changed BOOLEAN DEFAULT false NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -120,6 +121,8 @@ BEGIN
         status = EXCLUDED.status;
     RETURN new;
 EXCEPTION WHEN OTHERS THEN
+    -- SEC: no tragar el error en silencio; dejar rastro en los logs de Postgres
+    RAISE WARNING 'handle_new_user failed for %: %', new.email, SQLERRM;
     RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -152,14 +155,37 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Policies for profiles
-CREATE POLICY "Allow public read for profiles" ON public.profiles
-    FOR SELECT USING (true);
+-- SEC: lectura restringida (antes: USING (true) exponía PII de todos los alumnos).
+-- El usuario lee su propia fila; el admin lee todas.
+DROP POLICY IF EXISTS "Allow public read for profiles" ON public.profiles;
+CREATE POLICY "Users can read own profile, admins read all" ON public.profiles
+    FOR SELECT USING (auth.uid() = id OR public.is_admin());
 
+DROP POLICY IF EXISTS "Allow users to update their own profile or admins" ON public.profiles;
 CREATE POLICY "Allow users to update their own profile or admins" ON public.profiles
     FOR UPDATE USING (auth.uid() = id OR public.is_admin());
 
 CREATE POLICY "Allow admins to insert profiles" ON public.profiles
     FOR INSERT WITH CHECK (public.is_admin());
+
+-- Bootstrap: el trigger handle_new_user crea el perfil, pero si por carrera aún no existe,
+-- el propio usuario puede insertar su fila (solo con su id).
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+CREATE POLICY "Users can insert their own profile" ON public.profiles
+    FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- SEC: expone solo el UUID del admin (para el chat alumno→coach) sin abrir la tabla profiles.
+-- Los alumnos ya no pueden listar perfiles, así que necesitan esta vía mínima.
+CREATE OR REPLACE FUNCTION public.get_admin_id()
+RETURNS UUID AS $$
+DECLARE admin_id UUID;
+BEGIN
+    SELECT id INTO admin_id FROM public.profiles
+    WHERE role = 'admin'::user_role ORDER BY created_at ASC LIMIT 1;
+    RETURN admin_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+GRANT EXECUTE ON FUNCTION public.get_admin_id() TO authenticated;
 
 -- Policies for physical progress (Admin writes, User reads)
 CREATE POLICY "Allow users to read their own progress" ON public.physical_progress
@@ -272,7 +298,8 @@ CREATE TABLE IF NOT EXISTS public.promo_codes (
 );
 
 ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read for active promo codes" ON public.promo_codes FOR SELECT USING (true);
+-- SEC: los cupones solo los gestiona el admin (no hay consumo público en el sitio).
+DROP POLICY IF EXISTS "Allow public read for active promo codes" ON public.promo_codes;
 CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL USING (public.is_admin());
 
 -- 17. Create About Info Table (for "Nosotros" page)
@@ -280,7 +307,6 @@ CREATE TABLE IF NOT EXISTS public.about_info (
     id TEXT PRIMARY KEY DEFAULT 'coach-settings',
     subtitle TEXT DEFAULT 'sobre nosotros',
     title TEXT NOT NULL DEFAULT 'Sobre Beast Training',
-    subtitle TEXT DEFAULT 'conoce al coach',
     badge_text TEXT DEFAULT 'entrenador certificado',
     bio_p1 TEXT DEFAULT 'Hola, soy Javier. Fundador y Head Coach de Beast Training. Tras años de experiencia entrenando a deportistas y personas de todos los niveles en Concepción, fundé este espacio con un propósito: ofrecer un entrenamiento de fuerza y funcional verdaderamente personalizado.',
     bio_p2 TEXT DEFAULT 'Aquí no eres un número más. Nos enfocamos en enseñarte la técnica correcta, planificar tus progresos de manera científica y acompañarte en cada paso para que superes tus límites de forma segura y constante.',
@@ -330,5 +356,11 @@ VALUES (
     true
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- 18. Migración idempotente para bases de datos ya creadas con una versión anterior del schema.
+-- Re-ejecutar el script completo: las sentencias nuevas usan IF NOT EXISTS / OR REPLACE /
+-- DROP IF EXISTS, así que son seguras. Los errores "policy already exists" en políticas
+-- antiguas sin DROP se pueden ignorar.
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password_changed BOOLEAN DEFAULT false NOT NULL;
 
 

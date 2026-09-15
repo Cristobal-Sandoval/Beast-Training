@@ -1,1 +1,0 @@
-# This file is intentionally empty. See src/app/robots.js for the dynamic robots.txt

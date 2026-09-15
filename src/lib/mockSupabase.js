@@ -30,24 +30,24 @@ export default class MockSupabase {
       },
 
       async signInWithPassword({ email, password }) {
+        // SEC: mock solo para desarrollo local. Sin credenciales reales: la primera vez
+        // que se inicia sesión con un email, se registra esa clave en localStorage.
         const emailLower = email.toLowerCase();
-        
-        let defaultPassword = 'beast123';
-        if (emailLower === 'btrainingchile@gmail.com') {
-          defaultPassword = 'Yashark3.8/';
-        } else if (emailLower === 'pruebas@btraining.cl') {
-          defaultPassword = 'prueba123';
-        }
 
-        let storedPassword = defaultPassword;
+        const pwdKey = 'beast_passwords';
+        let passwords = {};
         if (typeof window !== 'undefined') {
-          const pwdKey = 'beast_passwords';
-          const passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
-          storedPassword = passwords[emailLower] || defaultPassword;
+          passwords = JSON.parse(localStorage.getItem(pwdKey) || '{}');
         }
 
-        if (password !== storedPassword) {
-          return { data: null, error: { message: 'Contraseña incorrecta.' } };
+        if (passwords[emailLower]) {
+          if (password !== passwords[emailLower]) {
+            return { data: null, error: { message: 'Contraseña incorrecta.' } };
+          }
+        } else if (typeof window !== 'undefined') {
+          // Primera vez con este email en el mock: se registra la clave ingresada.
+          passwords[emailLower] = password;
+          localStorage.setItem(pwdKey, JSON.stringify(passwords));
         }
 
         const isAdmin = emailLower === 'btrainingchile@gmail.com';
@@ -198,6 +198,20 @@ export default class MockSupabase {
     this.auth.notify = this.auth.notify.bind(this.auth);
   }
 
+  async rpc(fn) {
+    if (fn === 'get_admin_id') {
+      if (typeof window === 'undefined') return { data: null, error: null };
+      try {
+        const profiles = JSON.parse(localStorage.getItem('beast_profiles_list') || '[]');
+        const admin = profiles.find((p) => p.role === 'admin');
+        return { data: admin?.id || 'admin-uuid-123', error: null };
+      } catch (e) {
+        return { data: 'admin-uuid-123', error: null };
+      }
+    }
+    return { data: null, error: { message: `RPC desconocida en mock: ${fn}` } };
+  }
+
   from(table) {
     const query = {
       _queryType: 'select',
@@ -209,6 +223,7 @@ export default class MockSupabase {
       _records: null,
       _single: false,
       _updateData: null,
+      _orFilter: null,
 
       select(fields) {
         if (this._queryType !== 'insert' && this._queryType !== 'update' && this._queryType !== 'delete') {
@@ -219,6 +234,12 @@ export default class MockSupabase {
       eq(field, value) {
         this._eqField = field;
         this._eqValue = value;
+        return this;
+      },
+      // PERF/SEC: soporta filtros .or() estilo PostgREST para no traer tablas completas.
+      // Ej: "and(a.eq.1,b.eq.2),and(c.eq.3,d.eq.4)"
+      or(rawFilter) {
+        this._orFilter = rawFilter;
         return this;
       },
       single() {
@@ -485,7 +506,32 @@ export default class MockSupabase {
               data = this._single ? newMsg[0] : newMsg;
             } else {
               data = messages;
-              if (this._eqField === 'sender_id') {
+              if (this._orFilter) {
+                // Soporta grupos and(...),and(...) con condiciones campo.eq.valor
+                const groups = [];
+                const groupRe = /and\(([^)]+)\)/g;
+                let gm;
+                while ((gm = groupRe.exec(this._orFilter)) !== null) {
+                  groups.push(gm[1].split(',').map((c) => {
+                    const parts = c.split('.');
+                    return { field: parts[0], value: parts.slice(2).join('.') };
+                  }));
+                }
+                if (groups.length > 0) {
+                  data = messages.filter((m) =>
+                    groups.some((conds) => conds.every((cond) => String(m[cond.field]) === cond.value))
+                  );
+                } else {
+                  // .or() simple tipo "sender_id.eq.X,receiver_id.eq.X"
+                  const conds = String(this._orFilter).split(',').map((c) => {
+                    const parts = c.split('.');
+                    return { field: parts[0], value: parts.slice(2).join('.') };
+                  });
+                  data = messages.filter((m) =>
+                    conds.some((cond) => String(m[cond.field]) === cond.value)
+                  );
+                }
+              } else if (this._eqField === 'sender_id') {
                 data = messages.filter(m => m.sender_id === this._eqValue);
               } else if (this._eqField === 'receiver_id') {
                 data = messages.filter(m => m.receiver_id === this._eqValue);
