@@ -1,8 +1,11 @@
 -- SCHEMA FOR BEAST TRAINING GYM DATABASE (SUPABASE)
 -- Copy and paste this script into the Supabase SQL Editor to set up tables, triggers, and Row Level Security.
 
--- 1. Create Profile Roles Enum
-CREATE TYPE user_role AS ENUM ('user', 'admin');
+-- 1. Create Profile Roles Enum (seguro de re-ejecutar)
+DO $$ BEGIN
+  CREATE TYPE user_role AS ENUM ('user', 'admin');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 2. Create Profiles Table (Linked to Supabase Auth)
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -165,6 +168,7 @@ DROP POLICY IF EXISTS "Allow users to update their own profile or admins" ON pub
 CREATE POLICY "Allow users to update their own profile or admins" ON public.profiles
     FOR UPDATE USING (auth.uid() = id OR public.is_admin());
 
+DROP POLICY IF EXISTS "Allow admins to insert profiles" ON public.profiles;
 CREATE POLICY "Allow admins to insert profiles" ON public.profiles
     FOR INSERT WITH CHECK (public.is_admin());
 
@@ -188,41 +192,52 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION public.get_admin_id() TO authenticated;
 
 -- Policies for physical progress (Admin writes, User reads)
+DROP POLICY IF EXISTS "Allow users to read their own progress" ON public.physical_progress;
 CREATE POLICY "Allow users to read their own progress" ON public.physical_progress
     FOR SELECT USING (auth.uid() = user_id OR public.is_admin());
 
+DROP POLICY IF EXISTS "Allow admins to manage progress records" ON public.physical_progress;
 CREATE POLICY "Allow admins to manage progress records" ON public.physical_progress
     FOR ALL USING (public.is_admin());
 
 -- Policies for Banners (Read is public, Write is Admin only)
+DROP POLICY IF EXISTS "Allow public read for active banners" ON public.banners;
 CREATE POLICY "Allow public read for active banners" ON public.banners
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow admins to manage banners" ON public.banners;
 CREATE POLICY "Allow admins to manage banners" ON public.banners
     FOR ALL USING (public.is_admin());
 
 -- Policies for Blog Posts (Read is public, Write is Admin only)
+DROP POLICY IF EXISTS "Allow public read for blog posts" ON public.blog_posts;
 CREATE POLICY "Allow public read for blog posts" ON public.blog_posts
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow admins to manage blog posts" ON public.blog_posts;
 CREATE POLICY "Allow admins to manage blog posts" ON public.blog_posts
     FOR ALL USING (public.is_admin());
 
 -- Policies for Plans (Read is public, Write is Admin only)
+DROP POLICY IF EXISTS "Allow public read for plans" ON public.plans;
 CREATE POLICY "Allow public read for plans" ON public.plans
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow admins to manage plans" ON public.plans;
 CREATE POLICY "Allow admins to manage plans" ON public.plans
     FOR ALL USING (public.is_admin());
 
 -- Policies for Announcements (Read is public, Write is Admin only)
+DROP POLICY IF EXISTS "Allow public read for announcements" ON public.announcements;
 CREATE POLICY "Allow public read for announcements" ON public.announcements
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Allow admins to manage announcements" ON public.announcements;
 CREATE POLICY "Allow admins to manage announcements" ON public.announcements
     FOR ALL USING (public.is_admin());
 
 -- Policies for Appointment Requests (User manages their own, Admin manages all)
+DROP POLICY IF EXISTS "Allow users to manage their own appointment requests" ON public.appointment_requests;
 CREATE POLICY "Allow users to manage their own appointment requests" ON public.appointment_requests
     FOR ALL USING (auth.uid() = user_id OR public.is_admin());
 
@@ -265,14 +280,23 @@ CREATE TABLE IF NOT EXISTS public.direct_messages (
 -- Enable RLS for direct_messages
 ALTER TABLE public.direct_messages ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read their own received or sent messages" ON public.direct_messages;
 CREATE POLICY "Users can read their own received or sent messages" ON public.direct_messages
     FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
 
+DROP POLICY IF EXISTS "Users can insert their own sent messages" ON public.direct_messages;
 CREATE POLICY "Users can insert their own sent messages" ON public.direct_messages
     FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
--- Enable Supabase Realtime for instant chat updates
-ALTER PUBLICATION supabase_realtime ADD TABLE public.direct_messages;
+-- Enable Supabase Realtime for instant chat updates (seguro de re-ejecutar)
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'direct_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.direct_messages;
+  END IF;
+END $$;
 
 
 -- 12. Create Announcement Bar Table
@@ -285,7 +309,9 @@ CREATE TABLE IF NOT EXISTS public.announcement_bar (
 );
 
 ALTER TABLE public.announcement_bar ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read for announcement bar" ON public.announcement_bar;
 CREATE POLICY "Allow public read for announcement bar" ON public.announcement_bar FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow admins to manage announcement bar" ON public.announcement_bar;
 CREATE POLICY "Allow admins to manage announcement bar" ON public.announcement_bar FOR ALL USING (public.is_admin());
 
 -- 13. Create Promo Codes Table
@@ -300,6 +326,7 @@ CREATE TABLE IF NOT EXISTS public.promo_codes (
 ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
 -- SEC: los cupones solo los gestiona el admin (no hay consumo público en el sitio).
 DROP POLICY IF EXISTS "Allow public read for active promo codes" ON public.promo_codes;
+DROP POLICY IF EXISTS "Allow admins to manage promo codes" ON public.promo_codes;
 CREATE POLICY "Allow admins to manage promo codes" ON public.promo_codes FOR ALL USING (public.is_admin());
 
 -- 17. Create About Info Table (for "Nosotros" page)
@@ -326,7 +353,9 @@ CREATE TABLE IF NOT EXISTS public.about_info (
 );
 
 ALTER TABLE public.about_info ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read for about_info" ON public.about_info;
 CREATE POLICY "Allow public read for about_info" ON public.about_info FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow admins to manage about_info" ON public.about_info;
 CREATE POLICY "Allow admins to manage about_info" ON public.about_info FOR ALL USING (public.is_admin());
 
 INSERT INTO public.about_info (
@@ -358,9 +387,7 @@ VALUES (
 ON CONFLICT (id) DO NOTHING;
 
 -- 18. Migración idempotente para bases de datos ya creadas con una versión anterior del schema.
--- Re-ejecutar el script completo: las sentencias nuevas usan IF NOT EXISTS / OR REPLACE /
--- DROP IF EXISTS, así que son seguras. Los errores "policy already exists" en políticas
--- antiguas sin DROP se pueden ignorar.
+-- Todo el script es seguro de re-ejecutar (IF NOT EXISTS / OR REPLACE / DROP IF EXISTS).
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password_changed BOOLEAN DEFAULT false NOT NULL;
 
 
