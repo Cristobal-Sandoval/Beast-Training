@@ -2,34 +2,79 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # Runs every 3 days at 12:00 UTC to prevent Supabase 7-day free tier pause
-    - cron: '0 12 */3 * *'
+    # Runs twice a day (every 12 hours: 04:00 and 16:00 UTC) to ensure Supabase Postgres is always active
+    - cron: '0 4,16 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/supabase-keep-alive.yml'
 
 jobs:
   ping-supabase:
-    name: Ping Supabase Database
+    name: Ping Supabase Database & API
     runs-on: ubuntu-latest
     steps:
-      - name: Send keep-alive query
+      - name: Execute keep-alive queries to Supabase
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://wmivpbztuwvcwdrhurjy.supabase.co' }}
-          SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_yy_0d0WRp-iLqE_xu4Zl2g_pGT8pj_4' }}
+          DEFAULT_SUPABASE_URL: 'https://wmivpbztuwvcwdrhurjy.supabase.co'
+          DEFAULT_SUPABASE_KEY: 'sb_publishable_yy_0d0WRp-iLqE_xu4Zl2g_pGT8pj_4'
+          SECRET_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SECRET_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          echo "Sending lightweight keep-alive ping to Supabase..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X GET "${SUPABASE_URL}/rest/v1/plans?select=id&limit=1" \
+          set -e
+          SUPABASE_URL="${SECRET_URL:-$DEFAULT_SUPABASE_URL}"
+          SUPABASE_KEY="${SECRET_KEY:-$DEFAULT_SUPABASE_KEY}"
+          
+          echo "========================================================"
+          echo "🚀 Starting Supabase Keep-Alive Ping"
+          echo "Target URL: $SUPABASE_URL"
+          echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "========================================================"
+          
+          # 1. Ping Plans Table
+          echo "📡 [1/3] Querying 'plans' table..."
+          STATUS_PLANS=$(curl -s -o /tmp/plans_resp.json -w "%{http_code}" \
+            --retry 3 --retry-delay 5 --max-time 15 \
+            -X GET "${SUPABASE_URL}/rest/v1/plans?select=id,name,category&limit=2" \
             -H "apikey: ${SUPABASE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_KEY}")
           
-          BODY=$(echo "$RESPONSE" | sed -e '$d')
-          STATUS=$(echo "$RESPONSE" | tail -n1 | cut -d':' -f2)
-          
-          echo "Response Body: $BODY"
-          echo "HTTP Status Code: $STATUS"
-          
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ Supabase project is active and responding successfully!"
-          else
-            echo "⚠️ Unexpected status code: $STATUS"
+          echo "Status: $STATUS_PLANS | Response: $(cat /tmp/plans_resp.json)"
+          if [ "$STATUS_PLANS" -ne 200 ]; then
+            echo "❌ Failed querying 'plans' table (HTTP $STATUS_PLANS)"
             exit 1
           fi
+          
+          # 2. Ping About Info Table
+          echo "📡 [2/3] Querying 'about_info' table..."
+          STATUS_ABOUT=$(curl -s -o /tmp/about_resp.json -w "%{http_code}" \
+            --retry 3 --retry-delay 5 --max-time 15 \
+            -X GET "${SUPABASE_URL}/rest/v1/about_info?select=id,title&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          
+          echo "Status: $STATUS_ABOUT | Response: $(cat /tmp/about_resp.json)"
+          if [ "$STATUS_ABOUT" -ne 200 ]; then
+            echo "❌ Failed querying 'about_info' table (HTTP $STATUS_ABOUT)"
+            exit 1
+          fi
+
+          # 3. Ping Banners Table
+          echo "📡 [3/3] Querying 'banners' table..."
+          STATUS_BANNERS=$(curl -s -o /tmp/banners_resp.json -w "%{http_code}" \
+            --retry 3 --retry-delay 5 --max-time 15 \
+            -X GET "${SUPABASE_URL}/rest/v1/banners?select=id,title&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_KEY}")
+          
+          echo "Status: $STATUS_BANNERS | Response: $(cat /tmp/banners_resp.json)"
+          if [ "$STATUS_BANNERS" -ne 200 ]; then
+            echo "❌ Failed querying 'banners' table (HTTP $STATUS_BANNERS)"
+            exit 1
+          fi
+
+          echo "========================================================"
+          echo "✅ All queries succeeded! Supabase database is active."
+          echo "========================================================"
